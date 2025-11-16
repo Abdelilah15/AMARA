@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react'
 import { assets } from "../assets/assets";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import "../index.css"
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
@@ -14,7 +14,7 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const { backendUrl, setIsLoggedin } = useContext(AppContext);
+  const { backendUrl, setIsLoggedin, getUserData } = useContext(AppContext);
 
   const [state, setstate] = useState('Sign Up')
   const [name, setName] = useState('') 
@@ -25,37 +25,33 @@ const Login = () => {
     try {
       e.preventDefault();
       axios.defaults.withCredentials = true;
-      if (state === 'Sign Up') {
-        const {data} = await axios.post(backendUrl + '/api/auth/register', {name, email, password})
 
-        if(data.success){
+      if (state === 'Sign Up') {
+        const {data} = await axios.post (backendUrl +'/api/auth/register', {
+          name, email, password
+        })
+        if (data.success) {
           setIsLoggedin(true)
+          getUserData()
           navigate('/')
-          toast.success("Registration Successful")
         }else {
           toast.error(data.message)
         }
-      }else {
-        const {data} = await axios.post(backendUrl + '/api/auth/login', {email, password})
 
-        if(data.success){
+      }else {
+        const {data} = await axios.post (backendUrl + '/api/auth/login', {
+          email, password
+        })
+        if (data.success) {
           setIsLoggedin(true)
-          setUserData(data.user)
+          getUserData()
           navigate('/')
         }else {
           toast.error(data.message)
         }
       }
     } catch (error) {
-      console.error(error); // Toujours bon de logguer l'erreur complète
-
-    // CORRECTION : Utilisez "error.response.data.message" pour les erreurs Axios
-    if (error.response && error.response.data && error.response.data.message) {
-      toast.error(error.response.data.message);
-    } else {
-      // Message par défaut si l'API ne renvoie rien de propre
-      toast.error('Une erreur inconnue est survenue.'); 
-    }
+      toast.error(error.message)
     }
   }
 
