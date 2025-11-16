@@ -40,10 +40,10 @@ export const register = async (req, res)=>{
 
         await transporter.sendMail(mailOperation);
 
-        return res.json({succes: true});
+        return res.json({success: true});
 
     } catch (error){
-        res.json({success: false, message: 'error.message'});
+        res.json({success: false, message: error.message});
     }
 }
 
@@ -69,11 +69,11 @@ export const login = async (req, res)=>{
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'producrion' ? 'none' : 'strict',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
-        return res.json({succes: true});
+        return res.json({success: true});
 
     }catch (error){
         return res.json({success: false, message: error.message});
@@ -122,7 +122,7 @@ export const sendVerifyOtp = async (req, res)=>{
 
 
     } catch (error) {
-        res.json({ success: false, message: error.massage});
+        res.json({ success: false, message: error.message});
     }
 }
 
@@ -239,7 +239,7 @@ export const resetPassword = async (req, res)=>{
 
         await user.save();
 
-        return res.json({success: false, message: 'Password has benn reset successfully'});
+        return res.json({success: true, message: 'Password has been reset successfully'});
 
 
         
