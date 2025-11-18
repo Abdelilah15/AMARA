@@ -5,6 +5,7 @@ import user_robot from './user_robot.svg'
 import arrow_small_right from './arrow_small_right.svg'
 import hand_wave from './hand_wave.svg'
 import circle_user from './circle_user.svg'
+import téléchargement from './téléchargement.jpeg'
 
 
 
@@ -16,5 +17,7 @@ export const assets = {
     user_robot,
     hand_wave,
     circle_user,
+    téléchargement,
+
 
 }
