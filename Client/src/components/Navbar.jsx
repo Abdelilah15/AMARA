@@ -16,13 +16,13 @@ const Navbar = () => {
         axios.defaults.withCredentials = true
         const {data} = await axios.post(backendUrl + '/api/auth/send-verify-otp')
         if (data.success) {
-          toast.success('Verification OTP sent to your email')
           navigate('/email-verify')
+          toast.success('Verification OTP sent to your email')
         } else {
-          toast.error('Something went wrong')
+          toast.error(data.message)
         }
       } catch (error) {
-        toast.error('Something went wrong')
+        toast.error(data.message)
       }
     }
 
@@ -36,7 +36,7 @@ const Navbar = () => {
         toast.success('Logged out successfully')
 
       } catch (error) {
-        toast.error('Something went wrong')
+        toast.error(error.message)
       }
     }
 
