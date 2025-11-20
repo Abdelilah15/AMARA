@@ -65,10 +65,15 @@ const ResetPassword = () => {
 
   const onSubmitOtp = async (e) => {
     e.preventDefault();
-    try {
       const otpArray = inputRefs.current.map(e => e.value)
-      const otp = otpArray.join('')
-      const {data} = await axios.post(backendUrl + '/api/auth/reset-password', {otp, newPassword})
+      const otp = (otpArray.join(''))
+      setIsOtpSubmited(true)
+  }
+
+  const onSubmitNewPassword = async (e) => {
+    e.preventDefault();
+    try {
+      const {data} = await axios.post(backendUrl + '/api/auth/reset-password', {email, otp, newPassword})
       if (data.success) {
         toast.success('Password reset successfully')
         navigate('/login')
@@ -101,7 +106,7 @@ const ResetPassword = () => {
 
           {/* enterer l'otp */}
 {!isOtpSubmited && isEmailSent &&
-          <form  style={{borderRadius:"15px", paddingRight:"80px", paddingLeft:"80px", paddingTop:"20px", paddingBottom:"20px"}} className= 'bg-slate-900 shadow-lg w-160 flex flex-col justify-center items-center text-indigo-300 text-sm'>
+          <form onSubmit={onSubmitOtp}  style={{borderRadius:"15px", paddingRight:"80px", paddingLeft:"80px", paddingTop:"20px", paddingBottom:"20px"}} className= 'bg-slate-900 shadow-lg w-160 flex flex-col justify-center items-center text-indigo-300 text-sm'>
             <div style={{display:"flex", flexDirection:"row", borderRadius:"15px", justifyContent:"center", alignItems:"center", width:"100%"}}>
               <div style={{height:"100%", width:"100%", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", background:""}}>
                 <h2 className='text-3xl sm:text-5xl font-semibold mb-4'>Reset password OTP</h2>
@@ -126,7 +131,7 @@ const ResetPassword = () => {
 
           {/* new password */}
 {!isOtpSubmited && isEmailSent &&
-          <form style={{borderRadius:"15px", paddingRight:"80px", paddingLeft:"80px", paddingTop:"20px", paddingBottom:"20px"}} className= 'bg-slate-900 shadow-lg w-160 flex flex-col justify-center items-center text-indigo-300 text-sm'>
+          <form onSubmit={onSubmitNewPassword} style={{borderRadius:"15px", paddingRight:"80px", paddingLeft:"80px", paddingTop:"20px", paddingBottom:"20px"}} className= 'bg-slate-900 shadow-lg w-160 flex flex-col justify-center items-center text-indigo-300 text-sm'>
             <h2 className='text-3xl sm:text-5xl font-semibold mb-4'>New password</h2>
             <p style={{textAlign:"center"}} className='mb-8 max-w-md'>Enter the new password for your account.</p>
             <div style={{display:"flex", alignItems:"center", justifyContent:"center", backgroundColor:"#ffffff", borderRadius:"50px", padding:"5px 10px", paddingRight:"5px", marginBottom:"20px"}} className='w-full'>
