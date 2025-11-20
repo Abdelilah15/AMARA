@@ -118,7 +118,7 @@ export const sendVerifyOtp = async (req, res)=>{
             to: user.email,
             subject: 'Account Verification OTP',
             //`OTP ⵏⵏⴽ ⵉⴳⴰ : ${otp}. ⵙⴳⴰⴷⴷⴰ ⴰⵎⵉⴹⴰⵏ ⵏⵏⴽ`
-            html: EMAIL_VERIFICATION_TEMPLATE.replace('{{OTP}}', otp).replace('{{email}}', user.email)
+            html: EMAIL_VERIFICATION_TEMPLATE.replace('{{otp}}', otp).replace('{{email}}', user.email)
         }
         await transporter.sendMail(mailOption);
         res.json({ success: true, message: 'OTP ⵢⴰⴼⵓⴹ ⵏⵏ ⵙ ⵍⵉⵎⵉⵍ ⵏⵏⴽ'});
@@ -201,7 +201,7 @@ export const sendResetOtp = async (req, res)=>{
             to: user.email,
             subject: 'Password Reset OTP.',
             // text: `OTP ⵏⵏⴽ ⴰⴼⴰⴷ ⴰⴷ ⵜⵙⴳⴰⴷⴷⴰⵜ ⵜⴳⵓⵔⵉ ⵉ ⵓⵣⵔⴰⵢ ⵢⴰⴹⵏ ⵉⴳⴰ : ${otp}.
-            html: PASSWORD_RESET_TEMPLATE.replace('{{OTP}}', otp).replace('{{email}}', user.email)
+            html: PASSWORD_RESET_TEMPLATE.replace('{{otp}}', otp).replace('{{email}}', user.email)
 
         };
         await transporter.sendMail(mailOption);
