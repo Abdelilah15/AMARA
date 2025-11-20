@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from 'react'
 import { assets } from "../assets/assets";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../index.css"
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
@@ -30,7 +30,7 @@ const Login = () => {
     const hasUpperCase = /[A-Z]/;
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
 
-    if (!pass) {
+    if (!password) {
       setPasswordFeedback('');
       setIsPasswordValid(false);
       return;
