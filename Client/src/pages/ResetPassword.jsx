@@ -16,10 +16,10 @@ const ResetPassword = () => {
 
     const navigate = useNavigate()
     const [email, setEmail] = useState('')
-    const [newPassword, setnewPassword] = useState('')
+    const [newPassword, setNewPassword] = useState('')
+    const [otp, setOtp] = useState('')
     const [isEmailSent, setIsEmailSent] = useState('')
-    const [otp, setOtp] = useState(0)
-    const [isOtpSubmited, setIsOtpSubmited] = useState(false)
+    const [isOtpSubmitted, setIsOtpSubmitted] = useState(false)
 
     const inputRefs = React.useRef([])
       const handleInputChange = (e, index) => {
@@ -34,7 +34,6 @@ const ResetPassword = () => {
         }
       }
     
-      // Fonction pour gérer le collage du code complet
       const handlePaste = (e) => {
         const paste = e.clipboardData.getData('text'); // Récupère le texte collé
         const pasteArray = paste.split('');            // Transforme en tableau de caractères
@@ -52,12 +51,8 @@ const ResetPassword = () => {
     e.preventDefault();
     try {
       const {data} = await axios.post(backendUrl + '/api/auth/send-reset-otp', {email})
-      if (data.success) {
-        setIsEmailSent(true)
-        toast.success('OTP sent to your email')
-      } else {
-        toast.error(data.message)
-      }
+      data.success ? toast.success('OTP sent to your email') : toast.error(data.message)
+      data.success && setIsEmailSent(true)
     } catch (error) {
       toast.error(error.message)
     }
@@ -65,21 +60,17 @@ const ResetPassword = () => {
 
   const onSubmitOtp = async (e) => {
     e.preventDefault();
-      const otpArray = inputRefs.current.map(e => e.value)
-      const otp = (otpArray.join(''))
-      setIsOtpSubmited(true)
+    const otpArray = inputRefs.current.map(e => e.value)
+    setOtp(otpArray.join(''))
+    setIsOtpSubmitted(true)
   }
 
   const onSubmitNewPassword = async (e) => {
     e.preventDefault();
     try {
       const {data} = await axios.post(backendUrl + '/api/auth/reset-password', {email, otp, newPassword})
-      if (data.success) {
-        toast.success('Password reset successfully')
-        navigate('/login')
-      } else {
-        toast.error(data.message)
-      }
+      data.success ? toast.success('Password reset successfully') : toast.error(data.message)
+      data.success && navigate('/login')
     } catch (error) {
       toast.error(error.message)
     }
@@ -90,7 +81,7 @@ const ResetPassword = () => {
         <img onClick={()=>navigate('/')} src={assets.user} alt="" className='absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer'/>
           
           {/* entrer l'email */}
-{!isEmailSent &&
+{!isEmailSent && (
           <form onSubmit={onSubmitEmail} style={{borderRadius:"15px", paddingRight:"80px", paddingLeft:"80px", paddingTop:"20px", paddingBottom:"20px"}} className= 'bg-slate-900 shadow-lg w-160 flex flex-col justify-center items-center text-indigo-300 text-sm'>
             <h2 className='text-3xl sm:text-5xl font-semibold mb-4'>Reset Password</h2>
             <p style={{textAlign:"center"}} className='mb-8 max-w-md'>Enter your registred email address to reset your password.</p>
@@ -102,10 +93,10 @@ const ResetPassword = () => {
             </div>
             <button className='bg-gray-200 text-black cursor-pointer border border-gray-500 rounded-full px-12 py-3 hover:bg-gray-100 transation-all'>Submit</button>
           </form>
-}
+)}
 
           {/* enterer l'otp */}
-{!isOtpSubmited && isEmailSent &&
+{!isOtpSubmitted && isEmailSent && (
           <form onSubmit={onSubmitOtp}  style={{borderRadius:"15px", paddingRight:"80px", paddingLeft:"80px", paddingTop:"20px", paddingBottom:"20px"}} className= 'bg-slate-900 shadow-lg w-160 flex flex-col justify-center items-center text-indigo-300 text-sm'>
             <div style={{display:"flex", flexDirection:"row", borderRadius:"15px", justifyContent:"center", alignItems:"center", width:"100%"}}>
               <div style={{height:"100%", width:"100%", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", background:""}}>
@@ -127,10 +118,10 @@ const ResetPassword = () => {
               </div>
             </div>
           </form>
-}   
+)}   
 
           {/* new password */}
-{!isOtpSubmited && isEmailSent &&
+{isEmailSent && isOtpSubmitted &&(
           <form onSubmit={onSubmitNewPassword} style={{borderRadius:"15px", paddingRight:"80px", paddingLeft:"80px", paddingTop:"20px", paddingBottom:"20px"}} className= 'bg-slate-900 shadow-lg w-160 flex flex-col justify-center items-center text-indigo-300 text-sm'>
             <h2 className='text-3xl sm:text-5xl font-semibold mb-4'>New password</h2>
             <p style={{textAlign:"center"}} className='mb-8 max-w-md'>Enter the new password for your account.</p>
@@ -138,13 +129,13 @@ const ResetPassword = () => {
               <i style={{display:"flex",backgroundColor:"#ffffffff", justifyContent:"center", fontSize:"25px", color:"#777777ff", marginRight:"5px", marginLeft:"3px"}} class="fi fi-rr-lock"></i>
               <input type="password" placeholder='New Password' required
               className='w-full h-12 mx-1 px-4 text-black text-center text-xl rounded-full bg-gray-200 outline-none placeholder-gray-400' style={{fontSize:"18px"}} 
-              value={newPassword} onChange={e => setnewPassword(e.target.value)} />
+              value={newPassword} onChange={e => setNewPassword(e.target.value)} />
               
             </div>
             <button className='bg-gray-200 text-black cursor-pointer border border-gray-500 rounded-full px-12 py-3 hover:bg-gray-100 transation-all'>Reset Password</button>
           
           </form>
-}
+)}
     </div>
   )
 }

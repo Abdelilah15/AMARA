@@ -68,19 +68,19 @@ const Login = () => {
             <i className="fi fi-rr-user" style={{fontSize: "25px", color: "#777777ff", alignItems: "center", display: "flex", borderRadius: "50px", padding: "3px"}}></i>
             <input 
             onChange={e => setName(e.target.value)} value={name} 
-            className="bg-transparent outline-none placeholder-gray-400 text-gray-900" type="text" placeholder="Full Name" required/>
+            className=" w-full mr-5 bg-transparent outline-none placeholder-gray-400 text-gray-900" type="text" placeholder="Full Name" required/>
           </div>
           )}
           
           <div className='mb-4 flex items-center gap-3 w-full px-2.5 py-2 rounded-full bg-[#ffffff]'>
             <i className="fi fi-rr-envelope" style={{fontSize: "25px", color: "#777777ff", alignItems: "center", display: "flex", borderRadius: "50px", padding: "3px"}}></i>
             <input onChange={e => setEmail(e.target.value)} value={email}
-            className="bg-transparent outline-none placeholder-gray-400 text-gray-900" type="email" placeholder="Email id" required/>
+            className=" w-full mr-5 bg-transparent outline-none placeholder-gray-400 text-gray-900" type="email" placeholder="Email id" required/>
           </div>
           <div className='mb-4 flex items-center gap-3 w-full px-2.5 py-2 rounded-full bg-[#ffffff]'>
             <i className="fi fi-rr-lock" style={{fontSize: "25px", color: "#777777ff", alignItems: "center", display: "flex", borderRadius: "50px", padding: "3px"}}></i>
             <input onChange={e => setPassword(e.target.value)} value={password} 
-            className="bg-transparent outline-none placeholder-gray-400 text-gray-900" type="password" placeholder="Password" required/>
+            className=" mr-5 w-full bg-transparent outline-none placeholder-gray-400 text-gray-900" type="password" placeholder="Password" required/>
           </div>
 
           <p onClick={()=>navigate('/reset-password')} className="mb-4 text-indigo-500 cursor-pointer">Forgot password?</p>

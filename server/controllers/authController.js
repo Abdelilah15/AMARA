@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModel.js';
 import transporter from '../config/nodemailer.js';
+import { EMAIL_VERIFICATION_TEMPLATE, PASSWORD_RESET_TEMPLATE } from '../config/emailTemplates.js';
+
 
 export const register = async (req, res)=>{
     const {name, email, password} = req.body
@@ -115,7 +117,8 @@ export const sendVerifyOtp = async (req, res)=>{
             from: process.env.SENDER_EMAIL,
             to: user.email,
             subject: 'Account Verification OTP',
-            text: `OTP ⵏⵏⴽ ⵉⴳⴰ : ${otp}. ⵙⴳⴰⴷⴷⴰ ⴰⵎⵉⴹⴰⵏ ⵏⵏⴽ`
+            //`OTP ⵏⵏⴽ ⵉⴳⴰ : ${otp}. ⵙⴳⴰⴷⴷⴰ ⴰⵎⵉⴹⴰⵏ ⵏⵏⴽ`
+            html: EMAIL_VERIFICATION_TEMPLATE.replace('{{OTP}}', otp).replace('{{email}}', user.email)
         }
         await transporter.sendMail(mailOption);
         res.json({ success: true, message: 'OTP ⵢⴰⴼⵓⴹ ⵏⵏ ⵙ ⵍⵉⵎⵉⵍ ⵏⵏⴽ'});
@@ -197,8 +200,9 @@ export const sendResetOtp = async (req, res)=>{
             from: process.env.SENDER_EMAIL,
             to: user.email,
             subject: 'Password Reset OTP.',
-            text: `OTP ⵏⵏⴽ ⴰⴼⴰⴷ ⴰⴷ ⵜⵙⴳⴰⴷⴷⴰⵜ ⵜⴳⵓⵔⵉ ⵉ ⵓⵣⵔⴰⵢ ⵢⴰⴹⵏ ⵉⴳⴰ : ${otp}.
-            ⵙⵙⵎⵔⵙ OTP ⴰⴷ ⴰⴼⴰⴷ ⴰⴷ ⵜⵙⴳⴰⴷⴷⴰⵜ ⵜⴰⴳⵓⵔⵉ ⵏ ⵓⵣⵔⴰⵢ ⵜⴰⵎⴰⵢⵏⵓⵜ.`
+            // text: `OTP ⵏⵏⴽ ⴰⴼⴰⴷ ⴰⴷ ⵜⵙⴳⴰⴷⴷⴰⵜ ⵜⴳⵓⵔⵉ ⵉ ⵓⵣⵔⴰⵢ ⵢⴰⴹⵏ ⵉⴳⴰ : ${otp}.
+            html: PASSWORD_RESET_TEMPLATE.replace('{{OTP}}', otp).replace('{{email}}', user.email)
+
         };
         await transporter.sendMail(mailOption);
 
