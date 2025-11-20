@@ -63,6 +63,23 @@ const ResetPassword = () => {
     }
   }
 
+  const onSubmitOtp = async (e) => {
+    e.preventDefault();
+    try {
+      const otpArray = inputRefs.current.map(e => e.value)
+      const otp = otpArray.join('')
+      const {data} = await axios.post(backendUrl + '/api/auth/reset-password', {otp, newPassword})
+      if (data.success) {
+        toast.success('Password reset successfully')
+        navigate('/login')
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
+
   return (
     <div className='flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-purple-400'>
         <img onClick={()=>navigate('/')} src={assets.user} alt="" className='absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer'/>
