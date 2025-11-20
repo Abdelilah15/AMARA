@@ -35,13 +35,13 @@ const Login = () => {
       setIsPasswordValid(false);
       return;
     }
-    if (!minLength.test(pass)) {
+    if (!minLength.test(password)) {
       setPasswordFeedback('Faible : 8 caractères minimum requis');
       setIsPasswordValid(false);
-    }else if (!hasUpperCase.test(pass)) {
+    }else if (!hasUpperCase.test(password)) {
       setPasswordFeedback('Moyen : Ajoutez une majuscule');
       setIsPasswordValid(false);
-    } else if (!hasSpecialChar.test(pass)) {
+    } else if (!hasSpecialChar.test(password)) {
       setPasswordFeedback('Moyen : Ajoutez un caractère spécial');
       setIsPasswordValid(false);
     } else {
