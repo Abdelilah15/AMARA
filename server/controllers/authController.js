@@ -12,6 +12,11 @@ export const register = async (req, res)=>{
         return res.json({success: false, message: 'Missang Details'})
     }
 
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+        return res.json({ success: false, message: 'Le mot de passe doit contenir au moins 8 caractères, une majuscule et un caractère spécial.' });
+    }
+
     try {
         const existingUser = await userModel.findOne({email})
 

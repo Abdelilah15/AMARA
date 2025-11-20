@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import { assets } from "../assets/assets";
 import { data, useNavigate } from "react-router-dom";
 import "../index.css"
@@ -13,7 +13,6 @@ import "./Login.css"
 const Login = () => {
 
   const navigate = useNavigate();
-
   const { backendUrl, setIsLoggedin, getUserData } = useContext(AppContext);
 
   const [state, setstate] = useState('Sign Up')
@@ -21,9 +20,50 @@ const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
+  const [passwordFeedback, setPasswordFeedback] = useState('')
+  const [isPasswordValid, setIsPasswordValid] = useState(false)
+
+  const validatePassword = (password) => {
+    if (state === 'Login') return;
+
+    const minLength = /.{8,}/;
+    const hasUpperCase = /[A-Z]/;
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
+
+    if (!pass) {
+      setPasswordFeedback('');
+      setIsPasswordValid(false);
+      return;
+    }
+    if (!minLength.test(pass)) {
+      setPasswordFeedback('Faible : 8 caractères minimum requis');
+      setIsPasswordValid(false);
+    }else if (!hasUpperCase.test(pass)) {
+      setPasswordFeedback('Moyen : Ajoutez une majuscule');
+      setIsPasswordValid(false);
+    } else if (!hasSpecialChar.test(pass)) {
+      setPasswordFeedback('Moyen : Ajoutez un caractère spécial');
+      setIsPasswordValid(false);
+    } else {
+      setPasswordFeedback('Fort : Mot de passe valide');
+      setIsPasswordValid(true);
+    }
+  }
+
+  useEffect(() => {
+    validatePassword(password);
+  }, [password, state]);
+
+
   const onSubmitHandler = async (e) => {
     try {
       e.preventDefault();
+
+      if (state === 'Sign Up' && !isPasswordValid) {
+        toast.error('Le mot de passe ne répond pas aux critères de sécurité.');
+        return;
+      }
+
       axios.defaults.withCredentials = true;
 
       if (state === 'Sign Up') {
@@ -55,6 +95,7 @@ const Login = () => {
     }
   }
 
+
   return (
     <div className='flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400'>
       <img onClick={()=>navigate('/')} src={assets.user} alt="" className='absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer'/>
@@ -66,8 +107,7 @@ const Login = () => {
           {state === 'Sign Up' && (
             <div className='mb-4 flex items-center gap-3 w-full px-2.5 py-2 rounded-full bg-[#ffffff]'>
             <i className="fi fi-rr-user" style={{fontSize: "25px", color: "#777777ff", alignItems: "center", display: "flex", borderRadius: "50px", padding: "3px"}}></i>
-            <input 
-            onChange={e => setName(e.target.value)} value={name} 
+            <input onChange={e => setName(e.target.value)} value={name} 
             className=" w-full mr-5 bg-transparent outline-none placeholder-gray-400 text-gray-900" type="text" placeholder="Full Name" required/>
           </div>
           )}
@@ -83,6 +123,12 @@ const Login = () => {
             className=" mr-5 w-full bg-transparent outline-none placeholder-gray-400 text-gray-900" type="password" placeholder="Password" required/>
           </div>
 
+          {state === 'Sign Up' && passwordFeedback && (
+            <p className={`text-xs mb-4 text-center ${isPasswordValid ? 'text-green-400' : 'text-red-400'}`}>
+              {passwordFeedback}
+            </p>
+          )}
+        
           <p onClick={()=>navigate('/reset-password')} className="mb-4 text-indigo-500 cursor-pointer">Forgot password?</p>
           <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium cursor-pointer">{state}</button>
         </form>
