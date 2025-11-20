@@ -2,14 +2,16 @@ import React, { useContext } from 'react'
 import { assets } from '../assets/assets'
 import { AppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom';
-
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useEffect } from 'react';
 
 
 
 const EmailVerify = () => {
 
   axios.defaults.withCredentials = true;
-  const {backendUrl, isLoggedin, getUserData} = useContext(AppContext)
+  const {backendUrl, isLoggedin, getUserData, userData} = useContext(AppContext)
   const navigate = useNavigate()
 
   const inputRefs = React.useRef([])
@@ -58,6 +60,12 @@ const EmailVerify = () => {
       toast.error(error.message)
     }
   }
+
+  useEffect(() => {
+    isLoggedin && userData && userData.isAccountVerified && navigate('/')
+
+  }, [isLoggedin, userData])
+
 
   return (
     <div className='flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-purple-400'>
