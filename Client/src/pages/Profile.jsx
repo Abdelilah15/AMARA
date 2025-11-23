@@ -23,11 +23,11 @@ const Profile = () => {
   }
 
   return (
-    <div className='flex flex-col items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400'>
+    <div className='flex flex-col items-center min-h-screen px-6 sm:px-0 bg-white'>
       {/* Logo ou bouton retour */}
 
-      <div style={{height:"100%"}} className=" bg-slate-700 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm animate-fade-in">
-        <h2 className="text-3xl font-semibold text-white text-center mb-6">Mon Profil</h2>
+      <div className=" p-10 h-full sm:w-160 sm:h-full text-indigo-300 text-sm animate-fade-in">
+        <h2 className="text-3xl font-semibold text-gray-900 text-center mb-6">Mon Profil</h2>
 
         <div className="flex flex-col items-center gap-4 mb-6">
             {/* Avatar de l'utilisateur */}
@@ -36,7 +36,7 @@ const Profile = () => {
             </div>
             
             <div className="text-center">
-                <h3 className="text-xl font-bold text-white capitalize">{userData.name}</h3>
+                <h3 className="text-xl font-bold text-gray-900 capitalize">{userData.name}</h3>
                 <p className="text-gray-400">{userData.email}</p>
             </div>
         </div>

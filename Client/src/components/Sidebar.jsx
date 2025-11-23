@@ -4,13 +4,11 @@ import { assets } from '../assets/assets';
 import '../index.css';
 import { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
-import axios from 'axios';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false); // État pour le menu mobile
-  const { userData, isLoggedin } = useContext(AppContext);
-  axios.defaults.withCredentials = true;
+  const { userData} = useContext(AppContext);
 
 
   return (
@@ -71,14 +69,20 @@ const Sidebar = () => {
           </ul>
         </div>
 
-        <div className="bg-gray-600 p-2 rounded-lg shadow-lg flex items-center gap-2 text-sm text-gray-400">
-            <div className="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center text-4xl text-white font-bold uppercase border-3 border-indigo-300">
-                {userData.name ? userData.name[0] : 'U'}
-            </div>
-            <div className="text-left">
-                <h3 className="text-xl font-bold text-white capitalize">{userData.name}</h3>
-                <p className="text-gray-400">{userData.email}</p>
-            </div>
+        <div className="bg-gray-600 p-2 rounded-full shadow-lg flex items-center gap-2 text-sm text-gray-400">
+            {userData ? (
+                <>
+                <div className="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center text-4xl text-white font-bold uppercase border-3 border-indigo-300">
+                    {userData.name ? userData.name[0].toUpperCase() : 'U'}
+                </div>
+                <div className="text-left">
+                    <h3 className="text-xl font-bold text-white capitalize">{userData.name}</h3>
+                    <p className="text-gray-400">{userData.email}</p>
+                </div>
+                </>
+            ) : (
+                <p>Utilisateur non connecté</p>
+            )}
         </div>
       </div>
     </>
