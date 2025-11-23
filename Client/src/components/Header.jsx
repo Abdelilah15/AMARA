@@ -6,7 +6,7 @@ const Header = () => {
   const {userData} = useContext(AppContext);
 
   return (
-    <div className='flex flex-col items-center mt-20 px-4 text-center text-gray-800'>
+    <div style={{margin:"1px", borderRadius:"50px", backgroundColor:"white"}} className='flex flex-col items-center mt-20 px-4 text-center text-gray-800'>
       <img src={assets.user_robot} alt="" className='w-36 h-36 rounded-full mb-6'/>
       <h1 className='flex items-center gap-2 text-xl sm:text-3xl font-medium mb-2'>ⴰⵣⵓⵍ {userData ? userData.name : 'siwn'}!
         <img className='w-8 aspect-square' src={assets.hand_wave} alt="" />

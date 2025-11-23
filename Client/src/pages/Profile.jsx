@@ -25,14 +25,8 @@ const Profile = () => {
   return (
     <div className='flex flex-col items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400'>
       {/* Logo ou bouton retour */}
-      <img 
-        onClick={() => navigate('/')} 
-        src={assets.logo || assets.user} // Fallback si assets.logo n'existe pas
-        alt="Logo" 
-        className='absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer' 
-      />
 
-      <div className="bg-slate-900 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm animate-fade-in">
+      <div style={{height:"100%"}} className=" bg-slate-700 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm animate-fade-in">
         <h2 className="text-3xl font-semibold text-white text-center mb-6">Mon Profil</h2>
 
         <div className="flex flex-col items-center gap-4 mb-6">
