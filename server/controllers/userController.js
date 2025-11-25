@@ -15,7 +15,8 @@ export const getUserData = async (req, res)=>{
                 isAccountVerified: user.isAccountVerified,
                 email: user.email,
                 image: user.image,
-                banner: user.banner
+                banner: user.banner,
+                profileType: user.profileType
             }
         });
         
@@ -59,5 +60,22 @@ export const uploadBannerImage = async (req, res)=>{
 
     } catch (error) {
         res.json({success: false, message: error.message});
+    }
+}
+
+export const updateProfileType = async (req, res) => {
+    try {
+        const { profileType } = req.body;
+        const userId = req.user.id;
+
+        if (!['personal', 'professional'].includes(profileType)) {
+            return res.json({ success: false, message: "Type de profil invalide" });
+        }
+
+        await userModel.findByIdAndUpdate(userId, { profileType });
+        res.json({ success: true, message: "Type de profil mis à jour" });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
     }
 }

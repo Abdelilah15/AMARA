@@ -7,6 +7,7 @@ import ResetPassword from './pages/ResetPassword'
 import { ToastContainer } from 'react-toastify';
 import Profile from './pages/Profile'
 import Sidebar from './components/Sidebar';
+import Settings from './pages/Settings';
 
 
 
@@ -16,6 +17,7 @@ const App = () => {
   const isLoginPage = location.pathname === '/login';
   const isEmailVerifyPage = location.pathname === '/email-verify';
   const isResetPasswordPage = location.pathname === '/reset-password';
+  const isSettingsPage = location.pathname === '/settings';
 
 
   return (
@@ -29,6 +31,7 @@ const App = () => {
         <Route path='/email-verify' element={<EmailVerify/>}/>
         <Route path='/reset-password' element={<ResetPassword/>}/>
         <Route path='/profile' element={<Profile/>}/>
+        <Route path='/settings' element={<Settings/>}/>
       </Routes>
       </div>
     </div>

@@ -56,15 +56,16 @@ const Sidebar = () => {
           <ul className="space-y-4">
             <li 
               onClick={() => { navigate('/profile'); setIsOpen(false); }} 
-              className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3"
-            >
-              <img src={assets.user} className="w-5 invert" alt="" /> 
-              Profil
+                className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
+                <img src={assets.user} className="w-5 invert" alt="" /> Profil
             </li>
             <li onClick={() => { navigate('/'); setIsOpen(false); }} 
-              className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
-                <i class="fi fi-ts-house-chimney"></i> Accueil
+                className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
+                <img src={assets.house_chimney} className="w-5 invert"alt="" /> Accueil
             </li>
+            <li onClick={() => { navigate('/settings'); setIsOpen(false); }} 
+                className='hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3'>
+                <img src={assets.settings} className="w-5 invert" alt="" /> Settings</li>
             {/* Ajoutez vos autres liens ici */}
           </ul>
         </div>
