@@ -26,6 +26,10 @@ export const getUserData = async (req, res)=>{
 
 export const uploadProfileImage = async (req, res)=>{
     try {
+        if (!req.file) {
+            return res.json({ success: false, message: "Aucun fichier n'a été téléchargé." });
+        }
+
         const userId = req.user.id;
         const imagePath = req.file.path;
         const baseUrl = `${req.protocol}://${req.get('host')}/`;
@@ -41,6 +45,10 @@ export const uploadProfileImage = async (req, res)=>{
 
 export const uploadBannerImage = async (req, res)=>{
     try {
+        if (!req.file) {
+            return res.json({ success: false, message: "Aucun fichier n'a été téléchargé." });
+        }
+
         const userId = req.user.id;
         const imagePath = req.file.path;
         const baseUrl = `${req.protocol}://${req.get('host')}/`;

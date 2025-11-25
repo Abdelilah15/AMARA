@@ -8,7 +8,7 @@ import { assets } from '../assets/assets'; // Assurez-vous que assets contient d
 
 
 const Profile = () => {
-  const { userData, isLoggedin, setUserData } = useContext(AppContext);
+  const { userData, isLoggedin, getUserData, backendUrl } = useContext(AppContext);
   const navigate = useNavigate();
 
   // États locaux pour gérer l'aperçu des images avant l'envoi au serveur
@@ -38,8 +38,7 @@ const handleImageChange = async (e, type) => {
             : '/api/user/upload-banner';
 
         const { data } = await axios.post(backendUrl + endpoint, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }, // Important pour les fichiers
-            withCredentials: true
+            withCredentials: true,
         });
 
         if (data.success) {
