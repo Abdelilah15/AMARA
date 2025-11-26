@@ -21,10 +21,10 @@ const App = () => {
 
 
   return (
-    <div className='flex main-h-screen'>
+    <div className=' main-h-screen'>
       <ToastContainer/>
       {!isHomePage && !isLoginPage && !isEmailVerifyPage && !isResetPasswordPage && <Sidebar />}
-      <div className={`w-full transition-all duration-300 ${!isHomePage && !isLoginPage && !isEmailVerifyPage && !isResetPasswordPage ? 'sm:ml-64' : ''}`}>
+      <div className={`transition-all duration-300 ${!isHomePage && !isLoginPage && !isEmailVerifyPage && !isResetPasswordPage ? 'sm:ml-64' : ''}`}>
       <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path='/login' element={<Login/>}/>
