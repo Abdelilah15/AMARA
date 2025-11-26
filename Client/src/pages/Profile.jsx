@@ -6,15 +6,50 @@ import { toast } from 'react-toastify';
 import { assets } from '../assets/assets'; // Assurez-vous que assets contient des icônes par défaut si besoin
 
 
-
 const Profile = () => {
-  const { userData, isLoggedin, getUserData, backendUrl } = useContext(AppContext);
+  const { userData, isLoggedin, getUserData, backendUrl, setUserData } = useContext(AppContext);
   const navigate = useNavigate();
 
   // États locaux pour gérer l'aperçu des images avant l'envoi au serveur
   // (Note: La logique d'upload vers le serveur devra être connectée ici)
   const [profileImage, setProfileImage] = useState(null);
   const [bannerImage, setBannerImage] = useState(null);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Mettre à jour les champs quand userData change ou quand on ouvre la modale
+  useEffect(() => {
+    if (userData) {
+      setEditName(userData.name || '');
+      setEditBio(userData.bio || '');
+    }
+  }, [userData]);
+
+  const handleSaveProfile = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.post(backendUrl + '/api/user/update-profile', {
+        name: editName,
+        bio: editBio
+      });
+
+      if (data.success) {
+        setUserData(prev => ({ ...prev, name: editName, bio: editBio }));
+        toast.success(data.message);
+        setIsEditModalOpen(false);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  if (!userData) return <div className="min-h-screen flex justify-center items-center">Chargement...</div>;
 
   // Fonction pour simuler le changement d'image (Aperçu)
 const handleImageChange = async (e, type) => {

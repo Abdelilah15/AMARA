@@ -16,6 +16,7 @@ export const getUserData = async (req, res)=>{
                 email: user.email,
                 image: user.image,
                 banner: user.banner,
+                bio: user.bio,
                 profileType: user.profileType
             }
         });
@@ -63,6 +64,19 @@ export const uploadBannerImage = async (req, res)=>{
     }
 }
 
+export const updateUserBio = async (req, res) => {
+    try {
+        const { bio } = req.body;
+        const userId = req.user.id;
+
+        await userModel.findByIdAndUpdate(userId, { bio });
+        res.json({ success: true, message: "Bio mise à jour avec succès" });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+
 export const updateProfileType = async (req, res) => {
     try {
         const { profileType } = req.body;
@@ -74,6 +88,24 @@ export const updateProfileType = async (req, res) => {
 
         await userModel.findByIdAndUpdate(userId, { profileType });
         res.json({ success: true, message: "Type de profil mis à jour" });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+
+export const updateUserProfile = async (req, res) => {
+    try {
+        const { name, bio } = req.body;
+        const userId = req.user.id;
+
+        const updateData = {};
+        if (name) updateData.name = name;
+        if (bio !== undefined) updateData.bio = bio; // Permet de vider la bio si besoin
+
+        await userModel.findByIdAndUpdate(userId, updateData);
+        
+        res.json({ success: true, message: "Profil mis à jour avec succès" });
 
     } catch (error) {
         res.json({ success: false, message: error.message });
