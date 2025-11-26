@@ -8,6 +8,7 @@ import { AppContext } from '../context/AppContext';
 const Sidebar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false); // État pour le menu mobile
+  const [profileImage, setProfileImage] = useState(false);
   const { userData} = useContext(AppContext);
 
 
@@ -54,15 +55,17 @@ const Sidebar = () => {
 
           {/* Navigation */}
           <ul className="space-y-4">
+            <li onClick={() => { navigate('/'); setIsOpen(false); }} 
+                className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
+                <img src={assets.house_chimney} className="w-5 invert"alt="" /> Accueil
+            </li>
+
             <li 
               onClick={() => { navigate('/profile'); setIsOpen(false); }} 
                 className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
                 <img src={assets.user} className="w-5 invert" alt="" /> Profil
             </li>
-            <li onClick={() => { navigate('/'); setIsOpen(false); }} 
-                className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
-                <img src={assets.house_chimney} className="w-5 invert"alt="" /> Accueil
-            </li>
+            
             <li onClick={() => { navigate('/settings'); setIsOpen(false); }} 
                 className='hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3'>
                 <img src={assets.settings} className="w-5 invert" alt="" /> Settings</li>
@@ -73,15 +76,21 @@ const Sidebar = () => {
         <div className="bg-gray-600 p-2 rounded-full shadow-lg flex items-center gap-2 text-sm text-gray-400">
             {userData ? (
                 <>
-                <div className="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center text-4xl text-white font-bold uppercase border-3 border-indigo-300">
+                {profileImage ? (
+                    <div className="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center text-4xl text-white font-bold uppercase border-3 border-indigo-300">
                     {userData.name ? userData.name[0].toUpperCase() : 'U'}
-                </div>
+                </div>                   
+                ): (
+                    <div className="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center text-4xl text-white font-bold uppercase border-3 border-indigo-300">
+                    <img className="w-full h-full object-cover rounded-full" src={userData.image} alt="" />
+                </div> 
+                )}
                 <div className="text-left">
                     <h3 className="text-xl font-bold text-white capitalize">{userData.name}</h3>
                     <p className="text-gray-400">{userData.email}</p>
                 </div>
                 </>
-            ) : (
+                ) : (
                 <p>Utilisateur non connecté</p>
             )}
         </div>
