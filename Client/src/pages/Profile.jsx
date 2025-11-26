@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -7,7 +7,7 @@ import { assets } from '../assets/assets'; // Assurez-vous que assets contient d
 
 
 const Profile = () => {
-  const { userData, isLoggedin, getUserData, backendUrl, setUserData } = useContext(AppContext);
+  const { userData, isLoggedin, backendUrl, setUserData } = useContext(AppContext);
   const navigate = useNavigate();
 
   // États locaux pour gérer l'aperçu des images avant l'envoi au serveur
@@ -28,6 +28,13 @@ const Profile = () => {
     }
   }, [userData]);
 
+  // Redirect to login when not authenticated
+  useEffect(() => {
+    if (!isLoggedin) {
+      navigate('/login');
+    }
+  }, [isLoggedin, navigate]);
+
   const handleSaveProfile = async () => {
     setLoading(true);
     try {
@@ -37,6 +44,7 @@ const Profile = () => {
       });
 
       if (data.success) {
+        // Update local context with new fields
         setUserData(prev => ({ ...prev, name: editName, bio: editBio }));
         toast.success(data.message);
         setIsEditModalOpen(false);
@@ -49,7 +57,8 @@ const Profile = () => {
       setLoading(false);
     }
   };
-  if (!userData) return <div className="min-h-screen flex justify-center items-center">Chargement...</div>;
+  // If user is logged in but user data not yet loaded, show loader
+  if (isLoggedin && !userData) return <div className="min-h-screen flex justify-center items-center">Chargement...</div>;
 
   // Fonction pour simuler le changement d'image (Aperçu)
 const handleImageChange = async (e, type) => {
@@ -77,11 +86,13 @@ const handleImageChange = async (e, type) => {
         });
 
         if (data.success) {
-            toast.success(data.message);
-            // Optionnel : Mettre à jour le contexte global pour que l'image persiste si on change de page
-            getUserData(); 
+          toast.success(data.message);
+          // If API returned updated user object, merge it into context so UI updates
+          if (data.user) {
+            setUserData(data.user);
+          }
         } else {
-            toast.error(data.message);
+          toast.error(data.message);
         }
 
     } catch (error) {
@@ -138,7 +149,7 @@ const handleImageChange = async (e, type) => {
         <div className="px-6 pb-8 relative">
             
             {/* --- Zone Avatar (chevauche la bannière) --- */}
-            <div className="relative -mt-16 mb-4 flex justify-center sm:justify-start">
+            <div className="bg-blue-500 relative -mt-16 mb-4 flex justify-center sm:justify-start">
                 <div className="relative">
                     <div className="w-32 h-32 rounded-full border-4 border-white bg-indigo-600 overflow-hidden shadow-lg flex items-center justify-center text-5xl text-white font-bold uppercase">
                         {profileImage || userData.image ? (
@@ -157,12 +168,34 @@ const handleImageChange = async (e, type) => {
                     </label>
                     <input type="file" id="profile-upload" hidden accept="image/*" onChange={(e) => handleImageChange(e, 'profile')} />
                 </div>
+
+                <div style={{}}>hi</div>
             </div>
 
             {/* Informations Textuelles */}
             <div className="text-center sm:text-left mt-2">
-                <h2 className="text-3xl font-bold text-gray-900 capitalize">{userData.name}</h2>
+                <h2 className="text-3xl font-bold text-gray-900 capitalize">
+                    {userData.name}
+
+                    {/* --- Bouton Modifier le profil --- */}
+                    <button 
+                        onClick={() => setIsEditModalOpen(true)}
+                        className="p-1 text-gray-400 hover:text-indigo-600 transition-colors cursor-pointer"
+                        title="Modifier le profil"
+                    >
+                        <i className="fi fi-rr-edit text-lg"></i>
+                    </button>
+
+                </h2>
                 <p className="text-gray-500 font-medium">{userData.email}</p>
+                {/* --- Affichage de la Bio --- */}
+                <div className="mt-3 text-gray-600 text-sm leading-relaxed">
+                    {userData.bio ? (
+                        <p className="whitespace-pre-wrap">{userData.bio}</p>
+                    ) : (
+                        <p className="italic text-gray-400 text-xs">Aucune bio pour le moment.</p>
+                    )}
+                </div>
             </div>
 
             {/* Statut du compte et Actions */}
@@ -205,6 +238,56 @@ const handleImageChange = async (e, type) => {
             </div>
         </div>
       </div>
+
+    {/* --- MODALE D'EDITION (Ajoutée ici) --- */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm flex justify-center items-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in">
+            <div className="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 className="text-xl font-bold text-gray-800">Modifier le profil</h3>
+                <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                <input 
+                  type="text" 
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                  placeholder="Votre nom d'affichage"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                <textarea 
+                  value={editBio}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none h-32 resize-none transition-all"
+                  placeholder="Écrivez quelque chose sur vous..."
+                  maxLength={300}
+                />
+                <p className="text-xs text-right text-gray-400 mt-1">{editBio.length}/300</p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button 
+                onClick={() => setIsEditModalOpen(false)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+                disabled={loading}>Annuler
+              </button>
+              <button 
+                onClick={handleSaveProfile}
+                disabled={loading}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-sm disabled:opacity-70"
+              >
+                {loading ? 'Enregistrement...' : 'Enregistrer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
