@@ -7,7 +7,7 @@ import { assets } from '../assets/assets'; // Assurez-vous que assets contient d
 
 
 const Profile = () => {
-  const { userData, isLoggedin, backendUrl, setUserData } = useContext(AppContext);
+  const { userData, isLoggedin, backendUrl, setUserData, isAuthChecking } = useContext(AppContext);
   const navigate = useNavigate();
 
   // États locaux pour gérer l'aperçu des images avant l'envoi au serveur
@@ -18,13 +18,30 @@ const Profile = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState('');
   const [editBio, setEditBio] = useState('');
+  const [editLinks, setEditLinks] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const sendVerificationOtp = async () => {
+        try {
+          axios.defaults.withCredentials = true
+          const {data} = await axios.post(backendUrl + '/api/auth/send-verify-otp')
+          if (data.success) {
+            navigate('/email-verify')
+            toast.success('Verification OTP sent to your email')
+          } else {
+            toast.error(data.message)
+          }
+        } catch (error) {
+          toast.error(data.message)
+        }
+      }
 
   // Mettre à jour les champs quand userData change ou quand on ouvre la modale
   useEffect(() => {
     if (userData) {
       setEditName(userData.name || '');
       setEditBio(userData.bio || '');
+      setEditLinks(userData.links || []);
     }
   }, [userData]);
 
@@ -33,19 +50,30 @@ const Profile = () => {
     if (!isLoggedin) {
       navigate('/login');
     }
-  }, [isLoggedin, navigate]);
+  }, [isLoggedin, navigate, isAuthChecking]);
+
+  // Gestion des changements dans les inputs de liens
+  const handleLinkChange = (index, field, value) => {
+    const newLinks = [...editLinks];
+    // Si l'objet n'existe pas à cet index, on le crée
+    if (!newLinks[index]) newLinks[index] = { title: '', url: '' };
+    newLinks[index][field] = value;
+    setEditLinks(newLinks);
+  };
 
   const handleSaveProfile = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.post(backendUrl + '/api/user/update-profile', {
+        const filteredLinks = editLinks.filter(link => link.title.trim() !== '' && link.url.trim() !== '');
+        const { data } = await axios.post(backendUrl + '/api/user/update-profile', {
         name: editName,
-        bio: editBio
+        bio: editBio,
+        links: filteredLinks
       });
 
       if (data.success) {
         // Update local context with new fields
-        setUserData(prev => ({ ...prev, name: editName, bio: editBio }));
+        setUserData(prev => ({ ...prev, name: editName, bio: editBio, links: filteredLinks }));
         toast.success(data.message);
         setIsEditModalOpen(false);
       } else {
@@ -186,9 +214,6 @@ const handleImageChange = async (e, type) => {
             <div className="text-center sm:text-left mt-2">
                 <h2 className="text-3xl font-bold text-gray-900 capitalize">
                     {userData.name}
-
-                    
-
                 </h2>
                 <p className="text-gray-500 font-medium">{userData.email}</p>
                 {/* --- Affichage de la Bio --- */}
@@ -199,19 +224,66 @@ const handleImageChange = async (e, type) => {
                         <p className="italic text-gray-400 text-xs">Aucune bio pour le moment.</p>
                     )}
                 </div>
+                {/* --- NOUVEAU : AFFICHAGE DES LIENS --- */}
+                {userData.links && userData.links.length > 0 && (
+                  <div className="mt-4 flex flex-wrap justify-center sm:justify-start gap-2">
+                    {userData.links.map((link, index) => (
+                      <a 
+                        key={index} 
+                        href={link.url.startsWith('http') ? link.url : `https://${link.url}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="px-4 py-1.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-full hover:bg-gray-50 hover:border-indigo-300 hover:text-indigo-600 transition-all flex items-center gap-2"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                        </svg>
+                        {link.title || 'Lien'}
+                      </a>
+                    ))}
+                  </div>
+                )}
+                {/* -------------------------------------- */}
             </div>
-
-            {/* autres choses */}
+            
+            {/* Statut du compte et Actions */}
             <div className="mt-8 grid grid-cols-1 gap-4">
                 
+                {/* --- Affiche la carte d'alerte SEULEMENT si l'email n'est PAS vérifié --- */}
+                {!userData.isAccountVerified && (
+                    <div className="p-4 rounded-lg border-l-4 bg-red-50 border-red-500 flex items-center justify-between shadow-sm animate-pulse">
+                        <div>
+                            <p className="text-sm font-semibold text-gray-600">Action requise</p>
+                            <p className="text-lg font-bold text-red-700">
+                                Email Non Vérifié
+                            </p>
+                        </div>
+                        <div className="text-2xl text-red-500">
+                            <i className="fi fi-sr-cross-circle"></i>
+                        </div>
+                    </div>
+                )}
+
+                {/* Boutons d'action */}
+                <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                    {/* Le bouton de vérification apparaît seulement si nécessaire */}
+                    {!userData.isAccountVerified && (
+                        <button 
+                            onClick={sendVerificationOtp}
+                            className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-md shadow-indigo-200"
+                        >
+                            Vérifier l'email maintenant
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
       </div>
 
-    {/* --- MODALE D'EDITION (Ajoutée ici) --- */}
+      {/* --- MODALE D'EDITION MISE À JOUR --- */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm flex justify-center items-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 border-b pb-2">
                 <h3 className="text-xl font-bold text-gray-800">Modifier le profil</h3>
                 <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
@@ -219,40 +291,41 @@ const handleImageChange = async (e, type) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                <input 
-                  type="text" 
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                  placeholder="Votre nom d'affichage"
-                />
+                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Votre nom" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-                <textarea 
-                  value={editBio}
-                  onChange={(e) => setEditBio(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none h-32 resize-none transition-all"
-                  placeholder="Écrivez quelque chose sur vous..."
-                  maxLength={150}
-                />
-                <p className="text-xs text-right text-gray-400 mt-1">{editBio.length}/150</p>
+                <textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none" placeholder="Votre bio..." maxLength={300} />
+              </div>
+
+              {/* SECTION LIENS DANS LA MODALE */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Liens (Max 3)</label>
+                {[0, 1, 2].map((index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                        <input 
+                            type="text" 
+                            placeholder="Titre (ex: Portfolio)" 
+                            className="w-1/3 p-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none"
+                            value={editLinks[index]?.title || ''}
+                            onChange={(e) => handleLinkChange(index, 'title', e.target.value)}
+                        />
+                        <input 
+                            type="url" 
+                            placeholder="URL (https://...)" 
+                            className="w-2/3 p-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none"
+                            value={editLinks[index]?.url || ''}
+                            onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
+                        />
+                    </div>
+                ))}
+                <p className="text-xs text-gray-400">Laissez vide si vous ne voulez pas utiliser les 3 liens.</p>
               </div>
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
-              <button 
-                onClick={() => setIsEditModalOpen(false)}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors font-medium"
-                disabled={loading}>Annuler
-              </button>
-              <button 
-                onClick={handleSaveProfile}
-                disabled={loading}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-sm disabled:opacity-70"
-              >
-                {loading ? 'Enregistrement...' : 'Enregistrer'}
-              </button>
+              <button onClick={() => setIsEditModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg" disabled={loading}>Annuler</button>
+              <button onClick={handleSaveProfile} disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-sm disabled:opacity-70">{loading ? 'Enregistrement...' : 'Enregistrer'}</button>
             </div>
           </div>
         </div>

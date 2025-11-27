@@ -17,7 +17,8 @@ export const getUserData = async (req, res)=>{
                 image: user.image,
                 banner: user.banner,
                 bio: user.bio,
-                profileType: user.profileType
+                profileType: user.profileType,
+                links: user.links || []
             }
         });
         
@@ -96,12 +97,13 @@ export const updateProfileType = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
     try {
-        const { name, bio } = req.body;
+        const { name, bio, links } = req.body;
         const userId = req.user.id;
 
         const updateData = {};
         if (name) updateData.name = name;
         if (bio !== undefined) updateData.bio = bio; // Permet de vider la bio si besoin
+        if (links) updateData.links = links;
 
         await userModel.findByIdAndUpdate(userId, updateData);
         

@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema({
     isAccountVerified: {type: Boolean, default: false},
     resetOtp: {type: String, default: ''},
     resetOtpExpireAt: {type: Number, default: 0},
+
+    links: [{
+        title: {type: String},
+        url: {type: String}
+    }]
 })
 
 const userModel = mongoose.models.user || mongoose.model('user', userSchema);
