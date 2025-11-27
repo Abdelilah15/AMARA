@@ -77,17 +77,17 @@ const Sidebar = () => {
             {userData ? (
                 <>
                 {profileImage ? (
-                    <div className="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center text-4xl text-white font-bold uppercase border-3 border-indigo-300">
+                    <div className="w-14 h-14 shrink-0 rounded-full bg-indigo-500 flex items-center justify-center text-4xl text-white font-bold uppercase border-3 border-indigo-300">
                     {userData.name ? userData.name[0].toUpperCase() : 'U'}
                 </div>                   
                 ): (
-                    <div className="w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center text-4xl text-white font-bold uppercase border-3 border-indigo-300">
+                    <div className="shrink-0 w-14 h-14 rounded-full bg-indigo-500 flex items-center justify-center text-4xl text-white font-bold uppercase border-3 border-indigo-300">
                     <img className="w-full h-full object-cover rounded-full" src={userData.image} alt="" />
                 </div> 
                 )}
-                <div className="text-left">
+                <div className="text-left min-w-0">
                     <h3 className="text-xl font-bold text-white capitalize">{userData.name}</h3>
-                    <p className="text-gray-400">{userData.email}</p>
+                    <p className="text-gray-400 truncate">{userData.email}</p>
                 </div>
                 </>
                 ) : (

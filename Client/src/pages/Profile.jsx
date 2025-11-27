@@ -146,10 +146,10 @@ const handleImageChange = async (e, type) => {
 
   return (
     // Container Principal : Centré sur desktop, fond gris clair
-    <div className='min-h-screen bg-gray-50 flex flex-col items-center justify-center py-0 sm:py-10'>
+    <div className='min-h-screen flex flex-col items-center justify-start pt-10 bg-gray-50 p-4'>
       
       {/* Carte du Profil : Prend toute la largeur sur mobile (w-full), max-w-lg sur desktop, bords arrondis seulement sur desktop */}
-      <div className="w-full sm:max-w-lg bg-white sm:rounded-2xl shadow-xl overflow-hidden transition-all duration-300 animate-fade-in">
+      <div className="w-full max-w-3xl mx-auto">
         
         {/* --- Zone Bannière --- */}
         <div className="relative h-40 sm:h-48 bg-gray-200 group">
