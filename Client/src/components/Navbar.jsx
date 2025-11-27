@@ -10,7 +10,7 @@ import { toast } from 'react-toastify'
 
 const Navbar = () => {
     const navigate = useNavigate()
-    const {userData, backendUrl, setUserData, setIsLoggedin} = useContext(AppContext)
+    const {userData, backendUrl, setUserData, setIsLoggedin, setIsSidebarOpen } = useContext(AppContext)
     const sendVerificationOtp = async () => {
       try {
         axios.defaults.withCredentials = true
@@ -42,25 +42,38 @@ const Navbar = () => {
 
   return (
 <div className="bg-blue-400 w-full flex justify-between items-center p-4 sm:px-6 sm:px-24 absolute top-0">
-  <img src={assets.user} alt="" className="w-28 sm:w-32" />
+  
+    {/* Partie Gauche : Logo + Bouton Mobile */}
+      <div className="flex items-center gap-4">
+        {/* --- NOUVEAU : Bouton pour ouvrir la Sidebar (Visible sur Mobile uniquement) --- */}
+        <button 
+            onClick={() => setIsSidebarOpen(true)} 
+            className="md:hidden text-white p-2 hover:bg-gray-800 rounded-lg transition-colors"
+        >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
 
-{userData ? 
-  <div className='flex justify-center w-12 h-12 items-center border border-gray-500 rounded-full bg-gray-200 text-gray-800 font-medium cursor-pointer relative group hover:rounded-tl-[0px] hover:rounded-bl-[0px] hover:border-none hover:bg-white'>
-    {userData.name[0].toUpperCase()}
-    <div className='absolute hidden group-hover:block top-0 right-11 text-black rounded bg-white shadow-lg'>
-      <ul className='list-none text-black p-4 rounded-lg text-sm m-0 w-35'>
-        {!userData.isAccountVerified && 
-        <li onClick={sendVerificationOtp} className='hover:bg-gray-100 p-2 rounded cursor-pointer'>Verify email</li> }
-        <li onClick={() => navigate('/profile')} className='hover:bg-gray-100 p-2 rounded cursor-pointer'>Profile</li>
-        <li onClick={logout} className='hover:bg-gray-100 p-2 rounded cursor-pointer'>Logout</li>
-      </ul>
-    </div>
-  </div>
-  : <button onClick={()=>navigate('/login')}
-  className="cursor-pointer flex gap-2 px-5 py-2 rounded-full bg-blue-400 text-white hover:bg-gray-800 hover:text-white transition-all duration-200">Login
-    <img src={assets.anglecircleright} alt="Arrow" className="invert w-6 h-6"/>
-  </button> }
+        <div onClick={() => navigate('/')} className="cursor-pointer flex items-center gap-2">
+            <img src={assets.logo} alt="Logo" className="w-28 sm:w-32" />
+        </div>
+      </div>
 
+      {/* Partie Droite : Boutons Login/User */}
+      {userData ? (
+        <div 
+            onClick={() => navigate('/profile')}
+            className='w-8 h-8 flex justify-center items-center rounded-full bg-black text-white cursor-pointer'>
+            {userData.name[0].toUpperCase()}
+            {/* Note: Le menu déroulant utilisateur peut rester ici ou dans la Sidebar selon votre choix */}
+        </div>
+      ) : (
+        <button onClick={() => navigate('/login')} 
+            className='flex items-center gap-2 border border-gray-500 rounded-full px-6 py-2 text-gray-800 hover:bg-gray-100 transition-all'>
+            Login <img src={assets.arrow_icon} alt="" />
+        </button>
+      )}
   
 </div>
 

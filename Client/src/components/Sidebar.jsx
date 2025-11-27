@@ -4,12 +4,36 @@ import { assets } from '../assets/assets';
 import '../index.css';
 import { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false); // État pour le menu mobile
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [profileImage, setProfileImage] = useState(false);
-  const { userData} = useContext(AppContext);
+  const { userData, setUserData, backendUrl, setIsLoggedin, isSidebarOpen, setIsSidebarOpen } = useContext(AppContext);
+
+  const logout = async () => {
+        try {
+          axios.defaults.withCredentials = true
+          const {data} = await axios.post(backendUrl + '/api/auth/logout')
+          data.success && setIsLoggedin(false)
+          data.success && setUserData(false)
+          navigate('/')
+          toast.success('Déconnecté avec succès')
+          setIsSidebarOpen(false);
+
+        } catch (error) {
+          toast.error(error.message)
+        }
+    };
+
+  const handleNavigate = (path) => {
+      navigate(path);
+      setIsSidebarOpen(false);
+    };
 
 
   return (
@@ -73,7 +97,35 @@ const Sidebar = () => {
           </ul>
         </div>
 
-        <div className="bg-gray-600 p-2 rounded-full shadow-lg flex items-center gap-2 text-sm text-gray-400">
+
+        {/* --- Section Utilisateur (Footer Sidebar) --- */}
+        <div className="relative">
+            
+            {/* Menu Popup (S'affiche si showUserMenu est true) */}
+            {showUserMenu && (
+                <div style={{borderRadius:"25px"}} className="absolute bottom-20 left-0 w-full bg-gray-600 shadow-xl overflow-hidden mb-2 p-2">
+                    <button 
+                        className="w-full text-center px-4 py-3 hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors border rounded-full border-gray-700 mb-2 cursor-pointer"
+                        onClick={() => toast.info("Fonctionnalité à venir")}
+                    >Ajouter un autre compte
+                    </button>
+                    <button 
+                        className="w-full text-center px-4 py-3 hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors border rounded-full border-gray-700 mb-2 cursor-pointer"
+                        onClick={() => toast.info("Fonctionnalité à venir")}
+                    >Créer un compte
+                    </button>
+                    <button 
+                        className="w-full text-center px-4 py-3 hover:bg-red-900/30 text-sm text-red-400 hover:text-red-300 transition-colors border rounded-full border-red cursor-pointer"
+                        onClick={logout}
+                    >Se déconnecter
+                    </button>
+                </div>
+            )}
+
+        {/* Carte Utilisateur Cliquable */}
+        <div 
+            onClick={() => userData && setShowUserMenu(!showUserMenu)}
+            className="bg-gray-600 p-2 rounded-full shadow-lg flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
             {userData ? (
                 <>
                 {profileImage ? (
@@ -93,6 +145,7 @@ const Sidebar = () => {
                 ) : (
                 <p>Utilisateur non connecté</p>
             )}
+        </div>
         </div>
       </div>
     </>

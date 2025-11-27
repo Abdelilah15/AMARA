@@ -12,6 +12,7 @@ export const AppContextProvider = (props) => {
     const [isLoggedin, setIsLoggedin] = useState(true)
     const [userData, setUserData] = useState(false)
     const [isAuthChecking, setIsAuthChecking] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     
     const getAuthState = async () => {
         try {
@@ -49,7 +50,8 @@ export const AppContextProvider = (props) => {
         isLoggedin, setIsLoggedin,
         userData, setUserData,
         getUserData,
-        isAuthChecking, setIsAuthChecking
+        isAuthChecking, setIsAuthChecking,
+        isSidebarOpen, setIsSidebarOpen
     }
     return (
         <AppContext.Provider value={value}>
