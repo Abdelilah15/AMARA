@@ -149,7 +149,7 @@ const handleImageChange = async (e, type) => {
         <div className="px-6 pb-8 relative">
             
             {/* --- Zone Avatar (chevauche la bannière) --- */}
-            <div className="bg-blue-500 relative -mt-16 mb-4 flex justify-center sm:justify-start">
+            <div className="relative -mt-16 mb-4 flex justify-center sm:justify-start">
                 <div className="relative">
                     <div className="w-32 h-32 rounded-full border-4 border-white bg-indigo-600 overflow-hidden shadow-lg flex items-center justify-center text-5xl text-white font-bold uppercase">
                         {profileImage || userData.image ? (
@@ -169,7 +169,17 @@ const handleImageChange = async (e, type) => {
                     <input type="file" id="profile-upload" hidden accept="image/*" onChange={(e) => handleImageChange(e, 'profile')} />
                 </div>
 
-                <div style={{}}>hi</div>
+                <div style={{marginLeft:"auto", marginTop:"auto",}}>
+                    
+                    {/* --- Bouton Modifier le profil --- */}
+                    <button 
+                        onClick={() => setIsEditModalOpen(true)}
+                        className="px-10 py-2 border border-gray-300 rounded-full text-gray-700 font-medium transition-colors flex items-center justify-center hover:bg-gray-100 cursor-pointer"
+                        title="Modifier le profil"
+                    > <i class="fi fi-ts-user-pen"></i>
+                    </button>
+
+                </div>
             </div>
 
             {/* Informations Textuelles */}
@@ -177,14 +187,7 @@ const handleImageChange = async (e, type) => {
                 <h2 className="text-3xl font-bold text-gray-900 capitalize">
                     {userData.name}
 
-                    {/* --- Bouton Modifier le profil --- */}
-                    <button 
-                        onClick={() => setIsEditModalOpen(true)}
-                        className="p-1 text-gray-400 hover:text-indigo-600 transition-colors cursor-pointer"
-                        title="Modifier le profil"
-                    >
-                        <i className="fi fi-rr-edit text-lg"></i>
-                    </button>
+                    
 
                 </h2>
                 <p className="text-gray-500 font-medium">{userData.email}</p>
@@ -198,43 +201,9 @@ const handleImageChange = async (e, type) => {
                 </div>
             </div>
 
-            {/* Statut du compte et Actions */}
+            {/* autres choses */}
             <div className="mt-8 grid grid-cols-1 gap-4">
                 
-                {/* Carte Statut */}
-                <div className={`p-4 rounded-lg border-l-4 ${userData.isAccountVerified ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'} flex items-center justify-between shadow-sm`}>
-                    <div>
-                        <p className="text-sm font-semibold text-gray-600">Statut du compte</p>
-                        <p className={`text-lg font-bold ${userData.isAccountVerified ? 'text-green-700' : 'text-red-700'}`}>
-                            {userData.isAccountVerified ? 'Vérifié' : 'Non Vérifié'}
-                        </p>
-                    </div>
-                    <div className={`text-2xl ${userData.isAccountVerified ? 'text-green-500' : 'text-red-500'}`}>
-                        <i className={`fi ${userData.isAccountVerified ? 'fi-sr-check-circle' : 'fi-sr-cross-circle'}`}></i>
-                    </div>
-                </div>
-
-                {/* Boutons d'action */}
-                <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                    <button 
-                        onClick={() => navigate('/')}
-                        className="flex-1 py-3 px-4 bg-gray-900 hover:bg-gray-800 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                        </svg>
-                        Accueil
-                    </button>
-                    
-                    {!userData.isAccountVerified && (
-                        <button 
-                            onClick={() => navigate('/email-verify')}
-                            className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-                        >
-                            Vérifier l'email
-                        </button>
-                    )}
-                </div>
             </div>
         </div>
       </div>
@@ -265,9 +234,9 @@ const handleImageChange = async (e, type) => {
                   onChange={(e) => setEditBio(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none h-32 resize-none transition-all"
                   placeholder="Écrivez quelque chose sur vous..."
-                  maxLength={300}
+                  maxLength={150}
                 />
-                <p className="text-xs text-right text-gray-400 mt-1">{editBio.length}/300</p>
+                <p className="text-xs text-right text-gray-400 mt-1">{editBio.length}/150</p>
               </div>
             </div>
 

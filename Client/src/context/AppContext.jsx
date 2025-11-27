@@ -9,8 +9,9 @@ export const AppContextProvider = (props) => {
 
     axios.defaults.withCredentials = true;
     const backendUrl = import.meta.env.VITE_BACKEND_URL
-    const [isLoggedin, setIsLoggedin] = useState(false)
+    const [isLoggedin, setIsLoggedin] = useState(true)
     const [userData, setUserData] = useState(false)
+    const [isAuthChecking, setIsAuthChecking] = useState(true);
     
     const getAuthState = async () => {
         try {
@@ -18,10 +19,14 @@ export const AppContextProvider = (props) => {
             if (data.success) {
                 setIsLoggedin(true)
                 getUserData()
+            }else {
+                setIsLoggedin(false);
             }
 
         } catch (error) {
             toast.error(error.message)
+        } finally {
+            setIsAuthChecking(false);
         }
     }
 
@@ -43,7 +48,8 @@ export const AppContextProvider = (props) => {
         backendUrl,
         isLoggedin, setIsLoggedin,
         userData, setUserData,
-        getUserData
+        getUserData,
+        isAuthChecking, setIsAuthChecking
     }
     return (
         <AppContext.Provider value={value}>

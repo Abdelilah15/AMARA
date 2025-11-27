@@ -8,6 +8,7 @@ import circle_user from './circle_user.svg'
 import téléchargement from './téléchargement.jpeg'
 import settings from './settings.svg'
 import house_chimney from './house_chimney.svg'
+import user_pen from './user_pen.svg'
 
 
 
@@ -22,6 +23,7 @@ export const assets = {
     téléchargement,
     settings,
     house_chimney,
+    user_pen
 
 
 }
