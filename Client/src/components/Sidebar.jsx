@@ -59,14 +59,14 @@ const Sidebar = () => {
 
       {/* --- Sidebar --- */}
       <div className={`
-        fixed top-0 left-0 h-full w-84 bg-gray-900 text-white p-5 flex flex-col justify-between z-50
+        border-r border-gray-700 fixed top-0 left-0 h-full w-84 bg-gray-900 text-white flex flex-col justify-between z-50
         transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
         md:translate-x-0 
       `}>
-        <div>
+        
           {/* Logo / Header Sidebar */}
-          <div className="flex justify-between items-center mb-10">
+          <div className="w-full p-4 border-b border-gray-700 flex justify-between items-center">
             <div onClick={() => navigate('/')} className="cursor-pointer flex items-center gap-2">
                 <img src={assets.user_robot} alt="Logo" className="w-8 h-8 bg-white rounded-full" />
                 <span className="text-xl font-bold">AMARA</span>
@@ -77,6 +77,8 @@ const Sidebar = () => {
             </button>
           </div>
 
+        <div className='gap-2 flex flex-col w-full h-full justify-between p-4'>
+        <div>
           {/* Navigation */}
           <ul className="space-y-4">
             <li onClick={() => { navigate('/'); setIsOpen(false); }} 
@@ -145,6 +147,7 @@ const Sidebar = () => {
                 ) : (
                 <p>Utilisateur non connecté</p>
             )}
+        </div>
         </div>
         </div>
       </div>

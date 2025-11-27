@@ -7,6 +7,7 @@ import ResetPassword from './pages/ResetPassword'
 import { ToastContainer } from 'react-toastify';
 import Profile from './pages/Profile'
 import Sidebar from './components/Sidebar';
+import Navbar from './components/Navbar';
 import Settings from './pages/Settings';
 
 
