@@ -17,6 +17,7 @@ const Login = () => {
 
   const [state, setstate] = useState('Sign Up')
   const [name, setName] = useState('') 
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -68,7 +69,7 @@ const Login = () => {
 
       if (state === 'Sign Up') {
         const {data} = await axios.post (backendUrl +'/api/auth/register', {
-          name, email, password
+          name, username, email, password
         })
         if (data.success) {
           setIsLoggedin(true)
@@ -105,11 +106,28 @@ const Login = () => {
         
         <form onSubmit={onSubmitHandler}>
           {state === 'Sign Up' && (
+            <>
             <div className='mb-4 flex items-center gap-3 w-full px-2.5 py-2 rounded-full bg-[#ffffff]'>
-            <i className="fi fi-rr-user" style={{fontSize: "25px", color: "#777777ff", alignItems: "center", display: "flex", borderRadius: "50px", padding: "3px"}}></i>
-            <input onChange={e => setName(e.target.value)} value={name} 
-            className=" w-full mr-5 bg-transparent outline-none placeholder-gray-400 text-gray-900" type="text" placeholder="Full Name" required/>
-          </div>
+              <i className="fi fi-rr-user" style={{fontSize: "25px", color: "#777777ff", alignItems: "center", display: "flex", borderRadius: "50px", padding: "3px"}}></i>
+              <input 
+                onChange={e => setName(e.target.value)} 
+                value={name} 
+                className=" w-full mr-5 bg-transparent outline-none placeholder-gray-400 text-gray-900" 
+                type="text" 
+                placeholder="Full Name" 
+                required/>
+            </div>
+            <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]'>
+              <img src={assets.user_icon} alt="" /> {/* Vous pouvez utiliser une icône 'at' (@) si vous en avez une */}
+              <input 
+                onChange={e => setUsername(e.target.value)} 
+                value={username} 
+                className='bg-transparent outline-none text-white' 
+                type="text" 
+                placeholder="Username (ex: amara_fan)" 
+                required />
+            </div>
+           </>
           )}
           
           <div className='mb-4 flex items-center gap-3 w-full px-2.5 py-2 rounded-full bg-[#ffffff]'>

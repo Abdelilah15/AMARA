@@ -215,7 +215,7 @@ const handleImageChange = async (e, type) => {
                 <h2 className="text-3xl font-bold text-gray-900 capitalize">
                     {userData.name}
                 </h2>
-                <p className="text-gray-500 font-medium">{userData.email}</p>
+                <p className="text-indigo-600 font-medium mb-1">@{userData.username}</p>
                 {/* --- Affichage de la Bio --- */}
                 <div className="mt-3 text-gray-600 text-sm leading-relaxed">
                     {userData.bio ? (

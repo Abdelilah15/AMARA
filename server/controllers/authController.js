@@ -6,9 +6,9 @@ import { EMAIL_VERIFICATION_TEMPLATE, PASSWORD_RESET_TEMPLATE } from '../config/
 
 
 export const register = async (req, res)=>{
-    const {name, email, password} = req.body
+    const {name, email, password, username} = req.body
 
-    if(!name || !email || !password){
+    if(!name || !email || !password || !username){
         return res.json({success: false, message: 'Missang Details'})
     }
 
@@ -23,9 +23,15 @@ export const register = async (req, res)=>{
         if(existingUser){
             return res.json({success: false, message: 'User already exists'});
         }
+
+        const existingUsername = await userModel.findOne({ username });
+        if (existingUsername) {
+            return res.json({ success: false, message: "Username already taken" });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 8);
 
-        const user = new userModel({name, email, password: hashedPassword})
+        const user = new userModel({name, email, username, password: hashedPassword})
         await user.save();
             
         const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, { expiresIn: '7d'});
