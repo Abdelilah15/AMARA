@@ -35,21 +35,30 @@ const Profile = () => {
         toast.error("Utilisateur introuvable");
       }
     } catch (error) {
+      console.error(error);
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     // Si un username est dans l'URL, on cherche ses infos
     if (username) {
-      fetchUserProfile();
+      if (userData && (username === userData.username || username === '@' + userData.username)) {
+        setProfileData(userData);
+        setLoading(false);
+      } else {
+        fetchUserProfile();
+      }
     } else {
-      // Sinon, on affiche le profil de l'utilisateur connecté
+      // 3. Sinon (route /profile simple), c'est mon profil
       setProfileData(userData);
+      setLoading(false);
     }
-  }, [username, userData]);
+  }, [username, userData, backendUrl]);
 
-  
+
 
   const sendVerificationOtp = async () => {
         try {
@@ -115,8 +124,10 @@ const Profile = () => {
       setLoading(false);
     }
   };
+  
   // If user is logged in but user data not yet loaded, show loader
   if (isLoggedin && !userData) return <div className="min-h-screen flex justify-center items-center">Chargement...</div>;
+  if (!profileData) return <div className="text-white text-center mt-20">Profil introuvable</div>;
 
   // Fonction pour simuler le changement d'image (Aperçu)
 const handleImageChange = async (e, type) => {

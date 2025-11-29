@@ -8,7 +8,7 @@ import { getUserProfile } from '../controllers/userController.js';
 const userRouter = express.Router();
 userRouter.get('/data', userAuth, getUserData);
 userRouter.get('/list', getAllUsers);
-userRouter.get('/:username', getUserProfile);
+userRouter.get('/@:username', getUserProfile);
 userRouter.post('/update-profile-type', userAuth, updateProfileType);
 userRouter.post('/update-bio', userAuth, updateUserBio);
 userRouter.post('/update-profile', userAuth, updateUserProfile);
