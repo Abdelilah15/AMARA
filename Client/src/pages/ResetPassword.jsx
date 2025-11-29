@@ -20,6 +20,8 @@ const ResetPassword = () => {
     const [otp, setOtp] = useState('')
     const [isEmailSent, setIsEmailSent] = useState('')
     const [isOtpSubmitted, setIsOtpSubmitted] = useState(false)
+    const [loading, setLoading] = useState(false)
+
 
     const inputRefs = React.useRef([])
       const handleInputChange = (e, index) => {
@@ -49,12 +51,15 @@ const ResetPassword = () => {
 
   const onSubmitEmail = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const {data} = await axios.post(backendUrl + '/api/auth/send-reset-otp', {email})
       data.success ? toast.success('OTP sent to your email') : toast.error(data.message)
       data.success && setIsEmailSent(true)
     } catch (error) {
       toast.error(error.message)
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -67,12 +72,15 @@ const ResetPassword = () => {
 
   const onSubmitNewPassword = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const {data} = await axios.post(backendUrl + '/api/auth/reset-password', {email, otp, newPassword})
       data.success ? toast.success('Password reset successfully') : toast.error(data.message)
       data.success && navigate('/login')
     } catch (error) {
       toast.error(error.message)
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -91,7 +99,7 @@ const ResetPassword = () => {
               className='w-full h-12 mx-1 px-4 text-black text-center text-xl rounded-full bg-gray-200 outline-none placeholder-gray-400' style={{fontSize:"18px"}} 
               value={email} onChange={e => setEmail(e.target.value)} />
             </div>
-            <button className='bg-gray-200 text-black cursor-pointer border border-gray-500 rounded-full px-12 py-3 hover:bg-gray-100 transation-all'>Submit</button>
+            <button disabled={loading} className='bg-gray-200 text-black cursor-pointer border border-gray-500 rounded-full px-12 py-3 hover:bg-gray-100 transation-all'>{loading ? "Chargement..." : "Submit"}</button>
           </form>
 )}
 
@@ -132,7 +140,7 @@ const ResetPassword = () => {
               value={newPassword} onChange={e => setNewPassword(e.target.value)} />
               
             </div>
-            <button className='bg-gray-200 text-black cursor-pointer border border-gray-500 rounded-full px-12 py-3 hover:bg-gray-100 transation-all'>Reset Password</button>
+            <button disabled={loading} className='bg-gray-200 text-black cursor-pointer border border-gray-500 rounded-full px-12 py-3 hover:bg-gray-100 transation-all'>{loading ? "Chargement..." : "Reset Password"}</button>
           
           </form>
 )}

@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
         title: {type: String},
         url: {type: String}
     }]
-})
+}, { timestamps: true });
 
 const userModel = mongoose.models.user || mongoose.model('user', userSchema);
 

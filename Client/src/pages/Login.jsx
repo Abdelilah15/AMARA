@@ -20,9 +20,11 @@ const Login = () => {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const [passwordFeedback, setPasswordFeedback] = useState('')
   const [isPasswordValid, setIsPasswordValid] = useState(false)
+
 
   const validatePassword = (password) => {
     if (state === 'Login') return;
@@ -57,6 +59,7 @@ const Login = () => {
 
 
   const onSubmitHandler = async (e) => {
+    setLoading(true);
     try {
       e.preventDefault();
 
@@ -93,8 +96,12 @@ const Login = () => {
       }
     } catch (error) {
       toast.error(error.message)
+    } finally {
+      setLoading(false);
     }
   }
+
+
 
 
   return (
@@ -107,22 +114,22 @@ const Login = () => {
         <form onSubmit={onSubmitHandler}>
           {state === 'Sign Up' && (
             <>
-            <div className='mb-4 flex items-center gap-3 w-full px-2.5 py-2 rounded-full bg-[#ffffff]'>
+            <div className='mb-4 flex items-center w-full pl-2.5 pr-1 py-1 rounded-full bg-[#ffffff]'>
               <i className="fi fi-rr-user" style={{fontSize: "25px", color: "#777777ff", alignItems: "center", display: "flex", borderRadius: "50px", padding: "3px"}}></i>
               <input 
                 onChange={e => setName(e.target.value)} 
                 value={name} 
-                className=" w-full mr-5 bg-transparent outline-none placeholder-gray-400 text-gray-900" 
+                className='w-full rounded-full px-3 py-3 ml-1 bg-gray-200 outline-none placeholder-gray-400 text-gray-900' 
                 type="text" 
                 placeholder="Full Name" 
                 required/>
             </div>
-            <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]'>
-              <img src={assets.user_icon} alt="" /> {/* Vous pouvez utiliser une icône 'at' (@) si vous en avez une */}
+            <div className='mb-4 flex items-center w-full pl-2.5 pr-1 py-1 rounded-full bg-[#ffffff]'>
+              <i class="fi fi-rr-at" style={{fontSize: "25px", color: "#777777ff", alignItems: "center", display: "flex", borderRadius: "50px", padding: "3px"}}></i>
               <input 
                 onChange={e => setUsername(e.target.value)} 
                 value={username} 
-                className='bg-transparent outline-none text-white' 
+                className='w-full rounded-full px-3 py-3 ml-1 bg-gray-200 outline-none placeholder-gray-400 text-gray-900' 
                 type="text" 
                 placeholder="Username (ex: amara_fan)" 
                 required />
@@ -130,15 +137,25 @@ const Login = () => {
            </>
           )}
           
-          <div className='mb-4 flex items-center gap-3 w-full px-2.5 py-2 rounded-full bg-[#ffffff]'>
+          <div className='mb-4 flex items-center w-full pl-2.5 pr-1 py-1 rounded-full bg-[#ffffff]'>
             <i className="fi fi-rr-envelope" style={{fontSize: "25px", color: "#777777ff", alignItems: "center", display: "flex", borderRadius: "50px", padding: "3px"}}></i>
-            <input onChange={e => setEmail(e.target.value)} value={email}
-            className=" w-full mr-5 bg-transparent outline-none placeholder-gray-400 text-gray-900" type="email" placeholder="Email id" required/>
+            <input 
+              onChange={e => setEmail(e.target.value)} 
+              value={email}
+              className='w-full rounded-full px-3 py-3 ml-1 bg-gray-200 outline-none placeholder-gray-400 text-gray-900'
+              type="email" 
+              placeholder="Email id" 
+              required/>
           </div>
-          <div className='mb-4 flex items-center gap-3 w-full px-2.5 py-2 rounded-full bg-[#ffffff]'>
+          <div className='mb-4 flex items-center w-full pl-2.5 pr-1 py-1 rounded-full bg-[#ffffff]'>
             <i className="fi fi-rr-lock" style={{fontSize: "25px", color: "#777777ff", alignItems: "center", display: "flex", borderRadius: "50px", padding: "3px"}}></i>
-            <input onChange={e => setPassword(e.target.value)} value={password} 
-            className=" mr-5 w-full bg-transparent outline-none placeholder-gray-400 text-gray-900" type="password" placeholder="Password" required/>
+            <input 
+              onChange={e => setPassword(e.target.value)} 
+              value={password} 
+              className='w-full rounded-full px-3 py-3 ml-1 bg-gray-200 outline-none placeholder-gray-400 text-gray-900' 
+              type="password" 
+              placeholder="Password" 
+              required/>
           </div>
 
           {state === 'Sign Up' && passwordFeedback && (
@@ -148,7 +165,7 @@ const Login = () => {
           )}
         
           <p onClick={()=>navigate('/reset-password')} className="mb-4 text-indigo-500 cursor-pointer">Forgot password?</p>
-          <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium cursor-pointer">{state}</button>
+          <button disabled={loading} className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium cursor-pointer">{loading ? "Chargement..." : state}</button>
         </form>
 
         {state === 'Sign Up' ? 

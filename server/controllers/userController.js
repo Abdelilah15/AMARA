@@ -19,7 +19,8 @@ export const getUserData = async (req, res)=>{
                 banner: user.banner,
                 bio: user.bio,
                 profileType: user.profileType,
-                links: user.links || []
+                links: user.links || [],
+                createdAt: user.createdAt
             }
         });
         
@@ -98,7 +99,7 @@ export const updateProfileType = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
     try {
-        const { userId, name, username, bio, links } = req.body;
+        const { userId, name, username, bio, links, profileType } = req.body;
         const user = await userModel.findById(userId);
         
         if (!user) {

@@ -37,6 +37,7 @@ const Settings = () => {
             setUserData(prev => ({ ...prev, username: username }));
             toast.success("Nom d'utilisateur mis à jour !");
             setIsUsernameChanged(false);
+            setShowUsernameModal(false);
         } else {
             toast.error(data.message);
         }
