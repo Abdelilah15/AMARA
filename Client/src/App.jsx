@@ -43,6 +43,7 @@ const App = () => {
                 <Route path='/reset-password' element={<ResetPassword />} />
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/settings' element={<Settings />} />
+                <Route path='/@:username' element={<Profile />} />
             </Routes>
         </div>
       </div>

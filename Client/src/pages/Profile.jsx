@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { assets } from '../assets/assets'; // Assurez-vous que assets contient des icônes par défaut si besoin
@@ -9,6 +9,7 @@ import { assets } from '../assets/assets'; // Assurez-vous que assets contient d
 const Profile = () => {
   const { userData, isLoggedin, backendUrl, setUserData, isAuthChecking } = useContext(AppContext);
   const navigate = useNavigate();
+  const { username } = useParams();
 
   // États locaux pour gérer l'aperçu des images avant l'envoi au serveur
   // (Note: La logique d'upload vers le serveur devra être connectée ici)
@@ -20,6 +21,35 @@ const Profile = () => {
   const [editBio, setEditBio] = useState('');
   const [editLinks, setEditLinks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+
+  const fetchUserProfile = async () => {
+    try {
+      // Note: on enlève le '@' s'il est présent dans le paramètre
+      const cleanUsername = username.replace('@', '');
+      const { data } = await axios.get(backendUrl + '/api/user/' + cleanUsername);
+      
+      if (data.success) {
+        setProfileData(data.userData);
+      } else {
+        toast.error("Utilisateur introuvable");
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    // Si un username est dans l'URL, on cherche ses infos
+    if (username) {
+      fetchUserProfile();
+    } else {
+      // Sinon, on affiche le profil de l'utilisateur connecté
+      setProfileData(userData);
+    }
+  }, [username, userData]);
+
+  
 
   const sendVerificationOtp = async () => {
         try {

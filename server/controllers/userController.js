@@ -165,3 +165,31 @@ export const updateUserProfile = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 };
+
+export const getUserProfile = async (req, res) => {
+  try {
+    // On cherche l'utilisateur par son username (qui est dans l'URL)
+    const { username } = req.params;
+    
+    // On exclut le mot de passe et l'email pour la sécurité
+    const user = await userModel.findOne({ username }).select('-password -email');
+
+    if (!user) {
+      return res.json({ success: false, message: "Utilisateur non trouvé" });
+    }
+
+    res.json({ success: true, userData: user });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+    try {
+        // On récupère tous les utilisateurs, mais on cache les infos sensibles (mot de passe, etc.)
+        const users = await userModel.find({}).select('-password -email -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt');
+        res.json({ success: true, users });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
