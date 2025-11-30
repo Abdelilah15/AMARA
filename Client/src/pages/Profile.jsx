@@ -15,6 +15,7 @@ const Profile = () => {
   // (Note: La logique d'upload vers le serveur devra être connectée ici)
   const [profileImage, setProfileImage] = useState(null);
   const [bannerImage, setBannerImage] = useState(null);
+  const [imageModal, setImageModal] = useState(null);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState('');
@@ -22,6 +23,8 @@ const Profile = () => {
   const [editLinks, setEditLinks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
+
+  const isOwnProfile = userData && profileData && userData.username === profileData.username;
 
   const fetchUserProfile = async () => {
     try {
@@ -43,21 +46,23 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    // Si un username est dans l'URL, on cherche ses infos
-    if (username) {
+    // Si pas d'username dans l'URL, c'est mon profil (route /profile)
+    if (!username) {
+        if (userData) {
+            setProfileData(userData);
+        }
+    } 
+    // Si un username est dans l'URL
+    else if (username) {
       if (userData && (username === userData.username || username === '@' + userData.username)) {
+        // L'URL contient mon propre nom d'utilisateur
         setProfileData(userData);
-        setLoading(false);
       } else {
+        // C'est quelqu'un d'autre, on charge ses données
         fetchUserProfile();
       }
-    } else {
-      // 3. Sinon (route /profile simple), c'est mon profil
-      setProfileData(userData);
-      setLoading(false);
     }
   }, [username, userData, backendUrl]);
-
 
 
   const sendVerificationOtp = async () => {
@@ -77,19 +82,21 @@ const Profile = () => {
 
   // Mettre à jour les champs quand userData change ou quand on ouvre la modale
   useEffect(() => {
-    if (userData) {
+    if (userData && isOwnProfile) {
       setEditName(userData.name || '');
       setEditBio(userData.bio || '');
       setEditLinks(userData.links || []);
     }
-  }, [userData]);
+  }, [userData, isOwnProfile]);
 
   // Redirect to login when not authenticated
   useEffect(() => {
-    if (!isLoggedin) {
-      navigate('/login');
+    if (!isLoggedin && !username) { 
+        // Si pas de username (route /me) et pas connecté -> login
+        navigate('/login');
     }
-  }, [isLoggedin, navigate, isAuthChecking]);
+    // Si il y a un username (profil public), on laisse passer même si pas connecté (optionnel, selon votre choix)
+  }, [isLoggedin, navigate, isAuthChecking, username]);
 
   // Gestion des changements dans les inputs de liens
   const handleLinkChange = (index, field, value) => {
@@ -113,6 +120,7 @@ const Profile = () => {
       if (data.success) {
         // Update local context with new fields
         setUserData(prev => ({ ...prev, name: editName, bio: editBio, links: filteredLinks }));
+        setProfileData(prev => ({ ...prev, name: editName, bio: editBio, links: filteredLinks }));
         toast.success(data.message);
         setIsEditModalOpen(false);
       } else {
@@ -159,6 +167,7 @@ const handleImageChange = async (e, type) => {
           // If API returned updated user object, merge it into context so UI updates
           if (data.user) {
             setUserData(data.user);
+            setProfileData(data.user)
           }
         } else {
           toast.error(data.message);
@@ -171,7 +180,7 @@ const handleImageChange = async (e, type) => {
   };
 
   // Loading state
-  if (!userData && isLoggedin) {
+  if (!profileData) {
     return (
         <div className='min-h-screen flex items-center justify-center bg-gray-50'>
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
@@ -195,23 +204,28 @@ const handleImageChange = async (e, type) => {
         {/* --- Zone Bannière --- */}
         <div className="relative h-40 sm:h-48 bg-gray-200 group">
             {/* Image de la bannière ou Dégradé par défaut */}
-            {bannerImage || userData.banner ? (
+            {bannerImage || profileData.banner ? (
                 <img 
-                    src={bannerImage || userData.banner} 
+                    src={bannerImage || profileData.banner} 
                     alt="Banner" 
                     className="w-full h-full object-cover"
+                    onClick={() => setImageModal(bannerImage || profileData.banner)}
                 />
             ) : (
                 <div className="w-full h-full bg-gradient-to-r from-blue-400 to-purple-500"></div>
             )}
 
             {/* Bouton Modifier Bannière (visible au survol) */}
-            <label htmlFor="banner-upload" className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                </svg>
-            </label>
-            <input type="file" id="banner-upload" hidden accept="image/*" onChange={(e) => handleImageChange(e, 'banner')} />
+            {isOwnProfile && (
+                <>
+                  <label htmlFor="banner-upload" className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                        </svg>
+                  </label>
+                  <input type="file" id="banner-upload" hidden accept="image/*" onChange={(e) => handleImageChange(e, 'banner')} />
+                </>
+            )}
         </div>
 
         {/* --- Contenu du Profil --- */}
@@ -221,46 +235,55 @@ const handleImageChange = async (e, type) => {
             <div className="relative -mt-16 mb-4 flex justify-center sm:justify-start">
                 <div className="relative">
                     <div className="w-32 h-32 rounded-full border-4 border-white bg-indigo-600 overflow-hidden shadow-lg flex items-center justify-center text-5xl text-white font-bold uppercase">
-                        {profileImage || userData.image ? (
-                            <img src={profileImage || userData.image} alt="Profile" className="w-full h-full object-cover" />
+                        {profileImage || profileData.image ? (
+                            <img src={profileImage || profileData.image} 
+                            alt="Profile" 
+                            className="w-full h-full object-cover" 
+                            onClick={() => setImageModal(profileImage || profileData.image)}
+                            />
                         ) : (
-                            userData.name ? userData.name[0] : 'U'
+                            profileData.name ? profileData.name[0] : 'U'
                         )}
                     </div>
                     
                     {/* Bouton Modifier Avatar */}
-                    <label htmlFor="profile-upload" className="absolute bottom-1 right-1 bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full cursor-pointer border-2 border-white shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
-                        </svg>
-                    </label>
-                    <input type="file" id="profile-upload" hidden accept="image/*" onChange={(e) => handleImageChange(e, 'profile')} />
+                    {isOwnProfile && (
+                        <>
+                          <label htmlFor="profile-upload" className="absolute bottom-1 right-1 bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full cursor-pointer border-2 border-white shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
+                                </svg>
+                          </label>
+                          <input type="file" id="profile-upload" hidden accept="image/*" onChange={(e) => handleImageChange(e, 'profile')} />
+                        </>
+                    )}
                 </div>
 
                 <div style={{marginLeft:"auto", marginTop:"auto",}}>
                     
                     {/* --- Bouton Modifier le profil --- */}
-                    <button 
-                        onClick={() => setIsEditModalOpen(true)}
-                        className="px-10 py-2 border border-gray-300 rounded-full text-gray-700 font-medium transition-colors flex items-center justify-center hover:bg-gray-100 cursor-pointer"
-                        title="Modifier le profil"
-                    > <i class="fi fi-ts-user-pen"></i>
-                    </button>
-
+                    {isOwnProfile && (
+                        <button 
+                            onClick={() => setIsEditModalOpen(true)}
+                            className="px-10 py-2 border border-gray-300 rounded-full text-gray-700 font-medium transition-colors flex items-center justify-center hover:bg-gray-100 cursor-pointer"
+                            title="Modifier le profil"
+                        > <i className="fi fi-ts-user-pen"></i>
+                        </button>
+                    )}
                 </div>
             </div>
 
             {/* Informations Textuelles */}
             <div className="text-center sm:text-left mt-2">
                 <h2 className="text-3xl font-bold text-gray-900 capitalize">
-                    {userData.name}
+                    {profileData.name}
                 </h2>
-                <p className="text-indigo-600 font-medium mb-1">@{userData.username}</p>
+                <p className="text-indigo-600 font-medium mb-1">@{profileData.username}</p>
                 {/* --- Affichage de la Bio --- */}
                 <div className="mt-3 text-gray-600 text-sm leading-relaxed">
-                    {userData.bio ? (
-                        <p className="whitespace-pre-wrap">{userData.bio}</p>
+                    {profileData.bio ? (
+                        <p className="whitespace-pre-wrap">{profileData.bio}</p>
                     ) : (
                         <p className="italic text-gray-400 text-xs">Aucune bio pour le moment.</p>
                     )}
@@ -281,9 +304,9 @@ const handleImageChange = async (e, type) => {
                 </div>
 
                 {/* --- NOUVEAU : AFFICHAGE DES LIENS --- */}
-                {userData.links && userData.links.length > 0 && (
+                {profileData.links && profileData.links.length > 0 && (
                   <div className="mt-4 flex flex-wrap justify-center sm:justify-start gap-2">
-                    {userData.links.map((link, index) => (
+                    {profileData.links.map((link, index) => (
                       <a 
                         key={index} 
                         href={link.url.startsWith('http') ? link.url : `https://${link.url}`} 
@@ -303,36 +326,36 @@ const handleImageChange = async (e, type) => {
             </div>
             
             {/* Statut du compte et Actions */}
-            <div className="mt-8 grid grid-cols-1 gap-4">
-                
-                {/* --- Affiche la carte d'alerte SEULEMENT si l'email n'est PAS vérifié --- */}
-                {!userData.isAccountVerified && (
-                    <div className="p-4 rounded-lg border-l-4 bg-red-50 border-red-500 flex items-center justify-between shadow-sm animate-pulse">
-                        <div>
-                            <p className="text-sm font-semibold text-gray-600">Action requise</p>
-                            <p className="text-lg font-bold text-red-700">
-                                Email Non Vérifié
-                            </p>
+            {isOwnProfile && (
+                <div className="mt-8 grid grid-cols-1 gap-4">
+                    {/* Alerte Email non vérifié */}
+                    {!profileData.isAccountVerified && (
+                        <div className="p-4 rounded-lg border-l-4 bg-red-50 border-red-500 flex items-center justify-between shadow-sm animate-pulse">
+                            <div>
+                                <p className="text-sm font-semibold text-gray-600">Action requise</p>
+                                <p className="text-lg font-bold text-red-700">
+                                    Email Non Vérifié
+                                </p>
+                            </div>
+                            <div className="text-2xl text-red-500">
+                                <i className="fi fi-sr-cross-circle"></i>
+                            </div>
                         </div>
-                        <div className="text-2xl text-red-500">
-                            <i className="fi fi-sr-cross-circle"></i>
-                        </div>
-                    </div>
-                )}
-
-                {/* Boutons d'action */}
-                <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                    {/* Le bouton de vérification apparaît seulement si nécessaire */}
-                    {!userData.isAccountVerified && (
-                        <button 
-                            onClick={sendVerificationOtp}
-                            className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-md shadow-indigo-200"
-                        >
-                            Vérifier l'email maintenant
-                        </button>
                     )}
+
+                    {/* Bouton de vérification */}
+                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                        {!profileData.isAccountVerified && (
+                            <button 
+                                onClick={sendVerificationOtp}
+                                className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-md shadow-indigo-200"
+                            >
+                                Vérifier l'email maintenant
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
       </div>
 
@@ -387,6 +410,33 @@ const handleImageChange = async (e, type) => {
           </div>
         </div>
       )}
+
+      {/* --- NOUVEAU : LA MODALE D'IMAGE (LIGHTBOX) --- */}
+      {imageModal && (
+        <div 
+          className="fixed inset-0 z-[1000] bg-black/90 backdrop-blur-sm flex justify-center items-center p-4 animate-fade-in cursor-zoom-out"
+          onClick={() => setImageModal(null)} // Ferme quand on clique sur le fond noir
+        >
+          {/* Bouton Fermer */}
+          <button 
+            className="absolute top-5 right-5 text-white/70 hover:text-white transition-colors"
+            onClick={() => setImageModal(null)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          
+          {/* L'image en grand */}
+          <img 
+            src={imageModal} 
+            alt="Full view" 
+            className="max-w-full max-h-[90vh] object-contain rounded-md shadow-2xl animate-scale-in cursor-default"
+            onClick={(e) => e.stopPropagation()} // Empêche de fermer si on clique sur l'image elle-même
+          />
+        </div>
+      )}
+
     </div>
   );
 };
