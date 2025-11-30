@@ -13,7 +13,7 @@ import "./Login.css"
 const Login = () => {
 
   const navigate = useNavigate();
-  const { backendUrl, setIsLoggedin, getUserData } = useContext(AppContext);
+  const { backendUrl, isLoggedin, setIsLoggedin, getUserData, isAddingAccount, setIsAddingAccount, accounts } = useContext(AppContext);
 
   const [state, setstate] = useState('Sign Up')
   const [name, setName] = useState('') 
@@ -24,6 +24,14 @@ const Login = () => {
 
   const [passwordFeedback, setPasswordFeedback] = useState('')
   const [isPasswordValid, setIsPasswordValid] = useState(false)
+
+  useEffect(() => {
+    // Si connecté ET qu'on n'est PAS en train d'ajouter un compte, on redirige vers l'accueil.
+    // Si on ajoute un compte, on reste sur la page Login.
+    if (isLoggedin && !isAddingAccount) {
+      navigate('/');
+    }
+  }, [isLoggedin, isAddingAccount, navigate]);
 
 
   const validatePassword = (password) => {
@@ -63,6 +71,15 @@ const Login = () => {
     try {
       e.preventDefault();
 
+      // Vérification de la limite avant soumission (Double sécurité)
+      // On vérifie si c'est un NOUVEAU compte (pas dans la liste actuelle)
+      const isNewAccount = !accounts.some(acc => acc.email === email);
+      if (isNewAccount && accounts.length >= 3) {
+         toast.error("Limite de comptes atteinte (Max 3). Impossible d'en ajouter un nouveau.");
+         setLoading(false);
+         return;
+      }
+
       if (state === 'Sign Up' && !isPasswordValid) {
         toast.error('Le mot de passe ne répond pas aux critères de sécurité.');
         return;
@@ -89,10 +106,15 @@ const Login = () => {
         if (data.success) {
           setIsLoggedin(true)
           await getUserData()
-          navigate('/')
-        }else {
-          toast.error(data.message)
+          // IMPORTANT : On a fini d'ajouter un compte, on désactive le mode ajout
+        if(isAddingAccount) {
+            setIsAddingAccount(false); 
         }
+        
+        navigate('/');
+      } else {
+        toast.error(data.message);
+      }
       }
     } catch (error) {
       toast.error(error.message)
@@ -101,14 +123,30 @@ const Login = () => {
     }
   }
 
-
+  // Si on est en mode "Ajouter un compte", on peut ajouter un bouton retour
+  const handleCancelAdd = () => {
+      setIsAddingAccount(false);
+      navigate('/');
+  };
 
 
   return (
     <div className='flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400'>
-      <img onClick={()=>navigate('/')} src={assets.user} alt="" className='absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer'/>
+      <img 
+        onClick={isAddingAccount ? handleCancelAdd : ()=>navigate('/')} 
+        src={assets.user} 
+        alt="" 
+        className='absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer'
+        title={isAddingAccount ? "Annuler l'ajout" : "Retour à l'accueil"}
+      />
       <div className="bg-slate-900 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm">
-        <h2 className="text-3xl font-semibold text-white text-center mb-3">{state === 'Sign Up' ? 'Create Account' : 'Login'}</h2>
+        <h2 className="text-3xl font-semibold text-white text-center mb-3">
+          {/* Titre dynamique */}
+            {isAddingAccount 
+                ? (state === 'Sign Up' ? 'Ajouter un compte' : 'Connexion autre compte') 
+                : (state === 'Sign Up' ? 'Create Account' : 'Login')
+            }
+        </h2>
         <p className="text-center text-small mb-3 text-gray-300">{state === 'Sign Up' ? 'Create your account' : 'Login to your account!'}</p>
         
         <form onSubmit={onSubmitHandler}>

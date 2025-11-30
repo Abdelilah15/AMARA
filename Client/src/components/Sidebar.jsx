@@ -13,7 +13,7 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // État pour le menu mobile
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [profileImage, setProfileImage] = useState(false);
-  const { userData, setUserData, backendUrl, setIsLoggedin, isSidebarOpen, setIsSidebarOpen } = useContext(AppContext);
+  const { userData, setUserData, backendUrl, setIsLoggedin, isSidebarOpen, setIsSidebarOpen, startAddAccount } = useContext(AppContext);
 
   const logout = async () => {
         try {
@@ -34,6 +34,13 @@ const Sidebar = () => {
       navigate(path);
       setIsSidebarOpen(false);
     };
+
+  const handleAddAccount = () => {
+    // startAddAccount renvoie false si la limite est atteinte
+    if (startAddAccount()) {
+        navigate('/login');
+    }
+  };
 
 
   return (
@@ -107,8 +114,8 @@ const Sidebar = () => {
             {showUserMenu && (
                 <div style={{borderRadius:"25px"}} className="absolute bottom-20 left-0 w-full bg-gray-600 shadow-xl overflow-hidden mb-2 p-2">
                     <button 
+                        onClick={handleAddAccount}
                         className="w-full text-center px-4 py-3 hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors border rounded-full border-gray-700 mb-2 cursor-pointer"
-                        onClick={() => toast.info("Fonctionnalité à venir")}
                     >Ajouter un autre compte
                     </button>
                     <button 
