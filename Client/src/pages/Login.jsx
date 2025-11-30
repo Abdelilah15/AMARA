@@ -118,12 +118,11 @@ const Login = () => {
         })
         if (data.success) {
           setIsLoggedin(true)
-          await getUserData()
+          await getUserData(data.token);
           // IMPORTANT : On a fini d'ajouter un compte, on désactive le mode ajout
         if(isAddingAccount) {
             setIsAddingAccount(false); 
         }
-        
         navigate('/');
       } else {
         toast.error(data.message);

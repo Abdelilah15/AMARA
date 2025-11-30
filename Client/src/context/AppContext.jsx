@@ -37,13 +37,13 @@ export const AppContextProvider = (props) => {
         }
     }
 
-    const getUserData = async () => {
+    const getUserData = async (tokenToSave = null) => {
         try {
             const {data} = await axios.get(backendUrl + '/api/user/data')
             if(data.success) {
                 setUserData(data.userData);
                 // À chaque fois qu'on récupère les données d'un utilisateur connecté, on le sauvegarde/met à jour dans la liste
-                saveAccountToList(data.userData);
+                saveAccountToList(data.userData, tokenToSave);
             } else {
                 toast.error(data.message);
             }
@@ -59,6 +59,14 @@ export const AppContextProvider = (props) => {
             const exists = prevAccounts.find(acc => acc.username === user.username);
             let newAccounts = [...prevAccounts];
 
+            const accountData = {
+                ...user,
+                // Si un token est fourni (connexion manuelle), on le met à jour avec l'expiration
+                // Sinon, on garde l'ancien token s'il existe
+                token: token || (exists ? exists.token : null),
+                tokenExpiry: token ? (Date.now() + 7 * 24 * 60 * 60 * 1000) : (exists ? exists.tokenExpiry : null)
+            };
+
             if (exists) {
                 newAccounts = newAccounts.map(acc => acc.username === user.username ? user : acc);
             } else {
@@ -70,6 +78,17 @@ export const AppContextProvider = (props) => {
             localStorage.setItem('app_accounts', JSON.stringify(newAccounts));
             return newAccounts;
         });
+    };
+
+    // Nouvelle fonction pour le switch automatique
+    const switchAccountSession = async (token) => {
+        try {
+            const { data } = await axios.post(backendUrl + '/api/auth/switch-login', { token });
+            return data.success;
+        } catch (error) {
+            console.error("Switch error", error);
+            return false;
+        }
     };
 
     // Fonction pour démarrer le processus d'ajout de compte
@@ -97,7 +116,8 @@ export const AppContextProvider = (props) => {
         isSidebarOpen, setIsSidebarOpen,
         accounts, 
         isAddingAccount, setIsAddingAccount,
-        startAddAccount
+        startAddAccount,
+        switchAccountSession
     }
     return (
         <AppContext.Provider value={value}>

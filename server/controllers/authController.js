@@ -86,7 +86,7 @@ export const login = async (req, res)=>{
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
-        return res.json({success: true});
+        return res.json({success: true, token: token});
 
     }catch (error){
         return res.json({success: false, message: error.message});
@@ -176,6 +176,38 @@ export const verifyEmail = async (req, res)=>{
     }
 
 }
+
+export const switchLogin = async (req, res) => {
+    const { token } = req.body;
+
+    if (!token) {
+        return res.json({ success: false, message: 'No token provided' });
+    }
+
+    try {
+        // Vérifier si le token est valide
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        // Vérifier si l'utilisateur existe toujours
+        const user = await userModel.findById(decoded.id);
+        if (!user) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+
+        // Créer un NOUVEAU cookie de session (écrasant l'ancien)
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        return res.json({ success: true });
+
+    } catch (error) {
+        return res.json({ success: false, message: 'Session expired, please login again' });
+    }
+};
 
 // zr is itvirifa l'compt
 export const isAccountVerified = async (req, res)=>{
