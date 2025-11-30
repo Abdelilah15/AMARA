@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { assets } from '../assets/assets';
 import '../index.css';
 import { useContext } from 'react';
+import AccountSwitcher from './AccountSwitcher';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+
 
 
 const Sidebar = () => {
@@ -106,28 +108,13 @@ const Sidebar = () => {
           </ul>
         </div>
 
-
         {/* --- Section Utilisateur (Footer Sidebar) --- */}
         <div className="relative">
             
             {/* Menu Popup (S'affiche si showUserMenu est true) */}
             {showUserMenu && (
                 <div style={{borderRadius:"25px"}} className="absolute bottom-20 left-0 w-full bg-gray-600 shadow-xl overflow-hidden mb-2 p-2">
-                    <button 
-                        onClick={handleAddAccount}
-                        className="w-full text-center px-4 py-3 hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors border rounded-full border-gray-700 mb-2 cursor-pointer"
-                    >Ajouter un autre compte
-                    </button>
-                    <button 
-                        className="w-full text-center px-4 py-3 hover:bg-gray-700 text-sm text-gray-300 hover:text-white transition-colors border rounded-full border-gray-700 mb-2 cursor-pointer"
-                        onClick={() => toast.info("Fonctionnalité à venir")}
-                    >Créer un compte
-                    </button>
-                    <button 
-                        className="w-full text-center px-4 py-3 hover:bg-red-900/30 text-sm text-red-400 hover:text-red-300 transition-colors border rounded-full border-red cursor-pointer"
-                        onClick={logout}
-                    >Se déconnecter
-                    </button>
+                  <AccountSwitcher />
                 </div>
             )}
 

@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from 'react'
 import { assets } from "../assets/assets";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../index.css"
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
@@ -13,6 +13,7 @@ import "./Login.css"
 const Login = () => {
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { backendUrl, isLoggedin, setIsLoggedin, getUserData, isAddingAccount, setIsAddingAccount, accounts } = useContext(AppContext);
 
   const [state, setstate] = useState('Sign Up')
@@ -24,6 +25,18 @@ const Login = () => {
 
   const [passwordFeedback, setPasswordFeedback] = useState('')
   const [isPasswordValid, setIsPasswordValid] = useState(false)
+
+  // --- NOUVEAU : Gérer les états initiaux venant de la navigation ---
+  useEffect(() => {
+    // Si on a passé un état via la navigation (ex: force "Login" ou "Sign Up")
+    if (location.state?.initialState) {
+        setstate(location.state.initialState);
+    }
+    // Si on a passé un email (pour le switch account)
+    if (location.state?.email) {
+        setEmail(location.state.email);
+    }
+  }, [location]);
 
   useEffect(() => {
     // Si connecté ET qu'on n'est PAS en train d'ajouter un compte, on redirige vers l'accueil.
