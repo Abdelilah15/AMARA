@@ -53,7 +53,7 @@ export const AppContextProvider = (props) => {
     }
 
     // Fonction interne pour sauvegarder le compte dans la liste locale
-    const saveAccountToList = (user) => {
+    const saveAccountToList = (user, token) => {
         setAccounts(prevAccounts => {
             // On vérifie si l'utilisateur existe déjà pour le mettre à jour
             const exists = prevAccounts.find(acc => acc.username === user.username);
@@ -68,7 +68,7 @@ export const AppContextProvider = (props) => {
             };
 
             if (exists) {
-                newAccounts = newAccounts.map(acc => acc.username === user.username ? user : acc);
+                newAccounts = newAccounts.map(acc => acc.username === user.username ? accountData : acc);
             } else {
                 // S'il n'existe pas, on l'ajoute
                 newAccounts.push(user);
