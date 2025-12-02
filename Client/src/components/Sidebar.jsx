@@ -14,7 +14,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false); // État pour le menu mobile
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [profileImage, setProfileImage] = useState(false);
+  const [profileImage, setProfileImage] = useState(true);
   const { userData, setUserData, backendUrl, setIsLoggedin, isSidebarOpen, setIsSidebarOpen, startAddAccount } = useContext(AppContext);
 
   const logout = async () => {

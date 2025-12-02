@@ -19,6 +19,54 @@ export const AppContextProvider = (props) => {
         return saved ? JSON.parse(saved) : [];
     });
     const [isAddingAccount, setIsAddingAccount] = useState(false);
+
+    const handleLogout = async (navigate) => {
+        try {
+            // 1. Identifier l'utilisateur actuel à retirer
+            const currentUsername = userData?.username;
+            
+            // 2. Filtrer la liste pour retirer le compte actuel
+            const remainingAccounts = accounts.filter(acc => acc.username !== currentUsername);
+            
+            // 3. Mettre à jour le state et le localStorage immédiatement
+            setAccounts(remainingAccounts);
+            localStorage.setItem('app_accounts', JSON.stringify(remainingAccounts));
+
+            // 4. Appeler le backend pour nettoyer le cookie actuel
+            await axios.post(backendUrl + '/api/auth/logout');
+
+            // 5. Vérifier s'il reste des comptes valides
+            if (remainingAccounts.length > 0) {
+                // On prend le premier compte disponible
+                const nextAccount = remainingAccounts[0];
+                
+                // On tente de se connecter avec son token sauvegardé
+                if (nextAccount.token) {
+                    const switchSuccess = await switchAccountSession(nextAccount.token);
+                    if (switchSuccess) {
+                        toast.success(`Basculé vers ${nextAccount.name}`);
+                        await getUserData(); // Charger les données du nouveau compte
+                        navigate('/'); // Rediriger vers l'accueil
+                        return; // On s'arrête là, pas de déconnexion totale
+                    }
+                }
+            }
+
+            // 6. Si aucun compte restant ou échec du switch : Déconnexion totale
+            setIsLoggedin(false);
+            setUserData(false);
+            setIsSidebarOpen(false);
+            navigate('/login');
+            toast.success('Déconnecté de tous les comptes');
+
+        } catch (error) {
+            toast.error(error.message);
+            // En cas d'erreur critique, on force la sortie
+            setIsLoggedin(false);
+            navigate('/login');
+        }
+    };
+
     
     const getAuthState = async () => {
         try {
@@ -117,8 +165,11 @@ export const AppContextProvider = (props) => {
         accounts, 
         isAddingAccount, setIsAddingAccount,
         startAddAccount,
-        switchAccountSession
+        switchAccountSession,
+        handleLogout
     }
+
+
     return (
         <AppContext.Provider value={value}>
             {props.children}

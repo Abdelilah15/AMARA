@@ -196,7 +196,7 @@ const handleImageChange = async (e, type) => {
 
   return (
     // Container Principal : Centré sur desktop, fond gris clair
-    <div className=' min-h-screen flex flex-col items-center justify-start pt-16 bg-gray-50 p-4'>
+    <div className=' min-h-screen flex flex-col items-center justify-start pt-16 bg-gray-50'>
       
       {/* Carte du Profil : Prend toute la largeur sur mobile (w-full), max-w-lg sur desktop, bords arrondis seulement sur desktop */}
       <div className="w-full max-w-3xl mx-auto border border-gray-700">

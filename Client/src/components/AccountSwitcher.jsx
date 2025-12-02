@@ -5,7 +5,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const AccountSwitcher = () => {
-    const { accounts, userData, startAddAccount, switchAccountSession, getUserData, setUserData, backendUrl, setIsLoggedin, setIsSidebarOpen} = useContext(AppContext);
+    const { accounts, userData, startAddAccount, switchAccountSession, getUserData, setUserData, backendUrl, setIsLoggedin, setIsSidebarOpen, handleLogout } = useContext(AppContext);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
@@ -26,7 +26,7 @@ const AccountSwitcher = () => {
                 // Si succès, on rafraîchit les données de l'utilisateur actif
                 await getUserData();
                 toast.success(`Connecté en tant que ${account.name}`);
-                navigate('/'); // Assurer d'être sur la home ou recharger la page courante
+                navigate('/profile'); // Assurer d'être sur la home ou recharger la page courante
                 window.location.reload(); // Souvent nécessaire pour bien recharger le contexte global avec le nouveau cookie
             } else {
                 // Si échec (token invalide côté serveur), redirection login
@@ -48,21 +48,6 @@ const AccountSwitcher = () => {
     const handleCreateNew = () => {
         if (startAddAccount()) {
             navigate('/login', { state: { initialState: 'Sign Up' } });
-        }
-    };
-
-    const logout = async () => {
-        try {
-          axios.defaults.withCredentials = true
-          const {data} = await axios.post(backendUrl + '/api/auth/logout')
-          data.success && setIsLoggedin(false)
-          data.success && setUserData(false)
-          navigate('/')
-          toast.success('Déconnecté avec succès')
-          setIsSidebarOpen(false);
-
-        } catch (error) {
-          toast.error(error.message)
         }
     };
 
@@ -119,8 +104,9 @@ const AccountSwitcher = () => {
 
             <button 
                 className="mt-3 w-full text-center px-3 py-4 hover:bg-red-900/30 text-sm text-red-400 hover:text-red-300 transition-colors border rounded-full border-red cursor-pointer"
-                onClick={logout}
-                >Se déconnecter
+                onClick={() => handleLogout(navigate)} 
+            >
+                {accounts.length > 1 ? 'Se déconnecter de ce compte' : 'Se déconnecter'}
             </button>
 
         </div>

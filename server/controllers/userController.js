@@ -1,4 +1,6 @@
+import bcrypt from 'bcryptjs';
 import userModel from "../models/userModel.js";
+import transporter from '../config/nodemailer.js';
 
 export const getUserData = async (req, res)=>{
     try {
@@ -189,6 +191,128 @@ export const getAllUsers = async (req, res) => {
         // On récupère tous les utilisateurs, mais on cache les infos sensibles (mot de passe, etc.)
         const users = await userModel.find({}).select('-password -email -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt');
         res.json({ success: true, users });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export const changePassword = async (req, res) => {
+    try {
+        const { userId, oldPassword, newPassword } = req.body;
+
+        if (!userId || !oldPassword || !newPassword) {
+            return res.json({ success: false, message: "Données manquantes" });
+        }
+
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.json({ success: false, message: "Utilisateur non trouvé" });
+        }
+
+        // Vérifier l'ancien mot de passe
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.json({ success: false, message: "L'ancien mot de passe est incorrect" });
+        }
+
+        // Validation du nouveau mot de passe (optionnel mais recommandé)
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return res.json({ 
+                success: false, 
+                message: 'Le nouveau mot de passe doit contenir au moins 8 caractères, une majuscule et un caractère spécial.' 
+            });
+        }
+
+        // Hasher et sauvegarder le nouveau mot de passe
+        const hashedPassword = await bcrypt.hash(newPassword, 8); // 8 tours comme dans votre authController
+        user.password = hashedPassword;
+        await user.save();
+
+        return res.json({ success: true, message: "Mot de passe mis à jour avec succès" });
+
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+};
+
+// 1. Initier le changement d'email (Envoyer OTP au nouvel email)
+export const sendEmailChangeOtp = async (req, res) => {
+    try {
+        const { newEmail } = req.body;
+        const userId = req.user.id;
+
+        if (!newEmail) return res.json({ success: false, message: "Email requis" });
+
+        // Vérifier si l'email est déjà utilisé par quelqu'un d'autre
+        const existingUser = await userModel.findOne({ email: newEmail });
+        if (existingUser) {
+            return res.json({ success: false, message: "Cet email est déjà utilisé." });
+        }
+
+        const otp = String(Math.floor(100000 + Math.random() * 900000));
+        
+        // On sauvegarde l'OTP et le nouvel email demandé temporairement dans l'utilisateur
+        // Assurez-vous que votre modèle User accepte des champs flexibles ou ajoutez-les au Schema si strict
+        await userModel.findByIdAndUpdate(userId, {
+            emailChangeOtp: otp,
+            newEmailRequest: newEmail,
+            emailChangeOtpExpireAt: Date.now() + 15 * 60 * 1000 // 15 min expiration
+        });
+
+        // Envoyer l'email
+        const mailOptions = {
+            from: process.env.SENDER_EMAIL,
+            to: newEmail,
+            subject: 'Vérification de votre nouvel email',
+            text: `Votre code de vérification pour changer d'email est : ${otp}. Ce code expire dans 15 minutes.`
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.json({ success: true, message: "Code de vérification envoyé au nouvel email" });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+// 2. Vérifier l'OTP et changer l'email
+export const verifyEmailChange = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        const userId = req.user.id;
+
+        const user = await userModel.findById(userId);
+
+        if (!user || !user.newEmailRequest || !user.emailChangeOtp) {
+            return res.json({ success: false, message: "Aucune demande de changement d'email en cours" });
+        }
+
+        if (user.emailChangeOtp !== otp) {
+            return res.json({ success: false, message: "Code OTP invalide" });
+        }
+
+        if (user.emailChangeOtpExpireAt < Date.now()) {
+            return res.json({ success: false, message: "Le code a expiré" });
+        }
+
+        // Appliquer le changement
+        user.email = user.newEmailRequest;
+        
+        // Nettoyer les champs temporaires
+        user.newEmailRequest = undefined;
+        user.emailChangeOtp = undefined;
+        user.emailChangeOtpExpireAt = undefined;
+        
+        // Important : Si vous voulez que le nouvel email soit considéré comme vérifié :
+        // user.isAccountVerified = true; 
+        // Sinon, remettez le à false pour forcer une nouvelle vérification globale.
+
+        await user.save();
+
+        res.json({ success: true, message: "Email mis à jour avec succès !" });
+
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
