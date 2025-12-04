@@ -7,6 +7,7 @@ import AccountSwitcher from './AccountSwitcher';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import CreatePostModal from './CreatePostModal';
 
 
 
@@ -16,6 +17,8 @@ const Sidebar = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [profileImage, setProfileImage] = useState(true);
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+
   const { userData, setUserData, backendUrl, setIsLoggedin, isSidebarOpen, setIsSidebarOpen, startAddAccount } = useContext(AppContext);
 
   const logout = async () => {
@@ -32,6 +35,8 @@ const Sidebar = () => {
           toast.error(error.message)
         }
     };
+
+    
 
   const handleNavigate = (path) => {
       navigate(path);
@@ -121,9 +126,10 @@ const Sidebar = () => {
                     
                     {/* Bouton Post */}
                     <button 
+                      onClick={() => setIsPostModalOpen(true)}
                       className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded flex items-center gap-3 pl-6">
                         <span className="text-xl">
-                          <i class="fi fi-tr-photo-video flex"></i>
+                          <i className="fi fi-tr-photo-video flex"></i>
                           </span> Post
                     </button>
 
