@@ -15,6 +15,9 @@ const userSchema = new mongoose.Schema({
     resetOtp: {type: String, default: ''},
     resetOtpExpireAt: {type: Number, default: 0},
     usernameLastChanged: { type: Date, default: null },
+    newEmailRequest: {type: String, default: ''},
+    emailChangeOtp: {type: String, default: ''},
+    emailChangeOtpExpireAt: {type: Number, default: 0},
 
     links: [{
         title: {type: String},

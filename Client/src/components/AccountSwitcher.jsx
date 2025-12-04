@@ -9,6 +9,12 @@ const AccountSwitcher = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
+    const redirectToLogin = (account) => {
+        if (startAddAccount()) {
+            navigate('/login', { state: { initialState: 'Login', email: account.email } });
+        }
+    };
+
     const handleSwitch = async (account) => {
         if (userData && account.username === userData.username) return;
         if (loading) return;
@@ -25,6 +31,7 @@ const AccountSwitcher = () => {
             if (success) {
                 // Si succès, on rafraîchit les données de l'utilisateur actif
                 await getUserData();
+                
                 toast.success(`Connecté en tant que ${account.name}`);
                 navigate('/profile'); // Assurer d'être sur la home ou recharger la page courante
                 window.location.reload(); // Souvent nécessaire pour bien recharger le contexte global avec le nouveau cookie
@@ -39,11 +46,7 @@ const AccountSwitcher = () => {
         setLoading(false);
     };
 
-    const redirectToLogin = (account) => {
-        if (startAddAccount()) {
-            navigate('/login', { state: { initialState: 'Login', email: account.email } });
-        }
-    };
+    
 
     const handleCreateNew = () => {
         if (startAddAccount()) {

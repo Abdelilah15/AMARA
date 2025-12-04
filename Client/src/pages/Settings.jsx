@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect} from 'react';
+import React, { useContext, useState, useEffect, useRef} from 'react';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -26,6 +26,8 @@ const Settings = () => {
   const [newEmail, setNewEmail] = useState('');
   const [emailOtp, setEmailOtp] = useState('');
   const [isEmailOtpSent, setIsEmailOtpSent] = useState(false);
+
+  const emailInputRefs = useRef([]);
 
   useEffect(() => {
     if (userData) {
@@ -116,6 +118,49 @@ const Settings = () => {
   };
 
   // --- LOGIQUE CHANGEMENT EMAIL ---
+
+  // Fonctions pour gérer les inputs OTP (Inspiré de EmailVerify.jsx)
+  const handleOtpInput = (e, index) => {
+    const value = e.target.value;
+    
+    // Déplacer le focus vers le suivant si un chiffre est entré
+    if (value.length > 0 && index < emailInputRefs.current.length - 1) {
+      emailInputRefs.current[index + 1].focus();
+    }
+
+    // Mettre à jour la variable d'état globale emailOtp en combinant toutes les valeurs
+    updateOtpFromRefs();
+  };
+
+  const handleOtpKeyDown = (e, index) => {
+    // Revenir en arrière avec Backspace
+    if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+      emailInputRefs.current[index - 1].focus();
+    }
+    // Petite latence pour laisser le temps à l'input de se vider avant update
+    setTimeout(updateOtpFromRefs, 0);
+  };
+
+  const handleOtpPaste = (e) => {
+    const paste = e.clipboardData.getData('text');
+    const pasteArray = paste.split('');
+    
+    pasteArray.forEach((char, index) => {
+      if (emailInputRefs.current[index]) {
+        emailInputRefs.current[index].value = char;
+      }
+    });
+    updateOtpFromRefs();
+  };
+
+  // Fonction utilitaire pour lire les refs et mettre à jour le state string
+  const updateOtpFromRefs = () => {
+      if(emailInputRefs.current) {
+          const otpArray = emailInputRefs.current.map(input => input?.value || '');
+          setEmailOtp(otpArray.join(''));
+      }
+  };
+
   // Étape 1 : Envoyer l'OTP
   const handleSendEmailOtp = async () => {
     if (!newEmail.trim()) return toast.error("Veuillez entrer un email valide");
@@ -379,16 +424,18 @@ const Settings = () => {
                         // ÉTAPE 2 : Saisie de l'OTP
                         <div className='animate-fade-in'>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Code de vérification (OTP)</label>
-                            <div className="flex justify-center gap-2 mb-4">
-                                {/* Simple input pour l'OTP, peut être amélioré avec 6 cases distinctes */}
-                                <input 
-                                    type="text" 
-                                    maxLength="6"
-                                    value={emailOtp}
-                                    onChange={(e) => setEmailOtp(e.target.value)}
-                                    className="w-full text-center text-2xl tracking-widest py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
-                                    placeholder="000000"
-                                />
+                            <div className="flex justify-center gap-2 mb-4" onPaste={handleOtpPaste}>
+                                {Array(6).fill(0).map((_, index) => (
+                                    <input 
+                                        key={index}
+                                        type="text" 
+                                        maxLength="1"
+                                        className="w-12 h-12 text-center text-xl font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
+                                        ref={el => emailInputRefs.current[index] = el}
+                                        onInput={(e) => handleOtpInput(e, index)}
+                                        onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                                    />
+                                ))}
                             </div>
                             <div className="text-center">
                                 <button 

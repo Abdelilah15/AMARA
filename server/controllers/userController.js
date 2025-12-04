@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import userModel from "../models/userModel.js";
 import transporter from '../config/nodemailer.js';
+import { EMAIL_CHANGE_TEMPLATE } from '../config/emailTemplates.js';
+
 
 export const getUserData = async (req, res)=>{
     try {
@@ -265,7 +267,8 @@ export const sendEmailChangeOtp = async (req, res) => {
             from: process.env.SENDER_EMAIL,
             to: newEmail,
             subject: 'Vérification de votre nouvel email',
-            text: `Votre code de vérification pour changer d'email est : ${otp}. Ce code expire dans 15 minutes.`
+            //text: `Votre code de vérification pour changer d'email est : ${otp}. Ce code expire dans 15 minutes.`
+            html: EMAIL_CHANGE_TEMPLATE.replace('{{otp}}', otp)
         };
 
         await transporter.sendMail(mailOptions);

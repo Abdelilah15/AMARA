@@ -16,6 +16,7 @@ const Profile = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [bannerImage, setBannerImage] = useState(null);
   const [imageModal, setImageModal] = useState(null);
+  const [addLink, setaddLink] = useState(false);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState('');
@@ -100,12 +101,20 @@ const Profile = () => {
 
   // Gestion des changements dans les inputs de liens
   const handleLinkChange = (index, field, value) => {
-    const newLinks = [...editLinks];
-    // Si l'objet n'existe pas à cet index, on le crée
-    if (!newLinks[index]) newLinks[index] = { title: '', url: '' };
-    newLinks[index][field] = value;
-    setEditLinks(newLinks);
-  };
+  const newLinks = [...editLinks];
+  newLinks[index] = { ...newLinks[index], [field]: value };
+  setEditLinks(newLinks);
+};
+
+  const handleAddLink = () => {
+  if (editLinks.length < 3) {
+    setEditLinks([...editLinks, { title: '', url: '' }]);
+  }
+};
+
+const handleRemoveLink = (indexToRemove) => {
+  setEditLinks(editLinks.filter((_, index) => index !== indexToRemove));
+};
 
   const handleSaveProfile = async () => {
     setLoading(true);
@@ -380,27 +389,58 @@ const handleImageChange = async (e, type) => {
 
               {/* SECTION LIENS DANS LA MODALE */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Liens (Max 3)</label>
-                {[0, 1, 2].map((index) => (
-                    <div key={index} className="flex gap-2 mb-2">
-                        <input 
-                            type="text" 
-                            placeholder="Titre (ex: Portfolio)" 
-                            className="w-1/3 p-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none"
-                            value={editLinks[index]?.title || ''}
-                            onChange={(e) => handleLinkChange(index, 'title', e.target.value)}
-                        />
-                        <input 
-                            type="url" 
-                            placeholder="URL (https://...)" 
-                            className="w-2/3 p-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none"
-                            value={editLinks[index]?.url || ''}
-                            onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
-                        />
-                    </div>
-                ))}
-                <p className="text-xs text-gray-400">Laissez vide si vous ne voulez pas utiliser les 3 liens.</p>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Liens ({editLinks.length}/3)
+                </label>
+
+                {/* Boucle dynamique sur le tableau editLinks */}
+                {editLinks.map((link, index) => (
+                <div key={index} className="flex gap-2 mb-2 items-center">
+      
+                {/* Input Titre */}
+                <input 
+                  type="text" 
+                  placeholder="Titre (ex: Portfolio)" 
+                  className="w-1/3 p-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none"
+                  value={link.title || ''}
+                  onChange={(e) => handleLinkChange(index, 'title', e.target.value)}
+                />
+
+                {/* Input URL */}
+                <input 
+                  type="url" 
+                  placeholder="URL (https://...)" 
+                  className="flex-1 p-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none"
+                  value={link.url || ''}
+                  onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
+                />
+
+                {/* Bouton Supprimer (Icône Poubelle) */}
+                <button 
+                  onClick={() => handleRemoveLink(index)}
+                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  title="Supprimer ce lien"
+                  >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  </svg>
+                </button>
               </div>
+              ))}
+
+              {/* Bouton Ajouter (Visible seulement si moins de 3 liens) */}
+              {editLinks.length < 3 && (
+                <button
+                  onClick={handleAddLink}
+                  className="mt-2 flex items-center text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+                  >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Ajouter un autre lien
+                </button>
+              )}
+            </div>
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
