@@ -36,7 +36,7 @@ const Sidebar = () => {
         }
     };
 
-    
+
 
   const handleNavigate = (path) => {
       navigate(path);
@@ -132,6 +132,7 @@ const Sidebar = () => {
                           <i className="fi fi-tr-photo-video flex"></i>
                           </span> Post
                     </button>
+                    <CreatePostModal isOpen={isPostModalOpen} onClose={() => setIsPostModalOpen(false)} />
 
                     {/* Bouton Storie */}
                     <button 
