@@ -120,19 +120,27 @@ const Sidebar = () => {
                 <div className={`flex flex-col gap-2 overflow-hidden transition-all duration-300 ${isCreateMenuOpen ? 'max-h-60 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
                     
                     {/* Bouton Post */}
-                    <button className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded flex items-center gap-3 pl-6">
-                        <span className="text-xl">📝</span> Post
+                    <button 
+                      className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded flex items-center gap-3 pl-6">
+                        <span className="text-xl">
+                          <i class="fi fi-tr-photo-video flex"></i>
+                          </span> Post
                     </button>
 
                     {/* Bouton Storie */}
-                    <button className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded flex items-center gap-3 pl-6">
-                        <span className="text-xl">📸</span> Storie
+                    <button 
+                      className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded flex items-center gap-3 pl-6">
+                        <span className="text-xl">
+                          <i class="fi fi-tr-camera flex"></i>
+                          </span> Storie
                     </button>
 
                     {/* Bouton Article (Seulement si Pro) */}
-                    {userData && userData.isProfessional && (
+                    {userData && userData.profileType === 'professional' && (
                         <button className="bg-purple-600 hover:bg-purple-500 text-white p-2 rounded flex items-center gap-3 pl-6 border border-purple-400">
-                            <span className="text-xl">📰</span> Article <span className="text-xs bg-white text-purple-600 px-1 rounded font-bold">PRO</span>
+                            <span className="text-xl">
+                              <i class="fi fi-tr-document-signed flex"></i>
+                              </span> Article <span className="text-xs bg-white text-purple-600 px-1 rounded font-bold">PRO</span>
                         </button>
                     )}
                 </div>

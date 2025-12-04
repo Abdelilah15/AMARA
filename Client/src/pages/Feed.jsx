@@ -11,9 +11,7 @@ const Feed = () => {
         <Navbar />
         
         <div className="p-4 pt-20">
-            <h1 className="text-2xl font-bold mb-4">Mon Feed</h1>
-            <p className="text-gray-400">Contenu du feed ici (Posts, Stories...)</p>
-            {/* Ici tu peux importer et afficher <UserList /> ou autre composant de contenu */}
+            
         </div>
 
         {/* --- BOUTON CREATE FLOTTANT (Mobile) --- */}
@@ -24,20 +22,26 @@ const Feed = () => {
             {showMobileMenu && (
                 <div className="flex flex-col gap-3 mb-2 transition-all animate-bounce-in">
                     {/* Article (Pro seulement) */}
-                    {userData && userData.isProfessional && (
-                        <button className="bg-purple-600 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
-                            📰
+                    {userData && userData.profileType === 'professional' && (
+                        <button 
+                            onClick={() => {setShowMobileMenu(false)}}
+                            lassName="bg-purple-600 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
+                            <i class="fi fi-tr-document-signed flex"></i>
                         </button>
                     )}
                     
                     {/* Storie */}
-                    <button className="bg-blue-500 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
-                        📸
+                    <button 
+                        onClick={() => {setShowMobileMenu(false)}}
+                        lassName="bg-blue-500 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
+                        <i class="fi fi-tr-camera flex"></i>
                     </button>
 
                     {/* Post */}
-                    <button className="bg-green-500 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
-                        📝
+                    <button 
+                        onClick={() => {setShowMobileMenu(false)}}
+                        className="bg-green-500 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
+                        <i class="fi fi-tr-photo-video flex"></i>
                     </button>
                 </div>
             )}
@@ -49,7 +53,7 @@ const Feed = () => {
                 className="w-14 h-14 rounded-xl shadow-2xl flex items-center justify-center text-gray-800 transition-transform active:scale-95"
             >
                 {/* Icône qui change si ouvert/fermé */}
-                <i style={{fontSize:"30px"}} className={`fi fi-ts-feather transition-transform duration-300 ${showMobileMenu ? 'rotate-45 scale-125' : ''}`}></i>
+                <i style={{fontSize:"30px"}} className={`fi fi-ts-feather transition-transform duration-300 flex ${showMobileMenu ? 'rotate-45 scale-125' : ''}`}></i>
             </button>
         </div>
     </div>
