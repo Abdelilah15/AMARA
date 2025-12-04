@@ -23,6 +23,7 @@ const Profile = () => {
   const [editLinks, setEditLinks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
 
   const isOwnProfile = userData && profileData && userData.username === profileData.username;
 
@@ -63,6 +64,13 @@ const Profile = () => {
       }
     }
   }, [username, userData, backendUrl]);
+
+  const handleCopyLink = () => {
+  const profileUrl = window.location.href; // Récupère l'URL actuelle
+  navigator.clipboard.writeText(profileUrl);
+  setShowMenu(false); // Ferme le menu
+  toast.success('Lien copié !');
+};
 
 
   const sendVerificationOtp = async () => {
@@ -276,10 +284,41 @@ const handleImageChange = async (e, type) => {
                             onClick={() => setIsEditModalOpen(true)}
                             className="px-10 py-2 border border-gray-300 rounded-full text-gray-700 font-medium transition-colors flex items-center justify-center hover:bg-gray-100 cursor-pointer"
                             title="Modifier le profil"
-                        > <i className="fi fi-ts-user-pen"></i>
+                        > <i className="fi fi-ts-user-pen flex"></i>
                         </button>
                     )}
                 </div>
+
+                {/* --- NOUVEAU : BOUTON 3 POINTS ET MENU --- */}
+                <div className="relative mt-auto ml-1">
+                  <button 
+                    onClick={() => setShowMenu(!showMenu)}
+                    className="p-2 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-600 transition-colors cursor-pointer"
+                   >
+                   {/* Icône 3 points verticale */}
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                   </svg>
+
+                  </button>
+
+                  {/* Le Menu Déroulant (s'affiche si showMenu est true) */}
+                  {showMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 overflow-hidden">
+                      <button
+                        onClick={handleCopyLink}
+                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                        >
+                        {/* Icône Lien */}
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                       </svg>
+                        Copier le lien
+                      </button>
+                  </div>
+                )}
+              </div>
+
             </div>
 
             {/* Informations Textuelles */}
@@ -383,7 +422,7 @@ const handleImageChange = async (e, type) => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
                 <textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none" placeholder="Votre bio..." maxLength={150} />
-                  <p className="text-xs text-gray-400 mt-1">{length}/150 caractères max</p>
+                  <p className="text-xs text-gray-400 mt-1">{editBio.length}/150 caractères max</p>
               </div>
 
               {/* SECTION LIENS DANS LA MODALE */}

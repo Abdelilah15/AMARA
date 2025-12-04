@@ -33,7 +33,7 @@ const AccountSwitcher = () => {
                 await getUserData();
                 
                 toast.success(`Connecté en tant que ${account.name}`);
-                navigate('/profile'); // Assurer d'être sur la home ou recharger la page courante
+                navigate(`/@${account.username}`); // Assurer d'être sur la home ou recharger la page courante
                 window.location.reload(); // Souvent nécessaire pour bien recharger le contexte global avec le nouveau cookie
             } else {
                 // Si échec (token invalide côté serveur), redirection login

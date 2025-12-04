@@ -63,7 +63,7 @@ const Navbar = () => {
       {/* Partie Droite : Boutons Login/User */}
       {userData ? (
         <div 
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate(`/@${userData.username}`)}
             className='w-8 h-8 flex justify-center items-center rounded-full bg-black text-white cursor-pointer'>
             {userData.name[0].toUpperCase()}
             {/* Note: Le menu déroulant utilisateur peut rester ici ou dans la Sidebar selon votre choix */}

@@ -91,19 +91,26 @@ const Sidebar = () => {
           {/* Navigation */}
           <ul className="space-y-4">
             <li onClick={() => { navigate('/'); setIsOpen(false); }} 
-                className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
-                <img src={assets.house_chimney} className="w-5 invert"alt="" /> Accueil
+              className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
+              <img src={assets.house_chimney} className="w-5 invert"alt="" /> Accueil
             </li>
 
-            <li 
-              onClick={() => { navigate('/profile'); setIsOpen(false); }} 
-                className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
-                <img src={assets.user} className="w-5 invert" alt="" /> Profil
+            <li onClick={() => { navigate(`/@${userData.username}`); setIsOpen(false); }} 
+              className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
+              <img src={assets.user} className="w-5 invert" alt="" /> Profil
             </li>
             
             <li onClick={() => { navigate('/settings'); setIsOpen(false); }} 
-                className='hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3'>
-                <img src={assets.settings} className="w-5 invert" alt="" /> Settings</li>
+              className='hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3'>
+              <img src={assets.settings} className="w-5 invert" alt="" /> Settings
+            </li>
+
+            <li onClick={() => {  setIsOpen(false); }} 
+              style={{backgroundColor:"#00ff73ff"}}
+              className=' text-gray-700 font-medium p-3 rounded cursor-pointer flex justify-center items-center gap-3'>
+              <i style={{fontSize:"28px"}} class="fi fi-ts-feather flex text-gray-700"></i> Create
+            </li>
+
             {/* Ajoutez vos autres liens ici */}
           </ul>
         </div>
