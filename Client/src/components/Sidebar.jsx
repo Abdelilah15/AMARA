@@ -15,6 +15,7 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // État pour le menu mobile
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [profileImage, setProfileImage] = useState(true);
+  const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const { userData, setUserData, backendUrl, setIsLoggedin, isSidebarOpen, setIsSidebarOpen, startAddAccount } = useContext(AppContext);
 
   const logout = async () => {
@@ -90,7 +91,7 @@ const Sidebar = () => {
         <div>
           {/* Navigation */}
           <ul className="space-y-4">
-            <li onClick={() => { navigate('/'); setIsOpen(false); }} 
+            <li onClick={() => { navigate('/feed'); setIsOpen(false); }} 
               className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
               <img src={assets.house_chimney} className="w-5 invert"alt="" /> Accueil
             </li>
@@ -105,11 +106,37 @@ const Sidebar = () => {
               <img src={assets.settings} className="w-5 invert" alt="" /> Settings
             </li>
 
-            <li onClick={() => {  setIsOpen(false); }} 
-              style={{backgroundColor:"#00ff73ff"}}
-              className=' text-gray-700 font-medium p-3 rounded cursor-pointer flex justify-center items-center gap-3'>
-              <i style={{fontSize:"28px"}} class="fi fi-ts-feather flex text-gray-700"></i> Create
-            </li>
+            {/* --- BOUTON CREATE (Desktop Uniquement) --- */}
+            {/* hidden md:flex = Caché sur mobile, visible sur écran moyen et + */}
+            <div className="hidden md:flex flex-col gap-2">
+                <li onClick={() => setIsCreateMenuOpen(!isCreateMenuOpen)} 
+                  style={{backgroundColor:"#00ff73ff"}}
+                  className='text-gray-700 font-medium p-3 rounded cursor-pointer flex justify-center items-center gap-3 hover:opacity-90 transition-opacity'>
+                  <i style={{fontSize:"28px"}} className={`fi fi-ts-feather flex text-gray-700 transition-transform ${isCreateMenuOpen ? 'rotate-45' : ''}`}></i> 
+                  {isCreateMenuOpen ? 'Close' : 'Create'}
+                </li>
+
+                {/* Sous-menu (Liste des boutons) */}
+                <div className={`flex flex-col gap-2 overflow-hidden transition-all duration-300 ${isCreateMenuOpen ? 'max-h-60 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
+                    
+                    {/* Bouton Post */}
+                    <button className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded flex items-center gap-3 pl-6">
+                        <span className="text-xl">📝</span> Post
+                    </button>
+
+                    {/* Bouton Storie */}
+                    <button className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded flex items-center gap-3 pl-6">
+                        <span className="text-xl">📸</span> Storie
+                    </button>
+
+                    {/* Bouton Article (Seulement si Pro) */}
+                    {userData && userData.isProfessional && (
+                        <button className="bg-purple-600 hover:bg-purple-500 text-white p-2 rounded flex items-center gap-3 pl-6 border border-purple-400">
+                            <span className="text-xl">📰</span> Article <span className="text-xs bg-white text-purple-600 px-1 rounded font-bold">PRO</span>
+                        </button>
+                    )}
+                </div>
+            </div>
 
             {/* Ajoutez vos autres liens ici */}
           </ul>

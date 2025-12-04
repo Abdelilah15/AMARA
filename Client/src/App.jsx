@@ -9,6 +9,8 @@ import Profile from './pages/Profile'
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Settings from './pages/Settings';
+import Feed from './pages/Feed';
+
 
 
 const App = () => {
@@ -44,6 +46,7 @@ const App = () => {
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/settings' element={<Settings />} />
                 <Route path='/:username' element={<Profile />} />
+                <Route path='/feed' element={<Feed />} />
             </Routes>
         </div>
       </div>
