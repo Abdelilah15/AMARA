@@ -16,7 +16,6 @@ const Profile = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [bannerImage, setBannerImage] = useState(null);
   const [imageModal, setImageModal] = useState(null);
-  const [addLink, setaddLink] = useState(false);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState('');
