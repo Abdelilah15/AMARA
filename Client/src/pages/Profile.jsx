@@ -24,7 +24,10 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
+
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [userPosts, setUserPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
 
   const isOwnProfile = userData && profileData && userData.username === profileData.username;
 
@@ -162,6 +165,8 @@ const handleRemoveLink = (indexToRemove) => {
     } catch (error) {
         console.error(error);
         toast.error("Impossible de charger les posts");
+    } finally {
+        setLoadingPosts(false);
     }
   };
 
@@ -233,11 +238,16 @@ const handleImageChange = async (e, type) => {
       return null;
   }
 
+  const handlePostCreated = () => {
+        setIsPostModalOpen(false);
+        fetchUserPosts();
+    };
+
   return (
     // Container Principal : Centré sur desktop, fond gris clair
     <div className='mt-16 min-h-screen flex flex-col items-center justify-start bg-gray-50'>
       
-      {/* Carte du Profil : Prend toute la largeur sur mobile (w-full), max-w-lg sur desktop, bords arrondis seulement sur desktop */}
+      {/* ======== Carte du Profil ======== */}
       <div className="w-full max-w-3xl mx-auto border border-gray-700">
         
         {/* --- Zone Bannière --- */}
