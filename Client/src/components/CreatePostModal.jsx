@@ -60,6 +60,9 @@ const CreatePostModal = ({ isOpen, onClose }) => {
         try {
             const formData = new FormData();
             formData.append('content', content);
+            if (userData && userData._id) {
+            formData.append('userId', userData._id); 
+            }
             files.forEach((file) => {
                 formData.append('files', file);
             });
