@@ -36,9 +36,6 @@ const App = () => {
   return (
     <div className='flex'> {/* Ajout de flex pour la mise en page Sidebar + Contenu */}
       <ToastContainer />
-      
-      {/* Affiche la Sidebar uniquement si autorisé */}
-      {shouldShowNav && <Sidebar />}
 
       {/* Conteneur principal : s'ajuste si la sidebar est là ou non */}
       <div className={`flex-1 flex flex-col min-h-screen relative ${shouldShowNav ? 'md:ml-84' : ''} transition-all duration-300`}>

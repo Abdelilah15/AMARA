@@ -153,14 +153,14 @@ const handleRemoveLink = (indexToRemove) => {
     }
   };
 
-  const fetchUserPosts = async () => {
+  const fetchUserPosts = async (id) => { // [!code ++] Accepte l'ID en paramètre
     try {
-        // On attend que profileData soit chargé pour avoir l'ID
-        if (profileData && profileData._id) {
-            const { data } = await axios.get(backendUrl + '/api/post/user/' + profileData._id);
-            if (data.success) {
-                setUserPosts(data.posts);
-            }
+        const targetId = id || (profileData && profileData._id); // Sécurité
+        if (!targetId) return; // Si pas d'ID, on arrête
+
+        const { data } = await axios.get(backendUrl + '/api/post/user/' + targetId);
+        if (data.success) {
+            setUserPosts(data.posts);
         }
     } catch (error) {
         console.error(error);
@@ -168,14 +168,15 @@ const handleRemoveLink = (indexToRemove) => {
     } finally {
         setLoadingPosts(false);
     }
-  };
+};
 
   // --- USE EFFECT POUR DÉCLENCHER LE CHARGEMENT DES POSTS ---
   useEffect(() => {
-    if (profileData) {
-        fetchUserPosts();
+    // On ne lance la requête que si on a un ID valide
+    if (profileData && profileData._id) {
+        fetchUserPosts(profileData._id);
     }
-  }, [profileData]);
+  }, [profileData?._id]);
   
   // If user is logged in but user data not yet loaded, show loader
   if (isLoggedin && !userData) return <div className="min-h-screen flex justify-center items-center">Chargement...</div>;
@@ -449,7 +450,7 @@ const handleImageChange = async (e, type) => {
                             
                             {/* En-tête du post (Petit avatar + Date) */}
                             <div className="flex items-center gap-3 mb-3">
-                                <img 
+                                <img
                                     src={profileData.image || assets.user_robot} 
                                     className="w-10 h-10 rounded-full object-cover border border-gray-200" 
                                     alt="User" 

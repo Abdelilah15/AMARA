@@ -1,5 +1,6 @@
 import postModel from "../models/postModel.js";
 import userModel from "../models/userModel.js";
+import mongoose from "mongoose";
 
 // Créer un post
 export const createPost = async (req, res) => {
@@ -34,8 +35,16 @@ export const getUserPosts = async (req, res) => {
     try {
         const { userId } = req.params;
 
-        // On cherche les posts avec cet userId, triés du plus récent au plus ancien
-        const posts = await postModel.find({ userId }).sort({ createdAt: -1 });
+        // 1. Vérification de sécurité : est-ce un ID valide ?
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.json({ success: false, message: "ID utilisateur invalide" });
+        }
+
+        // 2. Conversion explicite en ObjectId pour garantir la correspondance
+        const objectId = new mongoose.Types.ObjectId(userId);
+
+        // 3. Recherche avec l'ObjectId
+        const posts = await postModel.find({ userId: objectId }).sort({ createdAt: -1 });
 
         res.json({ success: true, posts });
     } catch (error) {

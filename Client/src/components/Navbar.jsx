@@ -18,15 +18,22 @@ const Navbar = () => {
 <div className="z-10 fixed border-b border-gray-700 bg-gray-900 text-white w-full flex justify-between items-center p-4 sm:px-24 absolute top-0">
   
     {/* Partie Gauche : Logo + Bouton Mobile */}
-      <div className="flex items-center gap-4">
+    
+    <div>
+    {location.pathname === '/' ? (
+      <i class="fi fi-tr-angle-small-left"></i>
+      ): (
 
+        <button></button>
+
+      )}
       </div>
 
       {/* Partie Droite : Boutons Login/User */}
       {userData ? (
         <div 
             onClick={() => navigate(`/@${userData.username}`)}
-            className='w-8 h-8 flex justify-center items-center rounded-full bg-black text-white cursor-pointer'>
+            className=' w-8 h-8 flex justify-center items-center rounded-full bg-black text-white cursor-pointer'>
             {userData.name[0].toUpperCase()}
             {/* Note: Le menu déroulant utilisateur peut rester ici ou dans la Sidebar selon votre choix */}
         </div>

@@ -4,13 +4,16 @@ import Navbar from '../components/Navbar';
 import { AppContext } from '../context/AppContext';
 import CreatePostModal from '../components/CreatePostModal';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 
 const Feed = () => {
+  const navigate = useNavigate()
   const { userData, backendUrl } = useContext(AppContext);
   
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+
 
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,15 +55,19 @@ const Feed = () => {
                 posts.map((post) => (
                     <div key={post._id} className="bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-lg">
                         {/* Header du post */}
-                        <div className="flex items-center gap-3 mb-3">
+                        <div 
+                            className="flex items-center gap-3 mb-3">
                             <img 
+                                onClick={()=> navigate(`/@${post.userId?.username}`)}
                                 src={post.userId?.image || assets.user_robot} 
                                 alt="" 
-                                className="w-10 h-10 rounded-full object-cover bg-gray-700" 
+                                className="w-10 h-10 rounded-full object-cover bg-gray-700 cursor-pointer" 
                             />
                             <div>
-                                <h3 className="font-bold capitalize">{post.userId?.name || "Utilisateur"}</h3>
-                                <p className="text-xs text-gray-400">{new Date(post.createdAt).toLocaleDateString()}</p>
+                                <h3 
+                                onClick={()=> navigate(`/@${post.userId?.username}`)}
+                                className="font-bold capitalize">{post.userId?.name || "Utilisateur"}</h3>
+                                <p className="text-xs text-gray-400">{new Date(post.createdAt).toLocaleDateString()} • {new Date(post.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                             </div>
                         </div>
 
