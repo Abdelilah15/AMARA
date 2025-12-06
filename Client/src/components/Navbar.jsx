@@ -15,7 +15,7 @@ const Navbar = () => {
     
 
   return (
-<div className="border-b border-gray-700 bg-gray-900 text-white w-full flex justify-between items-center p-4 sm:px-24 absolute top-0">
+<div className="z-10 fixed border-b border-gray-700 bg-gray-900 text-white w-full flex justify-between items-center p-4 sm:px-24 absolute top-0">
   
     {/* Partie Gauche : Logo + Bouton Mobile */}
       <div className="flex items-center gap-4">
