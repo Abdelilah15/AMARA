@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/login'
@@ -13,13 +13,22 @@ import Feed from './pages/Feed';
 
 
 
+
 const App = () => {
   const location = useLocation();
+
+  const pathRef = useRef(null); // Stocke le chemin
+  const previousPath = pathRef.current;
+
   const isHomePage = location.pathname === '/';
   const isLoginPage = location.pathname === '/login';
   const isEmailVerifyPage = location.pathname === '/email-verify';
   const isResetPasswordPage = location.pathname === '/reset-password';
   const isSettingsPage = location.pathname === '/settings';
+
+  useEffect(() => {
+    pathRef.current = location.pathname; // Met à jour la référence après chaque rendu
+  }, [location.pathname]);
 
   const hideNavRoutes = ['/', '/login', '/email-verify', '/reset-password', '/register'];
   const shouldShowNav = !hideNavRoutes.includes(location.pathname);
@@ -36,6 +45,7 @@ const App = () => {
         
         {/* Affiche la Navbar uniquement si autorisé */}
         {shouldShowNav && <Navbar />}
+        {shouldShowNav && <Sidebar previousPath={previousPath} />}
         
         <div className='flex-1'>
             <Routes>

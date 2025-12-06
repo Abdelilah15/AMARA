@@ -11,7 +11,7 @@ import CreatePostModal from './CreatePostModal';
 
 
 
-const Sidebar = () => {
+const Sidebar = ({ previousPath }) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false); // État pour le menu mobile
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -54,15 +54,27 @@ const Sidebar = () => {
   return (
     <>
       {/* --- Bouton Menu (Visible uniquement sur Mobile) --- */}
+      {location.pathname === '/feed' ? (
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-md shadow-lg"
+        className="md:hidden fixed flex  top-3 left-4 z-50 p-2 text-white rounded-md"
       >
         {/* Icône Hamburger simple (SVG) */}
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
+      ): (
+
+        <button 
+                onClick={() => previousPath === '/' ? navigate('/feed') : navigate(-1)} // Retourne à la page précédente
+                className="md:hidden fixed flex top-3 left-4 z-50 p-2 text-white rounded-md"
+                style={{marginBottom:"auto"}}>
+                <i class="fi fi-tr-angle-small-left flex"
+                style={{fontSize:"20px"}}></i>
+            </button>
+
+      )}
 
       {/* --- Overlay (Fond sombre quand le menu est ouvert sur mobile) --- */}
       {isOpen && (
