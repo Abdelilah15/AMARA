@@ -28,6 +28,7 @@ const Profile = () => {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [userPosts, setUserPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
+  const [activeMenuId, setActiveMenuId] = useState(null);
 
   const isOwnProfile = userData && profileData && userData.username === profileData.username;
 
@@ -244,6 +245,39 @@ const handleImageChange = async (e, type) => {
         fetchUserPosts();
     };
 
+  const toggleMenu = (postId) => {
+        if (activeMenuId === postId) {
+            setActiveMenuId(null);
+        } else {
+            setActiveMenuId(postId);
+        }
+    };
+
+  const handleDeletePost = async (postId) => {
+        if (!window.confirm("Voulez-vous vraiment supprimer ce post ?")) return;
+
+        try {
+            const { data } = await axios.delete(backendUrl + `/api/post/delete/${postId}`);
+            
+            if (data.success) {
+                toast.success("Post supprimé");
+                // Mise à jour de la liste des posts localement sans rechargement
+                // Supposons que votre état de posts s'appelle 'userPosts' ou 'posts'
+                // setUserPosts(prev => prev.filter(post => post._id !== postId)); 
+                
+                // Si vous n'avez pas d'état local séparé pour les posts et utilisez userData,
+                // vous devrez peut-être recharger les données du profil :
+                getUserData(); 
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error("Erreur lors de la suppression");
+        } finally {
+            setActiveMenuId(null);
+        }
+    };
+
   return (
     // Container Principal : Centré sur desktop, fond gris clair
     <div className='mt-16 min-h-screen flex flex-col items-center justify-start bg-gray-50'>
@@ -447,7 +481,7 @@ const handleImageChange = async (e, type) => {
             {userData && userData.profileType === 'professional' && (
             <div>Articles</div>
             )}
-            
+
             <div>Stories</div>
             <div>Replyes</div>
         </div>
@@ -457,23 +491,92 @@ const handleImageChange = async (e, type) => {
                     {userPosts.map((post) => (
                         <div key={post._id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
                             
-                            {/* En-tête du post (Petit avatar + Date) */}
-                            <div className="flex items-center gap-3 mb-3">
-                                <img
-                                    src={profileData.image || assets.user_robot} 
-                                    className="w-10 h-10 rounded-full object-cover border border-gray-200" 
-                                    alt="User" 
-                                />
-                                <div>
-                                    <p className="font-semibold text-gray-900 text-sm">{profileData.name}</p>
-                                    <p className="text-xs text-gray-500">
-                                        {new Date(post.createdAt).toLocaleDateString()} • {new Date(post.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                    </p>
-                                </div>
-                            </div>
+                            {/* --- Header du post --- */}
+<div className="flex justify-between items-start mb-3">
 
-                            {/* Contenu textuel */}
-                            <p className="text-gray-700 text-sm mb-3 whitespace-pre-wrap">{post.content}</p>
+    {/* Partie Gauche : Avatar + Nom */}
+    <div className="flex items-center gap-3">
+        <img 
+            onClick={() => navigate(`/@${post.userId?.username}`)}
+            src={post.userId?.image || assets.user_robot} 
+            alt="" 
+            className="w-10 h-10 rounded-full object-cover bg-gray-700 cursor-pointer" 
+        />
+
+        <div>
+            <h3 
+                onClick={() => navigate(`/@${post.userId?.username}`)}
+                className="font-bold capitalize cursor-pointer hover:underline"
+            >
+                {post.userId?.name || "Utilisateur"}
+            </h3>
+
+            <p className="text-xs text-gray-400">
+                {new Date(post.createdAt).toLocaleDateString()} •{" "}
+                {new Date(post.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                })}
+            </p>
+        </div>
+    </div>
+
+    {/* Partie Droite : Menu 3 points */}
+    <div className="relative">
+
+        {/* Bouton 3 points */}
+        <button
+            onClick={() => toggleMenu(post._id)}
+            className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700 transition-colors"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 strokeWidth={1.5}
+                 stroke="currentColor"
+                 className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" 
+                d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+            </svg>
+        </button>
+
+        {/* Menu déroulant */}
+        {activeMenuId === post._id && (
+            <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-600 rounded-md shadow-xl z-20 overflow-hidden">
+
+                {/* Si c'est mon post → Supprimer */}
+                {userData && userData._id === post.userId?._id ? (
+                    <button
+                        onClick={() => handleDeletePost(post._id)}
+                        className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 flex items-center gap-2 transition-colors"
+                    >
+                        <i className="fi fi-rr-trash"></i>
+                        Supprimer le post
+                    </button>
+                ) : (
+                    <button
+                        className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 flex items-center gap-2"
+                    >
+                        <i className="fi fi-rr-flag"></i>
+                        Signaler le post
+                    </button>
+                )}
+
+                {/* Bouton fermer */}
+                <button
+                    onClick={() => setActiveMenuId(null)}
+                    className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 flex items-center gap-2"
+                >
+                    <i className="fi fi-rr-cross-small"></i>
+                    Fermer
+                </button>
+            </div>
+        )}
+    </div>
+</div>
+
+                            {/* Contenu texte */}
+                            <p className="text-gray-900 mb-3 whitespace-pre-wrap">{post.content}</p>
 
                             {/* Médias (Images/Vidéos) */}
                             {post.media && post.media.length > 0 && (
