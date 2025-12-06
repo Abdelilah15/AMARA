@@ -28,3 +28,17 @@ export const createPost = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 }
+
+export const getUserPosts = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // On cherche les posts avec cet userId, triés du plus récent au plus ancien
+        const posts = await postModel.find({ userId }).sort({ createdAt: -1 });
+
+        res.json({ success: true, posts });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}

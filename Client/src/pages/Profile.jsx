@@ -24,6 +24,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [userPosts, setUserPosts] = useState([]);
 
   const isOwnProfile = userData && profileData && userData.username === profileData.username;
 
@@ -148,6 +149,28 @@ const handleRemoveLink = (indexToRemove) => {
       setLoading(false);
     }
   };
+
+  const fetchUserPosts = async () => {
+    try {
+        // On attend que profileData soit chargé pour avoir l'ID
+        if (profileData && profileData._id) {
+            const { data } = await axios.get(backendUrl + '/api/post/user/' + profileData._id);
+            if (data.success) {
+                setUserPosts(data.posts);
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        toast.error("Impossible de charger les posts");
+    }
+  };
+
+  // --- USE EFFECT POUR DÉCLENCHER LE CHARGEMENT DES POSTS ---
+  useEffect(() => {
+    if (profileData) {
+        fetchUserPosts();
+    }
+  }, [profileData]);
   
   // If user is logged in but user data not yet loaded, show loader
   if (isLoggedin && !userData) return <div className="min-h-screen flex justify-center items-center">Chargement...</div>;
@@ -404,6 +427,60 @@ const handleImageChange = async (e, type) => {
                 </div>
             )}
         </div>
+
+        {/* --- SECTION POSTS DU PROFIL --- */}
+        <div className="border-t border-gray-200 mt-4">
+            <h3 className="text-xl font-bold text-gray-800 p-6">Publications</h3>
+            
+            {userPosts.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4 px-6 pb-6">
+                    {userPosts.map((post) => (
+                        <div key={post._id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                            
+                            {/* En-tête du post (Petit avatar + Date) */}
+                            <div className="flex items-center gap-3 mb-3">
+                                <img 
+                                    src={profileData.image || assets.user_robot} 
+                                    className="w-10 h-10 rounded-full object-cover border border-gray-200" 
+                                    alt="User" 
+                                />
+                                <div>
+                                    <p className="font-semibold text-gray-900 text-sm">{profileData.name}</p>
+                                    <p className="text-xs text-gray-500">
+                                        {new Date(post.createdAt).toLocaleDateString()} • {new Date(post.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Contenu textuel */}
+                            <p className="text-gray-700 text-sm mb-3 whitespace-pre-wrap">{post.content}</p>
+
+                            {/* Médias (Images/Vidéos) */}
+                            {post.media && post.media.length > 0 && (
+                                <div className={`grid gap-2 ${post.media.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                    {post.media.map((fileUrl, idx) => (
+                                        <div key={idx} className="rounded-lg overflow-hidden border border-gray-100 max-h-80">
+                                            {/* Note: Assurez-vous que l'URL est complète */}
+                                            <img 
+                                                src={`${backendUrl}/${fileUrl}`} 
+                                                alt="Post media" 
+                                                className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition-opacity"
+                                                onClick={() => setImageModal(`${backendUrl}/${fileUrl}`)} // Réutilise ta modale image existante
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-10 text-gray-500">
+                    <p>Aucune publication pour le moment.</p>
+                </div>
+            )}
+        </div>
+
       </div>
 
       {/* --- MODALE D'EDITION MISE À JOUR --- */}
