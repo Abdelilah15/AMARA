@@ -440,11 +440,20 @@ const handleImageChange = async (e, type) => {
         </div>
 
         {/* --- SECTION POSTS DU PROFIL --- */}
-        <div className="border-t border-gray-200 mt-4">
-            <h3 className="text-xl font-bold text-gray-800 p-6">Publications</h3>
+        <div className="flex justify-between px-10 py-2 border-t border-gray-200">
+            <div>Avtivite</div>
+            <div>Post</div>
+
+            {userData && userData.profileType === 'professional' && (
+            <div>Articles</div>
+            )}
             
+            <div>Stories</div>
+            <div>Replyes</div>
+        </div>
+        <div className="border-t border-gray-200">
             {userPosts.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4 px-6 pb-6">
+                <div className="grid grid-cols-1 gap-4 px-6 pb-6 mt-4">
                     {userPosts.map((post) => (
                         <div key={post._id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
                             

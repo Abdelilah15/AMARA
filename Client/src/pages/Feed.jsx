@@ -108,21 +108,21 @@ const Feed = () => {
             
             {/* Menu qui s'ouvre */}
             {showMobileMenu && (
-                <div className="flex flex-col gap-3 mb-2 transition-all animate-bounce-in">
+                <div className="flex flex-col items-end gap-2 mb-1 transition-all animate-bounce-in">
                     {/* Article (Pro seulement) */}
                     {userData && userData.profileType === 'professional' && (
                         <button 
                             onClick={() => {setShowMobileMenu(false)}}
-                            className="bg-purple-600 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
-                            <i class="fi fi-tr-document-signed flex"></i>
+                            className="backdrop-blur-xl bg-white/10 px-2 py-2 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
+                            Article <i class="fi fi-tr-document-signed flex ml-1"></i>
                         </button>
                     )}
                     
                     {/* Storie */}
                     <button 
                         onClick={() => setShowMobileMenu(false)}
-                        className="bg-blue-500 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
-                        <i class="fi fi-tr-camera flex"></i>
+                        className="backdrop-blur-xl bg-white/10 px-2 py-2 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
+                        Storie <i class="fi fi-tr-camera flex ml-1"></i>
                     </button>
 
                     {/* Post */}
@@ -131,10 +131,11 @@ const Feed = () => {
                             setShowMobileMenu(false);
                             setIsPostModalOpen(true);
                         }}
-                        className="bg-green-500 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
-                        <i class="fi fi-tr-photo-video flex"></i>
+                        className="backdrop-blur-xl bg-white/10 px-2 py-2 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
+                        Post <i class="fi fi-tr-photo-video flex ml-1"></i>
                     </button>
                 </div>
+
             )}
 
             {/* Le Gros Bouton Carré Principal */}
