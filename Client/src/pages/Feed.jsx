@@ -1,10 +1,14 @@
 import React, { useState, useContext } from 'react';
 import Navbar from '../components/Navbar';
 import { AppContext } from '../context/AppContext';
+import CreatePostModal from '../components/CreatePostModal';
+
 
 const Feed = () => {
   const { userData } = useContext(AppContext);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+
 
   return (
     <div className='min-h-screen bg-gray-900 text-white pb-20 relative'>
@@ -25,21 +29,24 @@ const Feed = () => {
                     {userData && userData.profileType === 'professional' && (
                         <button 
                             onClick={() => {setShowMobileMenu(false)}}
-                            lassName="bg-purple-600 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
+                            className="bg-purple-600 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
                             <i class="fi fi-tr-document-signed flex"></i>
                         </button>
                     )}
                     
                     {/* Storie */}
                     <button 
-                        onClick={() => {setShowMobileMenu(false)}}
-                        lassName="bg-blue-500 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
+                        onClick={() => setShowMobileMenu(false)}
+                        className="bg-blue-500 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
                         <i class="fi fi-tr-camera flex"></i>
                     </button>
 
                     {/* Post */}
                     <button 
-                        onClick={() => {setShowMobileMenu(false)}}
+                        onClick={() => {
+                            setShowMobileMenu(false);
+                            setIsPostModalOpen(true);
+                        }}
                         className="bg-green-500 w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
                         <i class="fi fi-tr-photo-video flex"></i>
                     </button>
@@ -56,6 +63,12 @@ const Feed = () => {
                 <i style={{fontSize:"30px"}} className={`fi fi-ts-feather transition-transform duration-300 flex ${showMobileMenu ? 'rotate-45 scale-125' : ''}`}></i>
             </button>
         </div>
+        
+        <CreatePostModal 
+        isOpen={isPostModalOpen} 
+        onClose={() => setIsPostModalOpen(false)} 
+      />
+
     </div>
   )
 }

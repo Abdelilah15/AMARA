@@ -126,13 +126,15 @@ const Sidebar = () => {
                     
                     {/* Bouton Post */}
                     <button 
-                      onClick={() => setIsPostModalOpen(true)}
+                      onClick={() => {
+                        setIsPostModalOpen(true)
+                        setIsCreateMenuOpen(false)
+                      }}
                       className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded flex items-center gap-3 pl-6">
                         <span className="text-xl">
                           <i className="fi fi-tr-photo-video flex"></i>
                           </span> Post
                     </button>
-                    <CreatePostModal isOpen={isPostModalOpen} onClose={() => setIsPostModalOpen(false)} />
 
                     {/* Bouton Storie */}
                     <button 
@@ -194,6 +196,10 @@ const Sidebar = () => {
         </div>
         </div>
       </div>
+      <CreatePostModal 
+        isOpen={isPostModalOpen} 
+        onClose={() => setIsPostModalOpen(false)} 
+      />
     </>
   );
 };
