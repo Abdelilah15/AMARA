@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const postSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
-    content: { type: String, maxLength: 300 },
+    content: { type: String, maxLength: 600 },
     media: [{ type: String }], // URLs des fichiers uploadés
     createdAt: { type: Date, default: Date.now }
 });

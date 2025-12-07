@@ -370,7 +370,7 @@ const Profile = () => {
           </div>
 
           {/* Informations Textuelles */}
-          <div className="text-center sm:text-left mt-2">
+          <div className="text-left sm:text-left mt-2">
             <h2 className="text-3xl font-bold text-gray-900 capitalize">
               {profileData.name}
             </h2>
@@ -400,7 +400,7 @@ const Profile = () => {
 
             {/* --- NOUVEAU : AFFICHAGE DES LIENS --- */}
             {profileData.links && profileData.links.length > 0 && (
-              <div className="mt-4 flex flex-wrap justify-center sm:justify-start gap-2">
+              <div className="mt-4 flex flex-wrap sm:justify-start gap-2">
                 {profileData.links.map((link, index) => (
                   <a
                     key={index}
@@ -479,7 +479,7 @@ const Profile = () => {
               <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce"></div>
             </div>
           ) : userPosts.length > 0 ? (
-            <div className="grid grid-cols-1 px-6 pb-6 mt-4">
+            <div className="grid grid-cols-1 pb-6 mt-4">
               {userPosts.map((post) => (
                 <PostItem
                   key={post._id}
@@ -506,20 +506,35 @@ const Profile = () => {
 
       {/* --- MODALE D'EDITION MISE À JOUR --- */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm flex justify-center items-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4 pb-2">
+        <div className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-sm flex justify-center items-center animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-scale-in max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 py-2 px-4 border-b border-gray-300">
               <h3 className="text-2xl font-bold text-gray-800">Modifier le profil</h3>
               <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 px-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Votre nom" />
+                <input
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full p-3 border-b border-gray-300 rounded-lg outline-none"
+                  placeholder="Votre nom" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-                <textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none" placeholder="Votre bio..." maxLength={150} />
+                <textarea
+                  value={editBio}
+                  onInput={(e) => {
+                    e.target.style.height = "auto";
+                    e.target.style.height = e.target.scrollHeight + "px";
+                  }}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  className="w-full overflow-hidden scrollbar-hide pl-3 border-b border-gray-300 outline-none resize-none"
+                  placeholder="Votre bio..."
+                  maxLength={150} />
                 <p className="text-xs text-gray-400 mt-1">{editBio.length}/150 caractères max</p>
               </div>
 
@@ -579,7 +594,7 @@ const Profile = () => {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-3 mt-6 border-t border-gray-300 py-2 px-4">
               <button onClick={() => setIsEditModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg" disabled={loading}>Annuler</button>
               <button onClick={handleSaveProfile} disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-sm disabled:opacity-70">{loading ? 'Enregistrement...' : 'Enregistrer'}</button>
             </div>

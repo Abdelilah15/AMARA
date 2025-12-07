@@ -47,7 +47,7 @@ const Feed = () => {
             <Navbar />
 
             {/* --- ZONE D'AFFICHAGE DES POSTS --- */}
-            <div className="p-4 pt-24 max-w-2xl mx-auto flex flex-col gap-6">
+            <div className=" pt-18 max-w-2xl mx-auto flex flex-col">
                 {loading ? (
                     <p className="text-center text-gray-400">Chargement des posts...</p>
                 ) : posts.length === 0 ? (
@@ -55,10 +55,10 @@ const Feed = () => {
                 ) : (
                     // On utilise simplement PostItem ici
                     posts.map((post) => (
-                        <PostItem 
-                            key={post._id} 
-                            post={post} 
-                            onDelete={removePostFromList} 
+                        <PostItem
+                            key={post._id}
+                            post={post}
+                            onDelete={removePostFromList}
                         />
                     ))
                 )}
@@ -92,7 +92,7 @@ const Feed = () => {
                                 setShowMobileMenu(false);
                                 setIsPostModalOpen(true);
                             }}
-                            className="backdrop-blur-xl bg-white/10 px-2 py-2 rounded-lg shadow-lg flex items-center justify-center text-xl hover:scale-110 transition-transform">
+                            className="bg-black px-2 py-2 rounded-lg shadow-lg flex items-center justify-center text-[#00ff73ff] text-xl hover:scale-110 transition-transform">
                             Post <i class="fi fi-tr-photo-video flex ml-1"></i>
                         </button>
                     </div>
@@ -109,6 +109,11 @@ const Feed = () => {
                     <i style={{ fontSize: "30px" }} className={`fi fi-ts-feather transition-transform duration-300 flex ${showMobileMenu ? 'rotate-45 scale-125' : ''}`}></i>
                 </button>
             </div>
+
+            <CreatePostModal
+                isOpen={isPostModalOpen}
+                onClose={() => setIsPostModalOpen(false)}
+            />
 
         </div>
     )

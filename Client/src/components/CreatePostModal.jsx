@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { AppContext } from '../context/AppContext';
 import { toast } from 'react-toastify';
@@ -43,6 +43,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
 
     if (!isOpen) return null;
 
+
     const handleFileChange = (e) => {
         // Convertir FileList en Array pour faciliter la manipulation
         const selectedFiles = Array.from(e.target.files);
@@ -58,8 +59,10 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
         setLoading(true);
 
         try {
+
             const formData = new FormData();
             formData.append('content', content);
+
             if (userData && userData._id) {
                 formData.append('userId', userData._id);
             }
@@ -79,8 +82,8 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                 setContent('');
                 setFiles([]);
                 if (typeof onPostCreated === 'function') {
-          onPostCreated(data.post); // on transmet le post créé (si tu veux)
-        }
+                    onPostCreated(data.post); // on transmet le post créé (si tu veux)
+                }
                 onClose();
             } else {
                 toast.error(data.message);
@@ -97,7 +100,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
             <div className="bg-gray-800 w-full max-w-lg rounded-xl border border-gray-700 shadow-2xl flex flex-col max-h-[90vh]">
 
                 {/* Header */}
-                <div className="flex justify-between items-center p-4 border-b border-gray-700">
+                <div className="flex justify-between items-center py-1 px-4 border-b border-gray-700">
                     <h2 className="text-xl font-bold text-white">Créer un post</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors text-xl">
                         ✕
@@ -116,15 +119,20 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                         {/* Zone de texte */}
                         <div className="relative">
                             <textarea
-                                className="w-full bg-gray-900 text-white rounded-lg p-3 border border-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none resize-none transition-all placeholder-gray-500"
+
+                                className="w-full resize-none text-white p-3 outline-none transition-all placeholder-gray-500"
                                 placeholder="De quoi voulez-vous parler ?"
                                 rows="4"
-                                maxLength={300}
+                                onInput={(e) => {
+                                    e.target.style.height = "auto";
+                                    e.target.style.height = e.target.scrollHeight + "px";
+                                }}
+                                maxLength={600}
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                             ></textarea>
-                            <span className={`absolute bottom-2 right-2 text-xs ${content.length === 300 ? 'text-red-500' : 'text-gray-500'}`}>
-                                {content.length}/300
+                            <span className={`absolute bottom-2 right-2 text-xs ${content.length === 600 ? 'text-red-500' : 'text-gray-500'}`}>
+                                {content.length}/600
                             </span>
                         </div>
 
@@ -162,7 +170,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                 </div>
 
                 {/* Footer Fixe */}
-                <div className="p-4 border-t border-gray-700 bg-gray-800 rounded-b-xl">
+                <div className="px-4 py-2 border-t border-gray-700 bg-gray-800 rounded-b-xl">
                     <div className="flex justify-between items-center">
                         {/* Bouton Upload */}
                         <label className="cursor-pointer text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-700/50">
@@ -181,8 +189,8 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                             onClick={handleSubmit}
                             disabled={loading || (!content && files.length === 0)}
                             className={`px-6 py-2 rounded-full font-bold text-white transition-all shadow-lg ${loading || (!content && files.length === 0)
-                                    ? 'bg-gray-600 cursor-not-allowed opacity-50'
-                                    : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:scale-105 hover:shadow-indigo-500/30'
+                                ? 'bg-gray-600 cursor-not-allowed opacity-50'
+                                : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:scale-105 hover:shadow-indigo-500/30'
                                 }`}
                         >
                             {loading ? 'Envoi...' : 'Publier'}

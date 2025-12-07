@@ -130,6 +130,7 @@ const Sidebar = ({ previousPath }) => {
                   className='text-gray-700 font-medium p-3 rounded cursor-pointer flex justify-center items-center gap-3 hover:opacity-90 transition-opacity'>
                   <i style={{ fontSize: "28px" }} className={`fi fi-ts-feather flex text-gray-700 transition-transform ${isCreateMenuOpen ? 'rotate-45' : ''}`}></i>
                   {isCreateMenuOpen ? 'Close' : 'Create'}
+                  {isCreateMenuOpen ? <i class="fi fi-rr-caret-up flex"></i> : <i class="fi fi-rr-caret-down flex"></i>}
                 </li>
 
                 {/* Sous-menu (Liste des boutons) */}
