@@ -4,11 +4,11 @@ import { AppContext } from '../context/AppContext';
 import { toast } from 'react-toastify';
 import { assets } from '../assets/assets';
 
-const CreatePostModal = ({ isOpen, onClose }) => {
+const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
     const [content, setContent] = useState('');
     const [files, setFiles] = useState([]);
     // Stocker les URLs de prévisualisation pour éviter les fuites de mémoire
-    const [previews, setPreviews] = useState([]); 
+    const [previews, setPreviews] = useState([]);
     const [loading, setLoading] = useState(false);
     const { backendUrl, userData } = useContext(AppContext);
 
@@ -61,7 +61,7 @@ const CreatePostModal = ({ isOpen, onClose }) => {
             const formData = new FormData();
             formData.append('content', content);
             if (userData && userData._id) {
-            formData.append('userId', userData._id); 
+                formData.append('userId', userData._id);
             }
             files.forEach((file) => {
                 formData.append('files', file);
@@ -78,6 +78,9 @@ const CreatePostModal = ({ isOpen, onClose }) => {
                 toast.success(data.message);
                 setContent('');
                 setFiles([]);
+                if (onPostCreated) {
+                    onPostCreated();
+                }
                 onClose();
             } else {
                 toast.error(data.message);
@@ -92,7 +95,7 @@ const CreatePostModal = ({ isOpen, onClose }) => {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
             <div className="bg-gray-800 w-full max-w-lg rounded-xl border border-gray-700 shadow-2xl flex flex-col max-h-[90vh]">
-                
+
                 {/* Header */}
                 <div className="flex justify-between items-center p-4 border-b border-gray-700">
                     <h2 className="text-xl font-bold text-white">Créer un post</h2>
@@ -140,10 +143,10 @@ const CreatePostModal = ({ isOpen, onClose }) => {
                                         </button>
 
                                         {preview.type === 'image' ? (
-                                            <img 
-                                                src={preview.url} 
-                                                alt="Preview" 
-                                                className="w-full h-40 object-cover" 
+                                            <img
+                                                src={preview.url}
+                                                alt="Preview"
+                                                className="w-full h-40 object-cover"
                                             />
                                         ) : (
                                             <div className="w-full h-40 flex flex-col items-center justify-center text-gray-400 gap-2">
@@ -163,25 +166,24 @@ const CreatePostModal = ({ isOpen, onClose }) => {
                     <div className="flex justify-between items-center">
                         {/* Bouton Upload */}
                         <label className="cursor-pointer text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-700/50">
-                            <i className="fi fi-tr-picture flex text-xl"></i> 
+                            <i className="fi fi-tr-picture flex text-xl"></i>
                             <span className="text-sm font-medium">Média</span>
-                            <input 
-                                type="file" 
-                                multiple 
-                                accept="image/*,video/*" 
-                                className="hidden" 
+                            <input
+                                type="file"
+                                multiple
+                                accept="image/*,video/*"
+                                className="hidden"
                                 onChange={handleFileChange}
                             />
                         </label>
 
-                        <button 
+                        <button
                             onClick={handleSubmit}
                             disabled={loading || (!content && files.length === 0)}
-                            className={`px-6 py-2 rounded-full font-bold text-white transition-all shadow-lg ${
-                                loading || (!content && files.length === 0) 
-                                ? 'bg-gray-600 cursor-not-allowed opacity-50' 
-                                : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:scale-105 hover:shadow-indigo-500/30'
-                            }`}
+                            className={`px-6 py-2 rounded-full font-bold text-white transition-all shadow-lg ${loading || (!content && files.length === 0)
+                                    ? 'bg-gray-600 cursor-not-allowed opacity-50'
+                                    : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:scale-105 hover:shadow-indigo-500/30'
+                                }`}
                         >
                             {loading ? 'Envoi...' : 'Publier'}
                         </button>
