@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 
+
 const Feed = () => {
     const navigate = useNavigate()
     const { userData, backendUrl } = useContext(AppContext);
@@ -35,11 +36,6 @@ const Feed = () => {
     useEffect(() => {
         fetchPosts();
     }, []);
-
-    const handlePostCreated = () => {
-        setIsPostModalOpen(false);
-        fetchPosts(); // Recharge la liste
-    };
 
     const toggleMenu = (postId) => {
         if (activeMenuId === postId) {
@@ -188,7 +184,6 @@ const Feed = () => {
             </div>
 
             {/* --- BOUTON CREATE FLOTTANT (Mobile) --- */}
-            {/* md:hidden = Visible seulement sur mobile */}
             <div className="md:hidden fixed bottom-6 right-6 flex flex-col items-end gap-3 z-50">
 
                 {/* Menu qui s'ouvre */}
@@ -233,11 +228,6 @@ const Feed = () => {
                     <i style={{ fontSize: "30px" }} className={`fi fi-ts-feather transition-transform duration-300 flex ${showMobileMenu ? 'rotate-45 scale-125' : ''}`}></i>
                 </button>
             </div>
-
-            <CreatePostModal
-                isOpen={isPostModalOpen}
-                onClose={() => setIsPostModalOpen(false)}
-            />
 
         </div>
     )

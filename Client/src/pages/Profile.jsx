@@ -256,13 +256,9 @@ const Profile = () => {
 
       if (data.success) {
         toast.success("Post supprimé");
-        // Mise à jour de la liste des posts localement sans rechargement
-        // Supposons que votre état de posts s'appelle 'userPosts' ou 'posts'
-        // setUserPosts(prev => prev.filter(post => post._id !== postId)); 
+        // On filtre le tableau local pour retirer le post supprimé immédiatement
+        setUserPosts(prev => prev.filter(post => post._id !== postId));
 
-        // Si vous n'avez pas d'état local séparé pour les posts et utilisez userData,
-        // vous devrez peut-être recharger les données du profil :
-        getUserData();
       } else {
         toast.error(data.message);
       }
@@ -615,10 +611,10 @@ const Profile = () => {
 
       </div>
 
-      <CreatePostModal 
-        isOpen={isPostModalOpen} 
+      <CreatePostModal
+        isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
-        onPostCreated={fetchUserPosts} // 3. C'est ici que la magie opère !
+        onPostCreated={() => fetchUserPosts(profileData._id)}
       />
 
       {/* --- MODALE D'EDITION MISE À JOUR --- */}
