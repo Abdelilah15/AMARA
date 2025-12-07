@@ -11,7 +11,7 @@ import PostItem from '../components/PostItem';
 
 const Feed = () => {
     const navigate = useNavigate()
-    const { userData, backendUrl } = useContext(AppContext);
+    const { userData, backendUrl, globalNewPost, setGlobalNewPost } = useContext(AppContext);
 
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [isPostModalOpen, setIsPostModalOpen] = useState(false);
@@ -41,6 +41,35 @@ const Feed = () => {
     const removePostFromList = (postId) => {
         setPosts(posts.filter(post => post._id !== postId));
     };
+
+    const handlePostCreated = (newPost) => {
+        // On ajoute le nouveau post au début de la liste existante
+        // On s'assure d'inclure les infos de l'utilisateur actuel pour l'affichage immédiat
+        const postWithUser = { 
+            ...newPost, 
+            userId: userData // Important pour afficher l'avatar/nom tout de suite
+        };
+        
+        setPosts((prevPosts) => [postWithUser, ...prevPosts]);
+        
+        // Optionnel : Vous pouvez aussi relancer fetchPosts() en arrière-plan pour être sûr
+        // fetchPosts(); 
+    };
+
+    const handleLocalPostCreated = (newPost) => {
+        const postWithUser = { ...newPost, userId: userData };
+        setPosts((prev) => [postWithUser, ...prev]);
+    };
+
+    useEffect(() => {
+        if (globalNewPost) {
+            // 1. Ajouter le post à la liste locale
+            setPosts((prev) => [globalNewPost, ...prev]);
+            
+            // 2. IMPORTANT : Vider le globalNewPost pour ne pas le rajouter en boucle
+            setGlobalNewPost(null);
+        }
+    }, [globalNewPost, setGlobalNewPost]);
 
     return (
         <div className='min-h-screen bg-gray-900 text-white pb-20 relative'>
@@ -113,6 +142,7 @@ const Feed = () => {
             <CreatePostModal
                 isOpen={isPostModalOpen}
                 onClose={() => setIsPostModalOpen(false)}
+                onPostCreated={handleLocalPostCreated}
             />
 
         </div>

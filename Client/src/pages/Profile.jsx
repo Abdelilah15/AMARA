@@ -9,7 +9,7 @@ import { assets } from '../assets/assets'; // Assurez-vous que assets contient d
 
 
 const Profile = () => {
-  const { userData, isLoggedin, backendUrl, setUserData, isAuthChecking } = useContext(AppContext);
+  const { userData, isLoggedin, backendUrl, setUserData, isAuthChecking, globalNewPost, setGlobalNewPost } = useContext(AppContext);
   const navigate = useNavigate();
   const { username } = useParams();
 
@@ -111,6 +111,16 @@ const Profile = () => {
     }
     // Si il y a un username (profil public), on laisse passer même si pas connecté (optionnel, selon votre choix)
   }, [isLoggedin, navigate, isAuthChecking, username]);
+
+  useEffect(() => {
+      // On ne l'ajoute que si c'est MON profil (sinon ça n'a pas de sens d'afficher mon nouveau post sur le profil de quelqu'un d'autre)
+      const isMyProfile = profileData && userData && (profileData._id === userData._id);
+
+      if (globalNewPost && isMyProfile) {
+          setUserPosts((prev) => [globalNewPost, ...prev]);
+          setGlobalNewPost(null); // On vide le tampon
+      }
+  }, [globalNewPost, setGlobalNewPost, profileData, userData]);
 
   // Gestion des changements dans les inputs de liens
   const handleLinkChange = (index, field, value) => {

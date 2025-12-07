@@ -19,7 +19,7 @@ const Sidebar = ({ previousPath }) => {
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
-  const { userData, setUserData, backendUrl, setIsLoggedin, isSidebarOpen, setIsSidebarOpen, startAddAccount } = useContext(AppContext);
+  const { userData, setUserData, backendUrl, setIsLoggedin, isSidebarOpen, setIsSidebarOpen, startAddAccount, setGlobalNewPost } = useContext(AppContext);
 
   const logout = async () => {
     try {
@@ -36,8 +36,6 @@ const Sidebar = ({ previousPath }) => {
     }
   };
 
-
-
   const handleNavigate = (path) => {
     navigate(path);
     setIsSidebarOpen(false);
@@ -48,6 +46,14 @@ const Sidebar = ({ previousPath }) => {
     if (startAddAccount()) {
       navigate('/login');
     }
+  };
+
+  const handleSidebarPostCreated = (post) => {
+      // On met le post dans le contexte global pour que Feed.jsx ou Profile.jsx le récupère
+      setGlobalNewPost({
+          ...post,
+          userId: userData // On s'assure que les infos user sont là
+      });
   };
 
 
@@ -211,6 +217,7 @@ const Sidebar = ({ previousPath }) => {
       <CreatePostModal
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
+        onPostCreated={handleSidebarPostCreated}
       />
     </>
   );

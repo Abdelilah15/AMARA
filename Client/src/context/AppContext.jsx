@@ -19,6 +19,7 @@ export const AppContextProvider = (props) => {
         return saved ? JSON.parse(saved) : [];
     });
     const [isAddingAccount, setIsAddingAccount] = useState(false);
+    const [globalNewPost, setGlobalNewPost] = useState(null);
 
     const handleLogout = async (navigate) => {
         try {
@@ -67,7 +68,6 @@ export const AppContextProvider = (props) => {
         }
     };
 
-    
     const getAuthState = async () => {
         try {
             const {data} = await axios.get(backendUrl + '/api/auth/is-auth')
@@ -166,7 +166,9 @@ export const AppContextProvider = (props) => {
         isAddingAccount, setIsAddingAccount,
         startAddAccount,
         switchAccountSession,
-        handleLogout
+        handleLogout,
+        globalNewPost, setGlobalNewPost
+
     }
 
 
