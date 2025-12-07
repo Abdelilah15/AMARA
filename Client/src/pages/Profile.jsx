@@ -269,6 +269,19 @@ const Profile = () => {
     }
   };
 
+  const handlePostCreation = async (newPost) => {
+  // 1) Mise à jour instantanée de l'UI (si newPost contient les champs attendus)
+  if (newPost) {
+    const postWithUserInfo = { ...newPost, userId: userData };
+    setUserPosts(prev => [postWithUserInfo, ...prev]);
+  }
+
+  // 2) Recharger la liste depuis l'API pour assurer la cohérence
+  if (profileData?._id) {
+    await fetchUserPosts(profileData._id);
+  }
+};
+
   return (
     // Container Principal : Centré sur desktop, fond gris clair
     <div className='mt-16 min-h-screen flex flex-col items-center justify-start bg-gray-50'>
@@ -611,10 +624,10 @@ const Profile = () => {
 
       </div>
 
-      <CreatePostModal
-        isOpen={isPostModalOpen}
+      <CreatePostModal 
+        isOpen={isPostModalOpen} 
         onClose={() => setIsPostModalOpen(false)}
-        onPostCreated={() => fetchUserPosts(profileData._id)}
+        onPostCreated={handlePostCreation} // <-- Utilisez la nouvelle fonction ici
       />
 
       {/* --- MODALE D'EDITION MISE À JOUR --- */}

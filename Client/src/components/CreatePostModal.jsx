@@ -78,9 +78,9 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                 toast.success(data.message);
                 setContent('');
                 setFiles([]);
-                if (onPostCreated) {
-                    onPostCreated();
-                }
+                if (typeof onPostCreated === 'function') {
+          onPostCreated(data.post); // on transmet le post créé (si tu veux)
+        }
                 onClose();
             } else {
                 toast.error(data.message);
