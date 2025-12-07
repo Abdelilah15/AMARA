@@ -11,6 +11,7 @@ import Navbar from './components/Navbar';
 import Settings from './pages/Settings';
 import Feed from './pages/Feed';
 import MediaModal from './components/MediaModal';
+import { AppContext } from './context/AppContext'
 
 
 

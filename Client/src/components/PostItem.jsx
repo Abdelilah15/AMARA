@@ -10,6 +10,17 @@ const PostItem = ({ post, onDelete }) => {
     const navigate = useNavigate();
     const { userData, backendUrl, setMediaModalData } = useContext(AppContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const mediaUrl = post.media && post.media.length > 0 ? post.media[0] : null;
+    
+    const getMediaType = (url) => {
+        if (!url) return null;
+        const extension = url.split('.').pop().toLowerCase();
+        if (['mp4', 'webm', 'ogg', 'mov'].includes(extension)) {
+            return 'video';
+        }
+        return 'image'; // Par défaut on considère que c'est une image
+    };
+    const mediaType = getMediaType(mediaUrl);
 
     // Fonction pour supprimer le post
     const handleDelete = async () => {
@@ -103,19 +114,19 @@ const PostItem = ({ post, onDelete }) => {
 
             {/* Post Content */}
             <div className="mb-4">
-                <p className="text-gray-300 mb-4 break-words">{post.content}</p>
-                {post.mediaUrl && post.mediaType === 'image' && (
+                <p className="text-gray-700 mb-4 break-words">{post.content}</p>
+                {mediaUrl && mediaType === 'image' && (
                     <img
-                        src={post.mediaUrl}
+                        src={mediaUrl}
                         alt="Post media"
                         // AJOUTS ICI : onClick et cursor-pointer
                         onClick={handleMediaClick}
                         className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
                     />
                 )}
-                {post.mediaUrl && post.mediaType === 'video' && (
+                {mediaUrl && mediaType === 'video' && (
                     <video
-                        src={post.mediaUrl}
+                        src={mediaUrl}
                         controls
                         // AJOUTS ICI : onClick et cursor-pointer
                         // Note : sur une vidéo avec contrôles natifs, le onClick peut parfois être intercepté par les contrôles (play/pause).
