@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import CreatePostModal from '../components/CreatePostModal';
+import PostItem from '../components/PostItem';
 import { assets } from '../assets/assets'; // Assurez-vous que assets contient des icônes par défaut si besoin
 
 
@@ -29,7 +30,7 @@ const Profile = () => {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [userPosts, setUserPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
-  const [activeMenuId, setActiveMenuId] = useState(null);
+  const [posts, setPosts] = useState([]);
 
   const isOwnProfile = userData && profileData && userData.username === profileData.username;
 
@@ -240,47 +241,22 @@ const Profile = () => {
     return null;
   }
 
-  const toggleMenu = (postId) => {
-    if (activeMenuId === postId) {
-      setActiveMenuId(null);
-    } else {
-      setActiveMenuId(postId);
-    }
-  };
-
-  const handleDeletePost = async (postId) => {
-    if (!window.confirm("Voulez-vous vraiment supprimer ce post ?")) return;
-
-    try {
-      const { data } = await axios.delete(backendUrl + `/api/post/delete/${postId}`);
-
-      if (data.success) {
-        toast.success("Post supprimé");
-        // On filtre le tableau local pour retirer le post supprimé immédiatement
-        setUserPosts(prev => prev.filter(post => post._id !== postId));
-
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      toast.error("Erreur lors de la suppression");
-    } finally {
-      setActiveMenuId(null);
-    }
-  };
-
   const handlePostCreation = async (newPost) => {
-  // 1) Mise à jour instantanée de l'UI (si newPost contient les champs attendus)
-  if (newPost) {
-    const postWithUserInfo = { ...newPost, userId: userData };
-    setUserPosts(prev => [postWithUserInfo, ...prev]);
-  }
+    // 1) Mise à jour instantanée de l'UI (si newPost contient les champs attendus)
+    if (newPost) {
+      const postWithUserInfo = { ...newPost, userId: userData };
+      setUserPosts(prev => [postWithUserInfo, ...prev]);
+    }
 
-  // 2) Recharger la liste depuis l'API pour assurer la cohérence
-  if (profileData?._id) {
-    await fetchUserPosts(profileData._id);
-  }
-};
+    // 2) Recharger la liste depuis l'API pour assurer la cohérence
+    if (profileData?._id) {
+      await fetchUserPosts(profileData._id);
+    }
+  };
+
+  const removePostFromList = (postId) => {
+    setPosts(posts.filter(post => post._id !== postId));
+  };
 
   return (
     // Container Principal : Centré sur desktop, fond gris clair
@@ -503,12 +479,12 @@ const Profile = () => {
               <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce"></div>
             </div>
           ) : userPosts.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 px-6 pb-6 mt-4">
+            <div className="grid grid-cols-1 px-6 pb-6 mt-4">
               {userPosts.map((post) => (
-                <PostItem 
-                    key={post._id} 
-                    post={post} 
-                    onDelete={removePostFromList} 
+                <PostItem
+                  key={post._id}
+                  post={post}
+                  onDelete={removePostFromList}
                 />
               ))}
             </div>
@@ -522,8 +498,8 @@ const Profile = () => {
 
       </div>
 
-      <CreatePostModal 
-        isOpen={isPostModalOpen} 
+      <CreatePostModal
+        isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
         onPostCreated={handlePostCreation} // <-- Utilisez la nouvelle fonction ici
       />

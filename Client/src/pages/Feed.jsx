@@ -38,38 +38,6 @@ const Feed = () => {
         fetchPosts();
     }, []);
 
-    const toggleMenu = (postId) => {
-        if (activeMenuId === postId) {
-            setActiveMenuId(null); // Fermer si déjà ouvert
-        } else {
-            setActiveMenuId(postId); // Ouvrir ce menu spécifique
-        }
-    };
-
-    // FONCTION : Supprimer le post
-    const handleDeletePost = async (postId) => {
-        // Confirmation simple
-        if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce post ?")) return;
-
-        try {
-            // Note: Assurez-vous que cette route existe dans votre backend (postRoutes.js)
-            const { data } = await axios.delete(backendUrl + `/api/post/delete/${postId}`);
-
-            if (data.success) {
-                toast.success("Post supprimé avec succès");
-                setPosts(posts.filter(post => post._id !== postId)); // Mise à jour locale optimiste
-                // ou fetchPosts(); pour recharger depuis le serveur
-            } else {
-                toast.error(data.message);
-            }
-        } catch (error) {
-            toast.error("Erreur lors de la suppression");
-            console.error(error);
-        } finally {
-            setActiveMenuId(null); // Fermer le menu après action
-        }
-    };
-
     const removePostFromList = (postId) => {
         setPosts(posts.filter(post => post._id !== postId));
     };
