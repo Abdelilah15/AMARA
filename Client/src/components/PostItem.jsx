@@ -8,7 +8,7 @@ import { assets } from '../assets/assets';
 
 const PostItem = ({ post, onDelete }) => {
     const navigate = useNavigate();
-    const { userData, backendUrl } = useContext(AppContext);
+    const { userData, backendUrl, setMediaModalData } = useContext(AppContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Fonction pour supprimer le post
@@ -30,6 +30,16 @@ const PostItem = ({ post, onDelete }) => {
             setIsMenuOpen(false);
         }
     };
+
+    const handleMediaClick = () => {
+        if (post.mediaUrl && post.mediaType) {
+            setMediaModalData({
+                url: post.mediaUrl,
+                type: post.mediaType
+            });
+        }
+    };
+
 
     return (
         <div className="w-full bg-white border-b border-gray-300 p-4 animate-fade-in">
@@ -91,23 +101,32 @@ const PostItem = ({ post, onDelete }) => {
                 </div>
             </div>
 
-            {/* --- CONTENU TEXTE --- */}
-            <p className="text-gray-900 mb-3 whitespace-pre-wrap">{post.content}</p>
-
-            {/* --- CONTENU MEDIA --- */}
-            {post.media && post.media.length > 0 && (
-                <div className={`grid gap-2 ${post.media.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                    {post.media.map((item, index) => (
-                        <img
-                            key={index}
-                            src={`${backendUrl}/${item}`}
-                            alt="Post content"
-                            className="w-full max-h-120 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
-                        // Si vous avez une fonction d'ouverture d'image en grand, vous pouvez la passer en prop
-                        />
-                    ))}
-                </div>
-            )}
+            {/* Post Content */}
+            <div className="mb-4">
+                <p className="text-gray-300 mb-4 break-words">{post.content}</p>
+                {post.mediaUrl && post.mediaType === 'image' && (
+                    <img
+                        src={post.mediaUrl}
+                        alt="Post media"
+                        // AJOUTS ICI : onClick et cursor-pointer
+                        onClick={handleMediaClick}
+                        className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
+                    />
+                )}
+                {post.mediaUrl && post.mediaType === 'video' && (
+                    <video
+                        src={post.mediaUrl}
+                        controls
+                        // AJOUTS ICI : onClick et cursor-pointer
+                        // Note : sur une vidéo avec contrôles natifs, le onClick peut parfois être intercepté par les contrôles (play/pause).
+                        // Pour une vraie expérience "cliquer pour agrandir" sur vidéo, il faudrait souvent masquer les contrôles natifs et mettre un overlay transparent, mais commençons simple.
+                        onClick={handleMediaClick}
+                        className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
+                    >
+                        Your browser does not support the video tag.
+                    </video>
+                )}
+            </div>
 
             {/* --- FOOTER (ACTIONS) --- */}
             <div className="flex justify-between mt-4 p-1 pt-2 px-4 rounded-full bg-gray-200 text-gray-600">

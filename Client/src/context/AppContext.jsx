@@ -20,6 +20,7 @@ export const AppContextProvider = (props) => {
     });
     const [isAddingAccount, setIsAddingAccount] = useState(false);
     const [globalNewPost, setGlobalNewPost] = useState(null);
+    const [mediaModalData, setMediaModalData] = useState(null);
 
     const handleLogout = async (navigate) => {
         try {
@@ -167,7 +168,8 @@ export const AppContextProvider = (props) => {
         startAddAccount,
         switchAccountSession,
         handleLogout,
-        globalNewPost, setGlobalNewPost
+        globalNewPost, setGlobalNewPost,
+        mediaModalData, setMediaModalData
 
     }
 
