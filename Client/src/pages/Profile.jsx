@@ -503,115 +503,13 @@ const Profile = () => {
               <div className="w-3 h-3 bg-indigo-600 rounded-full animate-bounce"></div>
             </div>
           ) : userPosts.length > 0 ? (
-            /* CAS 2 : POSTS AFFICHÉS */
             <div className="grid grid-cols-1 gap-4 px-6 pb-6 mt-4">
               {userPosts.map((post) => (
-                <div key={post._id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-
-                  {/* --- Header du post --- */}
-                  <div className="flex justify-between items-start mb-3">
-
-                    {/* Partie Gauche : Avatar + Nom */}
-                    <div className="flex items-center gap-3">
-                      <img
-                        onClick={() => navigate(`/@${post.userId?.username}`)}
-                        src={post.userId?.image || assets.user_robot}
-                        alt=""
-                        className="w-10 h-10 rounded-full object-cover bg-gray-700 cursor-pointer"
-                      />
-
-                      <div>
-                        <h3
-                          onClick={() => navigate(`/@${post.userId?.username}`)}
-                          className="font-bold capitalize cursor-pointer hover:underline"
-                        >
-                          {post.userId?.name || "Utilisateur"}
-                        </h3>
-
-                        <p className="text-xs text-gray-400">
-                          {new Date(post.createdAt).toLocaleDateString()} •{" "}
-                          {new Date(post.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit"
-                          })}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Partie Droite : Menu 3 points */}
-                    <div className="relative">
-
-                      {/* Bouton 3 points */}
-                      <button
-                        onClick={() => toggleMenu(post._id)}
-                        className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700 transition-colors"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="w-6 h-6">
-                          <path strokeLinecap="round" strokeLinejoin="round"
-                            d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
-                        </svg>
-                      </button>
-
-                      {/* Menu déroulant */}
-                      {activeMenuId === post._id && (
-                        <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-600 rounded-md shadow-xl z-20 overflow-hidden">
-
-                          {/* Si c'est mon post → Supprimer */}
-                          {userData && userData._id === post.userId?._id ? (
-                            <button
-                              onClick={() => handleDeletePost(post._id)}
-                              className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 flex items-center gap-2 transition-colors"
-                            >
-                              <i className="fi fi-rr-trash"></i>
-                              Supprimer le post
-                            </button>
-                          ) : (
-                            <button
-                              className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 flex items-center gap-2"
-                            >
-                              <i className="fi fi-rr-flag"></i>
-                              Signaler le post
-                            </button>
-                          )}
-
-                          {/* Bouton fermer */}
-                          <button
-                            onClick={() => setActiveMenuId(null)}
-                            className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-gray-700 flex items-center gap-2"
-                          >
-                            <i className="fi fi-rr-cross-small"></i>
-                            Fermer
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Contenu texte */}
-                  <p className="text-gray-900 mb-3 whitespace-pre-wrap">{post.content}</p>
-
-                  {/* Médias (Images/Vidéos) */}
-                  {post.media && post.media.length > 0 && (
-                    <div className={`grid gap-2 ${post.media.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                      {post.media.map((fileUrl, idx) => (
-                        <div key={idx} className="rounded-lg overflow-hidden border border-gray-100 max-h-120">
-                          {/* Note: Assurez-vous que l'URL est complète */}
-                          <img
-                            src={`${backendUrl}/${fileUrl}`}
-                            alt="Post media"
-                            className="w-full  cursor-pointer transition-opacity"
-                            onClick={() => setImageModal(`${backendUrl}/${fileUrl}`)} // Réutilise ta modale image existante
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <PostItem 
+                    key={post._id} 
+                    post={post} 
+                    onDelete={removePostFromList} 
+                />
               ))}
             </div>
           ) : (
