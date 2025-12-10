@@ -167,13 +167,9 @@ const PostItem = ({ post, onDelete }) => {
                 onMouseLeave={() => setShowControls(false)}
             >
                 <div
+                    className="post-content text-gray-700 mb-4 break-words whitespace-pre-wrap"
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
-                    className="prose text-gray-600 prose-invert max-w-none text-sm sm:text-base"
-                    style={{
-                        // Petits ajustements pour que les citations Quill (border-left) s'affichent bien
-                        blockquote: { borderLeft: '4px solid #6366f1', paddingLeft: '1rem', fontStyle: 'italic', color: '#9ca3af' }
-                    }}
-                />
+                ></div>
 
                 {mediaUrl && mediaType === 'image' && (
                     <img

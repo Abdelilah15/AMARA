@@ -37,3 +37,41 @@
   font-family: "Roboto", sans-serif;
 
 }
+
+@layer components {
+  /* Style pour le contenu riche des posts */
+  .post-content blockquote {
+    border-left: 6px solid #6366f1; /* Couleur Indigo */
+    padding-left: 1rem;
+    margin-left: 0;
+    margin-right: 0;
+    font-style: italic;
+    color: #374151; /* Gris clair (text-gray-400) */
+    background: #00ff73ff; /* Optionnel: fond léger */
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+  }
+
+  .post-content ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+  }
+
+  .post-content ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+  }
+  
+  .post-content strong {
+      font-weight: 700;
+      color: #fff;
+  }
+  
+  .post-content em {
+      font-style: italic;
+  }
+}

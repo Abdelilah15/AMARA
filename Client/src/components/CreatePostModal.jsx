@@ -223,6 +223,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                                     padding-left: 10px;
                                     color: #cbd5e1;
                                     font-style: italic;
+                                    background-color: #00992eff;
                                 }
                             `}</style>
 
