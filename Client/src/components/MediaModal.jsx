@@ -18,11 +18,13 @@ const MediaModal = () => {
         };
     }, [mediaModalData]); // On dépend de mediaModalData
 
-    const handleClose = () => {
+    const handleClose = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         setMediaModalData(null);
-        setShowControls(false);
-        if (e) e.preventDefault(); // Empêche le navigateur de remonter
-        if (e) e.stopPropagation(); // Arrête la propagation du clic
+        setShowControls(false); // Arrête la propagation du clic
     };
 
     const handleImageLoad = (e) => {

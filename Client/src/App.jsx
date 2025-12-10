@@ -31,7 +31,7 @@ const App = () => {
   const { mediaModalData } = useContext(AppContext);
 
   return (
-    <div className={`flex bg-gray-900 min-h-screen ${mediaModalData ? 'overflow-hidden h-screen' : ''}`}>
+    <div className="flex bg-gray-900 min-h-screen">
       <ToastContainer />
 
       {/* Conteneur principal : s'ajuste si la sidebar est là ou non */}
