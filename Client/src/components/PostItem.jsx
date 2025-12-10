@@ -13,10 +13,10 @@ const PostItem = ({ post, onDelete }) => {
     const rawMediaUrl = post.media && post.media.length > 0 ? post.media[0] : null;
     const [showControls, setShowControls] = useState(false);
 
-    const mediaUrl = rawMediaUrl 
+    const mediaUrl = rawMediaUrl
         ? (rawMediaUrl.startsWith('http') ? rawMediaUrl : backendUrl + '/' + rawMediaUrl)
         : null;
-    
+
     const getMediaType = (url) => {
         if (!url) return null;
         const extension = url.split('.').pop().toLowerCase();
@@ -55,6 +55,52 @@ const PostItem = ({ post, onDelete }) => {
             });
         }
     };
+
+    const renderStyledContent = (text) => {
+        if (!text) return null;
+
+        // On découpe le texte par ligne pour gérer les citations (qui prennent toute la ligne)
+        const lines = text.split('\n');
+
+        return lines.map((line, index) => {
+            // Gestion des citations (lignes commençant par >)
+            if (line.startsWith('>')) {
+                const quoteContent = line.replace(/^>\s?/, '');
+                return (
+                    <blockquote key={index} className="border-l-4 border-indigo-500 pl-4 py-1 my-2 bg-gray-50 text-gray-600 italic rounded-r">
+                        {parseInlineFormatting(quoteContent)}
+                    </blockquote>
+                );
+            }
+
+            // Ligne vide (pour conserver les sauts de ligne)
+            if (line.trim() === '') {
+                return <br key={index} />;
+            }
+
+            // Paragraphe standard
+            return (
+                <div key={index} className="min-h-[1.5em]">
+                    {parseInlineFormatting(line)}
+                </div>
+            );
+        });
+    };
+
+    const parseInlineFormatting = (text) => {
+    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+
+    return parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={i}>{part.slice(2, -2)}</strong>;
+        }
+        if (part.startsWith('*') && part.endsWith('*')) {
+            return <em key={i}>{part.slice(1, -1)}</em>;
+        }
+        return part;
+    });
+};
+
 
 
     return (
@@ -122,7 +168,9 @@ const PostItem = ({ post, onDelete }) => {
                 onMouseEnter={() => setShowControls(true)}
                 onMouseLeave={() => setShowControls(false)}
             >
-                <p className="text-gray-700 mb-4 break-words">{post.content}</p>
+                <div className="text-gray-700 mb-4 break-words leading-relaxed">
+                    {renderStyledContent(post.content)}
+                </div>
 
                 {mediaUrl && mediaType === 'image' && (
                     <img
