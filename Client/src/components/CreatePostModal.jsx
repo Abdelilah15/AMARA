@@ -1,11 +1,14 @@
-import React, { useState, useContext, useEffect, useRef } from 'react';
+import React, { useState, useContext, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { AppContext } from '../context/AppContext';
 import { toast } from 'react-toastify';
 import { assets } from '../assets/assets';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
     const [content, setContent] = useState('');
+    const [plainTextLength, setPlainTextLength] = useState(0);
     const [files, setFiles] = useState([]);
     // Stocker les URLs de prévisualisation pour éviter les fuites de mémoire
     const [previews, setPreviews] = useState([]);
@@ -13,6 +16,31 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
     const { backendUrl, userData } = useContext(AppContext);
     const MAX_CHAR = 800;
     const textareaRef = useRef(null);
+
+    // 2. Référence vers l'instance Quill pour le contrôler depuis le footer
+    const quillRef = useRef(null);
+    // Configuration de Quill pour cacher la toolbar par défaut
+    const modules = useMemo(() => ({
+        toolbar: false, // On cache la toolbar native
+        keyboard: {
+            bindings: { tab: false }
+        },
+        clipboard: {
+            matchVisual: false,
+            // Cette configuration force le collage en texte brut
+            matchers: [
+                [Node.ELEMENT_NODE, (node, delta) => {
+                    // On parcourt chaque morceau de texte collé (op)
+                    delta.ops = delta.ops.map(op => {
+                        // On ne retourne que l'insert (le texte) en supprimant les attributs (le style)
+                        return { insert: op.insert };
+                    });
+                    return delta;
+                }]
+            ]
+        }
+    }), []);
+
 
     // Nettoyer les URLs d'objets quand le composant est démonté ou quand les fichiers changent
     useEffect(() => {
@@ -45,6 +73,44 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
 
     if (!isOpen) return null;
 
+    // 3. Nouvelle fonction de formatage utilisant l'API Quill
+    const insertFormat = (type) => {
+        if (!quillRef.current) return;
+
+        // On récupère l'instance interne de l'éditeur
+        const editor = quillRef.current.getEditor();
+
+        // On se assure que l'éditeur a le focus
+        editor.focus();
+
+        // On récupère le format actuel à la position du curseur
+        const currentFormat = editor.getFormat();
+
+        switch (type) {
+            case 'bold':
+                editor.format('bold', !currentFormat.bold);
+                break;
+            case 'italic':
+                editor.format('italic', !currentFormat.italic);
+                break;
+            case 'quote':
+                // 'blockquote' est le nom du format dans Quill
+                editor.format('blockquote', !currentFormat.blockquote);
+                break;
+            default:
+                return;
+        }
+    };
+
+    // --- Gestion Changement avec calcul précis des caractères ---
+    const handleEditorChange = (htmlContent, delta, source, editor) => {
+        setContent(htmlContent);
+        // editor.getText() renvoie le texte pur. .trim() enlève les espaces superflus au début/fin.
+        const text = editor.getText();
+        // Quill ajoute toujours un \n à la fin, on le retire pour le compte réel si le reste est vide
+        const realLength = text.replace(/\n$/, "").length;
+        setPlainTextLength(realLength);
+    };
 
     const handleFileChange = (e) => {
         // Convertir FileList en Array pour faciliter la manipulation
@@ -56,49 +122,21 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
         setFiles(files.filter((_, index) => index !== indexToRemove));
     };
 
-    const insertFormat = (type) => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const selectedText = content.substring(start, end);
-        let newText = '';
-        let newCursorPos = 0;
-
-        switch (type) {
-            case 'bold':
-                newText = content.substring(0, start) + `**${selectedText || 'gras'}**` + content.substring(end);
-                newCursorPos = start + (selectedText ? selectedText.length + 4 : 2); // Positionner curseur
-                break;
-            case 'italic':
-                newText = content.substring(0, start) + `*${selectedText || 'italique'}*` + content.substring(end);
-                newCursorPos = start + (selectedText ? selectedText.length + 2 : 1);
-                break;
-            case 'quote':
-                // Ajouter un saut de ligne si on n'est pas au début
-                const prefix = start > 0 ? '\n> ' : '> ';
-                newText = content.substring(0, start) + `${prefix}${selectedText || 'citation'}` + content.substring(end);
-                newCursorPos = start + prefix.length + (selectedText ? selectedText.length : 8);
-                break;
-            default:
-                return;
-        }
-
-        setContent(newText);
-        // Remettre le focus et le curseur
-        setTimeout(() => {
-            textarea.focus();
-            textarea.setSelectionRange(newCursorPos, newCursorPos);
-        }, 0);
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (content.length > MAX_CHAR) {
-            toast.error(`Le message est trop long (${content.length}/${MAX_CHAR})`);
+        // Vérification basée sur le TEXTE BRUT (pas le HTML)
+        if (plainTextLength > MAX_CHAR) {
+            toast.error(`Le message est trop long (${plainTextLength}/${MAX_CHAR})`);
             return;
         }
+
+        // Vérification contenu vide (Quill laisse parfois des balises <p><br></p>)
+        const isEmpty = plainTextLength === 0 && files.length === 0;
+        if (isEmpty) {
+            toast.error("Le post ne peut pas être vide");
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -162,44 +200,47 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                             <span className="text-white font-medium capitalize">{userData?.name}</span>
                         </div>
 
-                        {/* Zone de texte */}
+                        {/* Zone d'édition Quill */}
                         <div className="relative w-full group">
-                            <div
-                                aria-hidden="true"
-                                className="absolute inset-0 w-full p-3 whitespace-pre-wrap break-words font-sans text-base pointer-events-none"
-                                style={{
-                                    minHeight: '6rem', // Doit correspondre au min-height ou rows du textarea
-                                    color: 'transparent' // Le texte normal est transparent pour laisser voir le textarea devant
-                                }}
-                            >
-                                {/* Partie valide (invisible) */}
-                                <span>{content.slice(0, MAX_CHAR)}</span>
-                                {/* Partie invalide (fond rouge visible) */}
-                                <span className="bg-red-500/50 decoration-wavy underline decoration-red-500 text-transparent rounded-sm">
-                                    {content.slice(MAX_CHAR)}
-                                </span>
-                            </div>
+                            {/* Style Override pour le Dark Mode de Quill */}
+                            <style>{`
+                                .ql-editor {
+                                    min-height: 120px;
+                                    font-size: 1rem;
+                                    color: white; /* Texte blanc */
+                                    padding: 0.75rem !important;
+                                }
+                                .ql-editor.ql-blank::before {
+                                    color: #9ca3af !important; /* Placeholder gris (text-gray-400) */
+                                    font-style: normal;
+                                }
+                                .ql-container.ql-snow {
+                                    border: none !important; /* Enlever la bordure par défaut */
+                                }
+                                /* Style pour les citations dans l'éditeur */
+                                .ql-editor blockquote {
+                                    border-left: 4px solid #6366f1;
+                                    padding-left: 10px;
+                                    color: #cbd5e1;
+                                    font-style: italic;
+                                }
+                            `}</style>
 
-                            <textarea
-                                ref={textareaRef}
-                                className="w-full resize-none text-white p-3 outline-none transition-all placeholder-gray-500"
-                                placeholder="De quoi voulez-vous parler ?"
-                                rows="4"
-                                onInput={(e) => {
-                                    e.target.style.height = "auto";
-                                    e.target.style.height = e.target.scrollHeight + "px";
-                                    const backdrop = e.target.previousSibling;
-                                    if (backdrop) backdrop.style.height = e.target.style.height;
-                                }}
+                            <ReactQuill
+                                ref={quillRef}
+                                theme="snow"
                                 value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                                style={{ minHeight: '6rem' }}
-                            ></textarea>
-                            {/* Compteur de caractères */}
-                            <span className={`absolute bottom-2 right-2 text-xs font-semibold transition-colors ${isOverLimit ? 'text-red-500' : 'text-gray-500'
+                                onChange={handleEditorChange}
+                                modules={modules}
+                                placeholder="De quoi voulez-vous parler ?"
+                                className="w-full bg-transparent"
+                            />
+
+                            {/* Compteur de caractères (Texte brut) */}
+                            <div className={`text-right text-xs font-semibold mt-1 transition-colors ${isOverLimit ? 'text-red-500' : 'text-gray-500'
                                 }`}>
-                                {isOverLimit ? `-${extraContentCount}` : content.length} / {MAX_CHAR}
-                            </span>
+                                {isOverLimit ? `-${extraContentCount}` : plainTextLength} / {MAX_CHAR}
+                            </div>
                         </div>
 
                         {/* --- Prévisualisation des images (MODIFIÉ) --- */}
@@ -252,15 +293,30 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                                 />
                             </label>
 
-                            {/* 3. AJOUT: Barre d'outils de formatage */}
-                            <div className="flex gap-2 mb-1 px-1">
-                                <button type="button" onClick={() => insertFormat('bold')} className="p-1 px-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded text-sm font-bold" title="">
+                            {/* Barre d'outils personnalisée connectée à Quill */}
+                            <div className="flex gap-1 border-l border-gray-600 pl-4">
+                                <button 
+                                    type="button" 
+                                    onMouseDown={(e) => { e.preventDefault(); insertFormat('bold'); }} // onMouseDown évite de perdre le focus de l'éditeur
+                                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
+                                    title="Gras"
+                                >
                                     <i className="fi fi-rr-bold flex"></i>
                                 </button>
-                                <button type="button" onClick={() => insertFormat('italic')} className="p-1 px-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded text-sm italic" title="">
+                                <button 
+                                    type="button" 
+                                    onMouseDown={(e) => { e.preventDefault(); insertFormat('italic'); }} 
+                                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
+                                    title="Italique"
+                                >
                                     <i className="fi fi-rr-italic flex"></i>
                                 </button>
-                                <button type="button" onClick={() => insertFormat('quote')} className="p-1 px-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded text-sm" title="">
+                                <button 
+                                    type="button" 
+                                    onMouseDown={(e) => { e.preventDefault(); insertFormat('quote'); }} 
+                                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
+                                    title="Citation"
+                                >
                                     <i className="fi fi-rr-quote-right flex"></i>
                                 </button>
                             </div>
@@ -268,8 +324,8 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
 
                         <button
                             onClick={handleSubmit}
-                            disabled={loading || (!content && files.length === 0) || isOverLimit}
-                            className={`px-6 py-2 rounded-full font-bold text-white transition-all shadow-lg ${loading || (!content && files.length === 0) || isOverLimit
+                            disabled={loading || (plainTextLength === 0 && files.length === 0) || isOverLimit}
+                            className={`px-6 py-2 rounded-full font-bold text-white transition-all shadow-lg ${loading || (plainTextLength === 0 && files.length === 0) || isOverLimit
                                     ? 'bg-gray-600 cursor-not-allowed opacity-50'
                                     : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:scale-105 hover:shadow-indigo-500/30'
                                 }`}

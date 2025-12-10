@@ -5,6 +5,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { AppContext } from '../context/AppContext';
 import { assets } from '../assets/assets';
+import DOMPurify from 'dompurify';
 
 const PostItem = ({ post, onDelete }) => {
     const navigate = useNavigate();
@@ -27,7 +28,6 @@ const PostItem = ({ post, onDelete }) => {
     };
     const mediaType = getMediaType(rawMediaUrl);
 
-    // Fonction pour supprimer le post
     const handleDelete = async () => {
         if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce post ?")) return;
 
@@ -88,20 +88,18 @@ const PostItem = ({ post, onDelete }) => {
     };
 
     const parseInlineFormatting = (text) => {
-    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+        const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
 
-    return parts.map((part, i) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-            return <strong key={i}>{part.slice(2, -2)}</strong>;
-        }
-        if (part.startsWith('*') && part.endsWith('*')) {
-            return <em key={i}>{part.slice(1, -1)}</em>;
-        }
-        return part;
-    });
-};
-
-
+        return parts.map((part, i) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+                return <strong key={i}>{part.slice(2, -2)}</strong>;
+            }
+            if (part.startsWith('*') && part.endsWith('*')) {
+                return <em key={i}>{part.slice(1, -1)}</em>;
+            }
+            return part;
+        });
+    };
 
     return (
         <div className="w-full bg-white border-b border-gray-300 p-4 animate-fade-in">
@@ -168,9 +166,14 @@ const PostItem = ({ post, onDelete }) => {
                 onMouseEnter={() => setShowControls(true)}
                 onMouseLeave={() => setShowControls(false)}
             >
-                <div className="text-gray-700 mb-4 break-words leading-relaxed">
-                    {renderStyledContent(post.content)}
-                </div>
+                <div
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
+                    className="prose text-gray-600 prose-invert max-w-none text-sm sm:text-base"
+                    style={{
+                        // Petits ajustements pour que les citations Quill (border-left) s'affichent bien
+                        blockquote: { borderLeft: '4px solid #6366f1', paddingLeft: '1rem', fontStyle: 'italic', color: '#9ca3af' }
+                    }}
+                />
 
                 {mediaUrl && mediaType === 'image' && (
                     <img
