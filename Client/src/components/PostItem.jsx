@@ -98,18 +98,18 @@ const PostItem = ({ post, onDelete }) => {
                             {userData && (userData._id === post.userId?._id) ? (
                                 <button
                                     onClick={handleDelete}
-                                    className="w-full text-left px-3 pt-3 text-sm text-red-400 hover:bg-gray-700 flex items-center gap-2">
+                                    className="w-full text-left px-3 pt-3 text-sm text-red-400 hover:bg-gray-100 flex items-center gap-2">
                                     <i className="fi fi-rr-trash"></i> Supprimer
                                 </button>
                             ) : (
                                 <button
-                                    className="w-full text-left px-3 pt-3 text-sm text-gray-600 hover:bg-gray-700 flex items-center gap-2">
+                                    className="w-full text-left px-3 pt-3 text-sm text-gray-600 hover:bg-gray-100 flex items-center gap-2">
                                     <i className="fi fi-rr-flag"></i> Signaler
                                 </button>
                             )}
                             <button
                                 onClick={() => setIsMenuOpen(false)}
-                                className="w-full text-left px-3 pt-1 pb-2 text-sm text-gray-600 hover:bg-gray-700 flex items-center gap-2">
+                                className="w-full text-left px-3 pt-1 pb-2 text-sm text-gray-600 hover:bg-gray-100 flex items-center gap-2">
                                 <i className="fi fi-rr-cross-small"></i> Fermer
                             </button>
                         </div>

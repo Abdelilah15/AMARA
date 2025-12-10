@@ -11,6 +11,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
     const [previews, setPreviews] = useState([]);
     const [loading, setLoading] = useState(false);
     const { backendUrl, userData } = useContext(AppContext);
+    const MAX_CHAR = 800;
 
     // Nettoyer les URLs d'objets quand le composant est démonté ou quand les fichiers changent
     useEffect(() => {
@@ -56,6 +57,10 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (content.length > MAX_CHAR) {
+            toast.error(`Le message est trop long (${content.length}/${MAX_CHAR})`);
+            return;
+        }
         setLoading(true);
 
         try {
@@ -95,6 +100,9 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
         }
     };
 
+    const isOverLimit = content.length > MAX_CHAR;
+    const extraContentCount = content.length - MAX_CHAR;
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
             <div className="bg-gray-800 w-full max-w-lg rounded-xl border border-gray-700 shadow-2xl flex flex-col max-h-[90vh]">
@@ -117,22 +125,42 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                         </div>
 
                         {/* Zone de texte */}
-                        <div className="relative">
-                            <textarea
+                        <div className="relative w-full group">
+                            <div 
+                                aria-hidden="true" 
+                                className="absolute inset-0 w-full p-3 whitespace-pre-wrap break-words font-sans text-base pointer-events-none"
+                                style={{
+                                    minHeight: '6rem', // Doit correspondre au min-height ou rows du textarea
+                                    color: 'transparent' // Le texte normal est transparent pour laisser voir le textarea devant
+                                }}
+                            >
+                                {/* Partie valide (invisible) */}
+                                <span>{content.slice(0, MAX_CHAR)}</span>
+                                {/* Partie invalide (fond rouge visible) */}
+                                <span className="bg-red-500/50 decoration-wavy underline decoration-red-500 text-transparent rounded-sm">
+                                    {content.slice(MAX_CHAR)}
+                                </span>
+                            </div>
 
+                            <textarea
                                 className="w-full resize-none text-white p-3 outline-none transition-all placeholder-gray-500"
                                 placeholder="De quoi voulez-vous parler ?"
                                 rows="4"
                                 onInput={(e) => {
                                     e.target.style.height = "auto";
                                     e.target.style.height = e.target.scrollHeight + "px";
+                                    const backdrop = e.target.previousSibling;
+                                    if (backdrop) backdrop.style.height = e.target.style.height;
                                 }}
-                                maxLength={600}
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
+                                style={{ minHeight: '6rem' }}
                             ></textarea>
-                            <span className={`absolute bottom-2 right-2 text-xs ${content.length === 600 ? 'text-red-500' : 'text-gray-500'}`}>
-                                {content.length}/600
+                            {/* Compteur de caractères */}
+                            <span className={`absolute bottom-2 right-2 text-xs font-semibold transition-colors ${
+                                isOverLimit ? 'text-red-500' : 'text-gray-500'
+                            }`}>
+                                {isOverLimit ? `-${extraContentCount}` : content.length} / {MAX_CHAR}
                             </span>
                         </div>
 
@@ -187,10 +215,11 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
 
                         <button
                             onClick={handleSubmit}
-                            disabled={loading || (!content && files.length === 0)}
-                            className={`px-6 py-2 rounded-full font-bold text-white transition-all shadow-lg ${loading || (!content && files.length === 0)
-                                ? 'bg-gray-600 cursor-not-allowed opacity-50'
-                                : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:scale-105 hover:shadow-indigo-500/30'
+                            disabled={loading || (!content && files.length === 0) || isOverLimit}
+                            className={`px-6 py-2 rounded-full font-bold text-white transition-all shadow-lg ${
+                                loading || (!content && files.length === 0) || isOverLimit
+                                    ? 'bg-gray-600 cursor-not-allowed opacity-50'
+                                    : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:scale-105 hover:shadow-indigo-500/30'
                                 }`}
                         >
                             {loading ? 'Envoi...' : 'Publier'}
