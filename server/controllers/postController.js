@@ -31,6 +31,38 @@ export const createPost = async (req, res) => {
     }
 }
 
+const formatPostForFrontend = (postDocument) => {
+    // On convertit le document Mongoose en objet JavaScript simple si ce n'est pas déjà fait
+    const post = postDocument.toObject ? postDocument.toObject() : postDocument;
+
+    let mediaUrl = null;
+    let mediaType = null;
+
+    // Si le tableau media contient quelque chose
+    if (post.media && post.media.length > 0) {
+        // 1. On prend le premier fichier du tableau pour 'mediaUrl'
+        // Si vous stockez juste "uploads/file.jpg", le frontend aura besoin de l'URL complète
+        // Assurez-vous que votre frontend gère l'URL de base, sinon ajoutez-la ici :
+        // mediaUrl = process.env.BACKEND_URL + '/' + post.media[0]; 
+        mediaUrl = post.media[0]; 
+
+        // 2. On détermine le 'mediaType' selon l'extension
+        const extension = mediaUrl.split('.').pop().toLowerCase();
+        if (['mp4', 'mov', 'webm', 'ogg'].includes(extension)) {
+            mediaType = 'video';
+        } else {
+            mediaType = 'image';
+        }
+    }
+
+    // On retourne le post avec les nouvelles propriétés ajoutées
+    return {
+        ...post,
+        mediaUrl: mediaUrl,
+        mediaType: mediaType
+    };
+};
+
 export const getUserPosts = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -48,7 +80,9 @@ export const getUserPosts = async (req, res) => {
             .sort({ createdAt: -1 })
             .populate('userId', 'name username image');
 
-        res.json({ success: true, posts });
+        const formattedPosts = posts.map(post => formatPostForFrontend(post));
+
+        res.json({ success: true, posts: formattedPosts });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });
@@ -62,7 +96,9 @@ export const getAllPosts = async (req, res) => {
             .sort({ createdAt: -1 })
             .populate('userId', 'name image username'); // Important pour afficher le nom/image de l'auteur
 
-        res.json({ success: true, posts });
+        const formattedPosts = posts.map(post => formatPostForFrontend(post));
+
+        res.json({ success: true, posts: formattedPosts });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });

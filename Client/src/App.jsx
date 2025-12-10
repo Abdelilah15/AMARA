@@ -34,8 +34,6 @@ const App = () => {
     <div className={`flex bg-gray-900 min-h-screen ${mediaModalData ? 'overflow-hidden h-screen' : ''}`}>
       <ToastContainer />
 
-      <MediaModal />
-
       {/* Conteneur principal : s'ajuste si la sidebar est là ou non */}
       <div className={`flex-1 flex flex-col min-h-screen relative ${shouldShowNav ? 'md:ml-84' : ''} transition-all duration-300`}>
         
@@ -56,6 +54,7 @@ const App = () => {
             </Routes>
         </div>
       </div>
+      <MediaModal />
     </div>
   );
 }

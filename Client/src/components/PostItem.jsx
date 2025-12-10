@@ -10,7 +10,12 @@ const PostItem = ({ post, onDelete }) => {
     const navigate = useNavigate();
     const { userData, backendUrl, setMediaModalData } = useContext(AppContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const mediaUrl = post.media && post.media.length > 0 ? post.media[0] : null;
+    const rawMediaUrl = post.media && post.media.length > 0 ? post.media[0] : null;
+    const [showControls, setShowControls] = useState(false);
+
+    const mediaUrl = rawMediaUrl 
+        ? (rawMediaUrl.startsWith('http') ? rawMediaUrl : backendUrl + '/' + rawMediaUrl)
+        : null;
     
     const getMediaType = (url) => {
         if (!url) return null;
@@ -20,7 +25,7 @@ const PostItem = ({ post, onDelete }) => {
         }
         return 'image'; // Par défaut on considère que c'est une image
     };
-    const mediaType = getMediaType(mediaUrl);
+    const mediaType = getMediaType(rawMediaUrl);
 
     // Fonction pour supprimer le post
     const handleDelete = async () => {
@@ -43,10 +48,10 @@ const PostItem = ({ post, onDelete }) => {
     };
 
     const handleMediaClick = () => {
-        if (post.mediaUrl && post.mediaType) {
+        if (mediaUrl && mediaType) {
             setMediaModalData({
-                url: post.mediaUrl,
-                type: post.mediaType
+                url: mediaUrl,
+                type: mediaType
             });
         }
     };
@@ -113,26 +118,33 @@ const PostItem = ({ post, onDelete }) => {
             </div>
 
             {/* Post Content */}
-            <div className="mb-4">
+            <div className="mb-4"
+                onMouseEnter={() => setShowControls(true)}
+                onMouseLeave={() => setShowControls(false)}
+            >
                 <p className="text-gray-700 mb-4 break-words">{post.content}</p>
+
                 {mediaUrl && mediaType === 'image' && (
                     <img
                         src={mediaUrl}
                         alt="Post media"
                         // AJOUTS ICI : onClick et cursor-pointer
                         onClick={handleMediaClick}
-                        className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
+                        className="w-full max-h-120 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
                     />
                 )}
                 {mediaUrl && mediaType === 'video' && (
                     <video
                         src={mediaUrl}
-                        controls
+                        controls={showControls}
                         // AJOUTS ICI : onClick et cursor-pointer
                         // Note : sur une vidéo avec contrôles natifs, le onClick peut parfois être intercepté par les contrôles (play/pause).
                         // Pour une vraie expérience "cliquer pour agrandir" sur vidéo, il faudrait souvent masquer les contrôles natifs et mettre un overlay transparent, mais commençons simple.
                         onClick={handleMediaClick}
-                        className="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
+                        autoPlay
+                        preload="auto"
+                        loop
+                        className="w-full max-h-120 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
                     >
                         Your browser does not support the video tag.
                     </video>
