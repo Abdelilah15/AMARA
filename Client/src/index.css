@@ -75,3 +75,12 @@
       font-style: italic;
   }
 }
+
+.post-content a {
+    color: #3b82f6; /* Tailwind blue-500 */
+    text-decoration: none;
+}
+
+.post-content a:hover {
+    text-decoration: underline;
+}

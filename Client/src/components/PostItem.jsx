@@ -1,11 +1,12 @@
 // src/components/PostItem.jsx
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { AppContext } from '../context/AppContext';
 import { assets } from '../assets/assets';
 import DOMPurify from 'dompurify';
+import linkifyHtml from 'linkify-html';
 
 const PostItem = ({ post, onDelete }) => {
     const navigate = useNavigate();
@@ -13,6 +14,7 @@ const PostItem = ({ post, onDelete }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const rawMediaUrl = post.media && post.media.length > 0 ? post.media[0] : null;
     const [showControls, setShowControls] = useState(false);
+    const [processedContent, setProcessedContent] = useState('');
 
     const mediaUrl = rawMediaUrl
         ? (rawMediaUrl.startsWith('http') ? rawMediaUrl : backendUrl + '/' + rawMediaUrl)
@@ -27,6 +29,34 @@ const PostItem = ({ post, onDelete }) => {
         return 'image'; // Par défaut on considère que c'est une image
     };
     const mediaType = getMediaType(rawMediaUrl);
+
+    // --- 2. Effet pour traiter le contenu (Linkify + Sanitize) ---
+    useEffect(() => {
+        if (post.content) {
+            // Configuration pour rendre les liens bleus et ouvrables dans un nouvel onglet
+            const linkifyOptions = {
+                defaultProtocol: 'https',
+                target: '_blank',
+                className: 'text-blue-500 hover:underline break-all', // Classes Tailwind pour le bleu
+                attributes: {
+                    rel: 'noopener noreferrer'
+                },
+                // Ignore les balises img, script, etc. pour ne pas casser le HTML existant
+                ignoreTags: ['script', 'style', 'img', 'video']
+            };
+
+            // Etape A : On transforme les URLs textuelles en balises <a>
+            const linkedHtml = linkifyHtml(post.content, linkifyOptions);
+
+            // Etape B : On nettoie le HTML (en autorisant target et class pour nos liens)
+            const cleanHtml = DOMPurify.sanitize(linkedHtml, {
+                ADD_ATTR: ['target', 'class', 'rel'], // IMPORTANT : Autoriser ces attributs
+                ADD_TAGS: ['iframe'], // Si vous voulez autoriser des embeds plus tard
+            });
+
+            setProcessedContent(cleanHtml);
+        }
+    }, [post.content]);
 
     const handleDelete = async () => {
         if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce post ?")) return;
@@ -166,9 +196,10 @@ const PostItem = ({ post, onDelete }) => {
                 onMouseEnter={() => setShowControls(true)}
                 onMouseLeave={() => setShowControls(false)}
             >
+                {/* --- 3. Affichage du contenu traité --- */}
                 <div
-                    className="post-content text-gray-700 mb-4 break-words whitespace-pre-wrap"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
+                    className="post-content text-gray-800 text-sm leading-relaxed mb-3 break-words whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={{ __html: processedContent }}
                 ></div>
 
                 {/* --- NOUVEAU : AFFICHAGE DU LINK PREVIEW --- */}
