@@ -26,7 +26,7 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
             key={index} 
             src={getFullUrl(url)} 
             alt={`media-${index}`} 
-            onClick={() => onMediaClick(getFullUrl(url), 'image')}
+            onClick={() => onMediaClick(index)}
             className={`media-item ${extraClass}`} 
         />
     );
@@ -44,7 +44,7 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
                         src={url} 
                         controls 
                         className="media-item" 
-                        onClick={() => onMediaClick(url, 'video')}
+                        onClick={() => onMediaClick(0)}
                     />
                 </div>
             );
@@ -91,7 +91,7 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
                 {renderImage(mediaList[2], 2)}
                 
                 {/* La 4ème case avec l'overlay */}
-                <div className="more-media-overlay" onClick={() => onMediaClick(getFullUrl(mediaList[3]), 'image')}>
+                <div className="more-media-overlay" onClick={() => onMediaClick(3)}>
                    <img src={getFullUrl(mediaList[3])} alt="media-more" className="media-item" />
                    <div className="overlay-count">+{hiddenCount + 1}</div>
                 </div>
@@ -170,13 +170,21 @@ const PostItem = ({ post, onDelete }) => {
         }
     };
 
-    const handleMediaClick = () => {
-        if (mediaUrl && mediaType) {
-            setMediaModalData({
-                url: mediaUrl,
-                type: mediaType
-            });
-        }
+    // Cette fonction reçoit maintenant l'index de l'élément cliqué
+    const handleMediaClick = (index) => {
+        // On récupère la liste brute
+        const rawList = post.media && post.media.length > 0 ? post.media : (post.image ? [post.image] : []);
+        
+        // On formate toutes les URLs pour qu'elles soient prêtes pour la modale
+        const formattedList = rawList.map(url => 
+            url.startsWith('http') ? url : `${backendUrl}/${url}`
+        );
+
+        // On envoie la liste ET l'index de départ
+        setMediaModalData({
+            mediaList: formattedList,
+            initialIndex: index
+        });
     };
 
     const renderStyledContent = (text) => {
