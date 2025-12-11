@@ -46,8 +46,6 @@ const AccountSwitcher = () => {
         setLoading(false);
     };
 
-    
-
     const handleCreateNew = () => {
         if (startAddAccount()) {
             navigate('/login', { state: { initialState: 'Sign Up' } });

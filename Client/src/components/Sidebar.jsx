@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useLocation } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { assets } from '../assets/assets';
 import '../index.css';
@@ -8,6 +8,9 @@ import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import CreatePostModal from './CreatePostModal';
+import "@flaticon/flaticon-uicons/css/all/all.css";
+import { IconUser, IconUserFilled, IconHome, IconHomeFilled, IconSettings, IconSettingsFilled } from "@tabler/icons-react";
+
 
 
 
@@ -110,23 +113,26 @@ const Sidebar = ({ previousPath }) => {
           </button>
         </div>
 
-        <div className='gap-2 flex flex-col w-full h-full justify-between p-4'>
+        <div className='gap-1 flex flex-col w-full h-full justify-between p-4'>
           <div>
             {/* Navigation */}
-            <ul className="space-y-4">
+            <ul className="space-y-1">
               <li onClick={() => { navigate('/feed'); setIsOpen(false); }}
-                className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
-                <img src={assets.house_chimney} className="w-5 invert" alt="" /> Accueil
+                style={{ fontSize: "20px" }}
+                className={`hover:bg-gray-700 px-3 py-2 rounded cursor-pointer flex items-center gap-5 ${location.pathname === "/feed" && "bg-gray-700 text-white"}`}>
+                {location.pathname === "/feed" ? (<IconHomeFilled size={40} strokeWidth={1} className='flex' />):(<IconHome size={40} strokeWidth={1} className='flex' />)} Accueil
               </li>
 
               <li onClick={() => { navigate(`/@${userData.username}`); setIsOpen(false); }}
-                className="hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3">
-                <img src={assets.user} className="w-5 invert" alt="" /> Profil
+                style={{ fontSize: "20px" }}
+                className={`hover:bg-gray-700 px-3 py-2 rounded cursor-pointer flex items-center gap-5 ${location.pathname === `/@${userData.username}` && "bg-gray-700 text-white"}`}>
+                {location.pathname === `/@${userData.username}` ? (<IconUserFilled size={40} strokeWidth={1} className='flex' />):(<IconUser size={40} strokeWidth={1} className='flex' />)} Profil
               </li>
 
               <li onClick={() => { navigate('/settings'); setIsOpen(false); }}
-                className='hover:bg-gray-700 p-2 rounded cursor-pointer flex items-center gap-3'>
-                <img src={assets.settings} className="w-5 invert" alt="" /> Settings
+                style={{ fontSize: "20px" }}
+                className={`hover:bg-gray-700 mb-5 px-3 py-2 rounded cursor-pointer flex items-center gap-5 ${location.pathname === "/settings" && "bg-gray-700 text-white"}`}>
+                {location.pathname === "/settings" ? (<IconSettingsFilled size={40} strokeWidth={1} className='flex' />):(<IconSettings size={40} strokeWidth={1} className='flex' />)} Settings
               </li>
 
               {/* --- BOUTON CREATE (Desktop Uniquement) --- */}
