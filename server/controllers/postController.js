@@ -1,24 +1,68 @@
 import postModel from "../models/postModel.js";
 import userModel from "../models/userModel.js";
 import mongoose from "mongoose";
+import axios from 'axios';
+import * as cheerio from 'cheerio';
 
-// Créer un post
+// --- 1. Nouvelle fonction pour récupérer les métadonnées d'un lien ---
+export const getLinkMetadata = async (req, res) => {
+    try {
+        const { url } = req.body;
+        if (!url) return res.json({ success: false, message: "URL manquante" });
+
+        // On récupère le HTML de la page
+        const { data } = await axios.get(url, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AmaraBot/1.0)' },
+            timeout: 5000 // Timeout de 5s pour ne pas bloquer
+        });
+
+        const $ = cheerio.load(data);
+
+        // Extraction des balises Open Graph ou fallback sur les balises standard
+        const metadata = {
+            url: url,
+            title: $('meta[property="og:title"]').attr('content') || $('title').text() || '',
+            description: $('meta[property="og:description"]').attr('content') || $('meta[name="description"]').attr('content') || '',
+            image: $('meta[property="og:image"]').attr('content') || '',
+            domain: new URL(url).hostname
+        };
+
+        return res.json({ success: true, metadata });
+
+    } catch (error) {
+        console.error("Erreur link preview:", error.message);
+        // On ne renvoie pas d'erreur 500 pour ne pas casser l'UI, juste un succès false
+        return res.json({ success: false, message: "Impossible de récupérer l'aperçu" });
+    }
+};
+
 export const createPost = async (req, res) => {
     try {
-        const { content } = req.body;
+        const { content, linkPreview } = req.body;
         const userId = req.user.id;
         
         // Récupérer les chemins des fichiers uploadés via Multer
         const media = req.files ? req.files.map(file => `uploads/${file.filename}`) : [];
 
-        if (!content && media.length === 0) {
+        // Parse linkPreview s'il arrive sous forme de string (via FormData)
+        let parsedLinkPreview = null;
+        if (linkPreview) {
+            try {
+                parsedLinkPreview = JSON.parse(linkPreview);
+            } catch (e) {
+                parsedLinkPreview = null;
+            }
+        }
+
+        if (!content && media.length === 0 && !parsedLinkPreview) {
             return res.json({ success: false, message: "Le post ne peut pas être vide." });
         }
 
         const newPost = new postModel({
             userId,
             content,
-            media
+            media,
+            linkPreview: parsedLinkPreview
         });
 
         await newPost.save();

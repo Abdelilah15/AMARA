@@ -1,10 +1,11 @@
-import React, { useState, useContext, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useContext, useEffect, useRef, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { AppContext } from '../context/AppContext';
 import { toast } from 'react-toastify';
 import { assets } from '../assets/assets';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import debounce from 'lodash.debounce';
 
 const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
     const [content, setContent] = useState('');
@@ -13,13 +14,16 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
     // Stocker les URLs de prévisualisation pour éviter les fuites de mémoire
     const [previews, setPreviews] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    const [linkPreview, setLinkPreview] = useState(null); // Les données reçues du back
+    const [isFetchingPreview, setIsFetchingPreview] = useState(false);
+    const [ignoredUrls, setIgnoredUrls] = useState(new Set());
+
     const { backendUrl, userData } = useContext(AppContext);
     const MAX_CHAR = 800;
-    const textareaRef = useRef(null);
-
-    // 2. Référence vers l'instance Quill pour le contrôler depuis le footer
     const quillRef = useRef(null);
-    // Configuration de Quill pour cacher la toolbar par défaut
+    const URL_REGEX = /(https?:\/\/[^\s<]+)/g;
+
     const modules = useMemo(() => ({
         toolbar: false, // On cache la toolbar native
         keyboard: {
@@ -41,6 +45,49 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
         }
     }), []);
 
+    // Fonction pour appeler le backend
+    const fetchLinkPreview = async (url) => {
+        if (ignoredUrls.has(url)) return; // Ne pas recharger si l'user a fermé
+        
+        setIsFetchingPreview(true);
+        try {
+            const { data } = await axios.post(
+                backendUrl + '/api/post/preview-link', 
+                { url },
+                { withCredentials: true }
+            );
+            if (data.success && data.metadata && data.metadata.title) {
+                setLinkPreview(data.metadata);
+            }
+        } catch (error) {
+            console.error("Erreur preview", error);
+        } finally {
+            setIsFetchingPreview(false);
+        }
+    };
+
+    // Version "Debounce" de la fonction pour ne pas spammer le serveur
+    const debouncedFetchPreview = useCallback(
+        debounce((url) => fetchLinkPreview(url), 1000), 
+        [ignoredUrls, backendUrl] // Dépendances
+    );
+
+    // Fonction pour supprimer la preview manuellement
+    const removeLinkPreview = () => {
+        if (linkPreview) {
+            setIgnoredUrls(prev => new Set(prev).add(linkPreview.url));
+            setLinkPreview(null);
+        }
+    }
+    
+    useEffect(() => {
+        if(!isOpen) {
+            setLinkPreview(null);
+            setIgnoredUrls(new Set());
+            setFiles([]);
+            setContent('');
+        }
+    }, [isOpen]);
 
     // Nettoyer les URLs d'objets quand le composant est démonté ou quand les fichiers changent
     useEffect(() => {
@@ -110,6 +157,24 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
         // Quill ajoute toujours un \n à la fin, on le retire pour le compte réel si le reste est vide
         const realLength = text.replace(/\n$/, "").length;
         setPlainTextLength(realLength);
+
+        // Détection de lien
+        // On cherche le PREMIER lien dans le texte
+        const matches = text.match(URL_REGEX);
+        
+        if (matches && matches.length > 0) {
+            const firstUrl = matches[0];
+            // Si on a déjà un preview pour cette URL, on ne fait rien
+            if (linkPreview && linkPreview.url === firstUrl) return;
+            // Si c'est une nouvelle URL, on lance le fetch
+            if (!linkPreview) {
+                debouncedFetchPreview(firstUrl);
+            }
+        } else if (!matches && linkPreview) {
+            // Optionnel : Si l'utilisateur efface le lien du texte, on peut garder ou supprimer la preview.
+            // Généralement sur Twitter, la preview reste même si on efface le lien texte.
+            // Si vous voulez l'enlever : setLinkPreview(null);
+        }
     };
 
     const handleFileChange = (e) => {
@@ -117,6 +182,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
         const selectedFiles = Array.from(e.target.files);
         setFiles(prev => [...prev, ...selectedFiles]);
     };
+
 
     const removeFile = (indexToRemove) => {
         setFiles(files.filter((_, index) => index !== indexToRemove));
@@ -130,8 +196,8 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
             return;
         }
 
-        // Vérification contenu vide (Quill laisse parfois des balises <p><br></p>)
-        const isEmpty = plainTextLength === 0 && files.length === 0;
+        // Le post n'est pas vide s'il y a du texte, des fichiers OU une preview
+        const isEmpty = plainTextLength === 0 && files.length === 0 && !linkPreview;
         if (isEmpty) {
             toast.error("Le post ne peut pas être vide");
             return;
@@ -150,6 +216,10 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
             files.forEach((file) => {
                 formData.append('files', file);
             });
+
+            if (linkPreview) {
+                formData.append('linkPreview', JSON.stringify(linkPreview));
+            }
 
             const { data } = await axios.post(backendUrl + '/api/post/create', formData, {
                 withCredentials: true,
@@ -236,6 +306,38 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                                 placeholder="De quoi voulez-vous parler ?"
                                 className="w-full bg-transparent"
                             />
+
+                            {/* Loader Link Preview */}
+                            {isFetchingPreview && (
+                                <div className="text-xs text-indigo-400 animate-pulse mt-1">Recherche de l'aperçu...</div>
+                            )}
+
+                            {/* --- AFFICHAGE LINK PREVIEW --- */}
+                            {linkPreview && (
+                                <div className="mt-3 relative rounded-xl overflow-hidden border border-gray-600 bg-gray-900 group/preview transition-all hover:border-gray-500">
+                                    <button
+                                        type="button"
+                                        onClick={removeLinkPreview}
+                                        className="absolute top-2 right-2 bg-black/70 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-500 transition-colors z-20"
+                                        title="Supprimer l'aperçu"
+                                    >
+                                        ✕
+                                    </button>
+                                    
+                                    <a href={linkPreview.url} target="_blank" rel="noreferrer" className="block">
+                                        {linkPreview.image && (
+                                            <div className="h-54 overflow-hidden">
+                                                <img src={linkPreview.image} alt="" className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+                                        <div className="p-3 bg-gray-800/50">
+                                            <div className="text-xs text-gray-400 uppercase mb-1">{linkPreview.domain}</div>
+                                            <h3 className="text-white font-semibold text-sm line-clamp-1">{linkPreview.title}</h3>
+                                            <p className="text-gray-400 text-xs mt-1 line-clamp-2">{linkPreview.description}</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            )}
 
                             {/* Compteur de caractères (Texte brut) */}
                             <div className={`text-right text-xs font-semibold mt-1 transition-colors ${isOverLimit ? 'text-red-500' : 'text-gray-500'
@@ -325,13 +427,10 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
 
                         <button
                             onClick={handleSubmit}
-                            disabled={loading || (plainTextLength === 0 && files.length === 0) || isOverLimit}
-                            className={`px-6 py-2 rounded-full font-bold text-white transition-all shadow-lg ${loading || (plainTextLength === 0 && files.length === 0) || isOverLimit
-                                    ? 'bg-gray-600 cursor-not-allowed opacity-50'
-                                    : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:scale-105 hover:shadow-indigo-500/30'
-                                }`}
+                            disabled={loading || (plainTextLength === 0 && files.length === 0 && !linkPreview) || isOverLimit}
+                            className={`px-6 py-2 rounded-full font-bold text-white transition-all shadow-lg ${loading || (plainTextLength === 0 && files.length === 0 && !linkPreview) || isOverLimit ? 'bg-gray-600 cursor-not-allowed opacity-50' : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:scale-105'}`}
                         >
-                            {loading ? 'Envoi...' : 'Publier'}
+                            {loading ? '...' : 'Publier'}
                         </button>
                     </div>
                 </div>

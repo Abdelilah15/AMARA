@@ -171,6 +171,38 @@ const PostItem = ({ post, onDelete }) => {
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
                 ></div>
 
+                {/* --- NOUVEAU : AFFICHAGE DU LINK PREVIEW --- */}
+                {post.linkPreview && (
+                    <a 
+                        href={post.linkPreview.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block mb-4 rounded-xl overflow-hidden border border-gray-300 hover:bg-gray-50 transition-colors group"
+                    >
+                        {post.linkPreview.image && (
+                            <div className="h-54 overflow-hidden bg-gray-100 border-b border-gray-200">
+                                <img 
+                                    src={post.linkPreview.image} 
+                                    alt={post.linkPreview.title} 
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    onError={(e) => e.target.style.display = 'none'} // Cache si l'image est brisée
+                                />
+                            </div>
+                        )}
+                        <div className="p-3">
+                            <div className="text-xs text-gray-500 uppercase mb-1 font-medium">
+                                {post.linkPreview.domain}
+                            </div>
+                            <h4 className="text-gray-900 font-bold text-base mb-1 line-clamp-1">
+                                {post.linkPreview.title}
+                            </h4>
+                            <p className="text-gray-600 text-sm line-clamp-2">
+                                {post.linkPreview.description}
+                            </p>
+                        </div>
+                    </a>
+                )}
+
                 {mediaUrl && mediaType === 'image' && (
                     <img
                         src={mediaUrl}
