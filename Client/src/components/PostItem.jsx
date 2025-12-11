@@ -7,6 +7,98 @@ import { AppContext } from '../context/AppContext';
 import { assets } from '../assets/assets';
 import DOMPurify from 'dompurify';
 import linkifyHtml from 'linkify-html';
+import '../index.css';
+
+// --- SOUS-COMPOSANT : GESTION DE LA GALERIE ---
+const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
+    if (!mediaList || mediaList.length === 0) return null;
+
+    const count = mediaList.length;
+
+    // Fonction utilitaire pour formater l'URL correctement pour chaque image
+    const getFullUrl = (url) => {
+        return url.startsWith('http') ? url : `${backendUrl}/${url}`;
+    };
+
+    // Helper pour générer une balise image standard
+    const renderImage = (url, index, extraClass = "") => (
+        <img 
+            key={index} 
+            src={getFullUrl(url)} 
+            alt={`media-${index}`} 
+            onClick={() => onMediaClick(getFullUrl(url), 'image')}
+            className={`media-item ${extraClass}`} 
+        />
+    );
+
+    // --- CAS 1 : Un seul média (Image ou Vidéo) ---
+    if (count === 1) {
+        const url = getFullUrl(mediaList[0]);
+        const extension = url.split('.').pop().toLowerCase();
+        const isVideo = ['mp4', 'webm', 'ogg', 'mov'].includes(extension);
+
+        if (isVideo) {
+            return (
+                <div className="media-gallery gallery-1">
+                    <video 
+                        src={url} 
+                        controls 
+                        className="media-item" 
+                        onClick={() => onMediaClick(url, 'video')}
+                    />
+                </div>
+            );
+        }
+        return <div className="media-gallery gallery-1">{renderImage(mediaList[0], 0)}</div>;
+    }
+
+    // --- CAS 2 : Deux images (50% / 50%) ---
+    if (count === 2) {
+        return (
+            <div className="media-gallery gallery-2">
+                {mediaList.map((url, i) => renderImage(url, i))}
+            </div>
+        );
+    }
+
+    // --- CAS 3 : Trois images (1 grande à gauche, 2 à droite) ---
+    if (count === 3) {
+        return (
+            <div className="media-gallery gallery-3">
+                {renderImage(mediaList[0], 0)}
+                {renderImage(mediaList[1], 1)}
+                {renderImage(mediaList[2], 2)}
+            </div>
+        );
+    }
+
+    // --- CAS 4 : Quatre images (Grille 2x2) ---
+    if (count === 4) {
+        return (
+            <div className="media-gallery gallery-4">
+                {mediaList.map((url, i) => renderImage(url, i))}
+            </div>
+        );
+    }
+
+    // --- CAS 5 et plus : (3 images + 1 overlay) ---
+    if (count >= 5) {
+        const hiddenCount = count - 4;
+        return (
+            <div className="media-gallery gallery-5-plus">
+                {renderImage(mediaList[0], 0)}
+                {renderImage(mediaList[1], 1)}
+                {renderImage(mediaList[2], 2)}
+                
+                {/* La 4ème case avec l'overlay */}
+                <div className="more-media-overlay" onClick={() => onMediaClick(getFullUrl(mediaList[3]), 'image')}>
+                   <img src={getFullUrl(mediaList[3])} alt="media-more" className="media-item" />
+                   <div className="overlay-count">+{hiddenCount + 1}</div>
+                </div>
+            </div>
+        );
+    }
+};
 
 const PostItem = ({ post, onDelete }) => {
     const navigate = useNavigate();
@@ -15,6 +107,7 @@ const PostItem = ({ post, onDelete }) => {
     const rawMediaUrl = post.media && post.media.length > 0 ? post.media[0] : null;
     const [showControls, setShowControls] = useState(false);
     const [processedContent, setProcessedContent] = useState('');
+
 
     const mediaUrl = rawMediaUrl
         ? (rawMediaUrl.startsWith('http') ? rawMediaUrl : backendUrl + '/' + rawMediaUrl)
@@ -234,31 +327,13 @@ const PostItem = ({ post, onDelete }) => {
                     </a>
                 )}
 
-                {mediaUrl && mediaType === 'image' && (
-                    <img
-                        src={mediaUrl}
-                        alt="Post media"
-                        // AJOUTS ICI : onClick et cursor-pointer
-                        onClick={handleMediaClick}
-                        className="w-full max-h-120 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
-                    />
-                )}
-                {mediaUrl && mediaType === 'video' && (
-                    <video
-                        src={mediaUrl}
-                        controls={showControls}
-                        // AJOUTS ICI : onClick et cursor-pointer
-                        // Note : sur une vidéo avec contrôles natifs, le onClick peut parfois être intercepté par les contrôles (play/pause).
-                        // Pour une vraie expérience "cliquer pour agrandir" sur vidéo, il faudrait souvent masquer les contrôles natifs et mettre un overlay transparent, mais commençons simple.
-                        onClick={handleMediaClick}
-                        autoPlay
-                        preload="auto"
-                        loop
-                        className="w-full max-h-120 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
-                    >
-                        Your browser does not support the video tag.
-                    </video>
-                )}
+                {/* --- NOUVELLE GALERIE --- */}
+                {/* On passe le tableau post.media ou on crée un tableau si c'est l'ancien format post.image */}
+                <PostGallery 
+                    mediaList={post.media && post.media.length > 0 ? post.media : (post.image ? [post.image] : [])} 
+                    backendUrl={backendUrl}
+                    onMediaClick={handleMediaClick}
+                />
             </div>
 
             {/* --- FOOTER (ACTIONS) --- */}

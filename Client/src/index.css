@@ -84,3 +84,70 @@
 .post-content a:hover {
     text-decoration: underline;
 }
+
+/* Galerie de médias */
+.media-gallery {
+  display: grid;
+  gap: 2px; /* Petit espace entre les images */
+  width: 100%;
+  height: 350px; /* Hauteur fixe pour uniformiser les posts */
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.media-item {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+/* Cas : 1 média (Pleine largeur) */
+.gallery-1 {
+  grid-template-columns: 1fr;
+}
+
+/* Cas : 2 médias (50% - 50%) */
+.gallery-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Cas : 3 médias (1 grand à gauche, 2 petits à droite) */
+.gallery-3 {
+  grid-template-columns: 1.5fr 1fr; /* La gauche est un peu plus large */
+  grid-template-rows: 1fr 1fr;
+}
+.gallery-3 img:nth-child(1) {
+  grid-row: 1 / span 2; /* Prend toute la hauteur à gauche */
+}
+
+/* Cas : 4 médias (Grille 2x2) */
+.gallery-4 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+/* Cas : 5+ médias (Grille 2x2 avec overlay sur la dernière) */
+.gallery-5-plus {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+/* Overlay pour le "+X" */
+.more-media-overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.overlay-count {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6); /* Fond sombre transparent */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+}

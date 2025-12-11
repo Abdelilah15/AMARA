@@ -3,7 +3,10 @@ import mongoose from "mongoose";
 const postSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
     content: { type: String, maxLength: 800 },
-    media: [{ type: String }], // URLs des fichiers uploadés
+    media: {
+        type: [String], // Un tableau d'URLs
+        default: []
+    }, // URLs des fichiers uploadés
     linkPreview: {
         url: String,
         title: String,
