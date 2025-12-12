@@ -79,7 +79,7 @@ const Sidebar = ({ previousPath }) => {
           onClick={() => previousPath === '/' ? navigate('/feed') : navigate(-1)} // Retourne à la page précédente
           className="md:hidden fixed flex top-3 left-4 z-50 p-2 text-white rounded-md"
           style={{ marginBottom: "auto" }}>
-          <i class="fi fi-tr-angle-small-left flex"
+          <i className="fi fi-tr-angle-small-left flex"
             style={{ fontSize: "20px" }}></i>
         </button>
 
@@ -142,7 +142,7 @@ const Sidebar = ({ previousPath }) => {
                   className='text-gray-700 font-medium p-3 rounded cursor-pointer flex justify-center items-center gap-3 hover:opacity-90 transition-opacity'>
                   <i style={{ fontSize: "28px" }} className={`fi fi-ts-feather flex text-gray-700 transition-transform ${isCreateMenuOpen ? 'rotate-45' : ''}`}></i>
                   {isCreateMenuOpen ? 'Close' : 'Create'}
-                  {isCreateMenuOpen ? <i class="fi fi-rr-caret-up flex"></i> : <i class="fi fi-rr-caret-down flex"></i>}
+                  {isCreateMenuOpen ? <i className="fi fi-rr-caret-up flex"></i> : <i className="fi fi-rr-caret-down flex"></i>}
                 </li>
 
                 {/* Sous-menu (Liste des boutons) */}
@@ -164,7 +164,7 @@ const Sidebar = ({ previousPath }) => {
                   <button
                     className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded flex items-center gap-3 pl-6">
                     <span className="text-xl">
-                      <i class="fi fi-tr-camera flex"></i>
+                      <i className="fi fi-tr-camera flex"></i>
                     </span> Storie
                   </button>
 
@@ -172,7 +172,7 @@ const Sidebar = ({ previousPath }) => {
                   {userData && userData.profileType === 'professional' && (
                     <button className="bg-purple-600 hover:bg-purple-500 text-white p-2 rounded flex items-center gap-3 pl-6 border border-purple-400">
                       <span className="text-xl">
-                        <i class="fi fi-tr-document-signed flex"></i>
+                        <i className="fi fi-tr-document-signed flex"></i>
                       </span> Article <span className="text-xs bg-white text-purple-600 px-1 rounded font-bold">PRO</span>
                     </button>
                   )}

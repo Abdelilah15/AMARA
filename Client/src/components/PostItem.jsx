@@ -8,6 +8,7 @@ import { assets } from '../assets/assets';
 import DOMPurify from 'dompurify';
 import linkifyHtml from 'linkify-html';
 import '../index.css';
+import { timeAgo } from '../utils/timeAgo';
 
 // --- SOUS-COMPOSANT : GESTION DE LA GALERIE ---
 const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
@@ -22,12 +23,12 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
 
     // Helper pour générer une balise image standard
     const renderImage = (url, index, extraClass = "") => (
-        <img 
-            key={index} 
-            src={getFullUrl(url)} 
-            alt={`media-${index}`} 
+        <img
+            key={index}
+            src={getFullUrl(url)}
+            alt={`media-${index}`}
             onClick={() => onMediaClick(index)}
-            className={`media-item ${extraClass}`} 
+            className={`media-item ${extraClass}`}
         />
     );
 
@@ -40,10 +41,10 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
         if (isVideo) {
             return (
                 <div className="media-gallery gallery-1">
-                    <video 
-                        src={url} 
-                        controls 
-                        className="media-item" 
+                    <video
+                        src={url}
+                        controls
+                        className="media-item"
                         onClick={() => onMediaClick(0)}
                     />
                 </div>
@@ -89,11 +90,11 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
                 {renderImage(mediaList[0], 0)}
                 {renderImage(mediaList[1], 1)}
                 {renderImage(mediaList[2], 2)}
-                
+
                 {/* La 4ème case avec l'overlay */}
                 <div className="more-media-overlay" onClick={() => onMediaClick(3)}>
-                   <img src={getFullUrl(mediaList[3])} alt="media-more" className="media-item" />
-                   <div className="overlay-count">+{hiddenCount + 1}</div>
+                    <img src={getFullUrl(mediaList[3])} alt="media-more" className="media-item" />
+                    <div className="overlay-count">+{hiddenCount + 1}</div>
                 </div>
             </div>
         );
@@ -107,6 +108,11 @@ const PostItem = ({ post, onDelete }) => {
     const rawMediaUrl = post.media && post.media.length > 0 ? post.media[0] : null;
     const [showControls, setShowControls] = useState(false);
     const [processedContent, setProcessedContent] = useState('');
+
+    const authorName = post.userId ? post.userId.name : "Utilisateur Inconnu";
+    const authorUsername = post.userId ? post.userId.username : "inconnu";
+    const authorAvatar = (post.userId && post.userId.avatar) ? post.userId.avatar : assets.profile_icon; // Image par défaut
+    const postDate = post.createdAt;
 
 
     const mediaUrl = rawMediaUrl
@@ -174,9 +180,9 @@ const PostItem = ({ post, onDelete }) => {
     const handleMediaClick = (index) => {
         // On récupère la liste brute
         const rawList = post.media && post.media.length > 0 ? post.media : (post.image ? [post.image] : []);
-        
+
         // On formate toutes les URLs pour qu'elles soient prêtes pour la modale
-        const formattedList = rawList.map(url => 
+        const formattedList = rawList.map(url =>
             url.startsWith('http') ? url : `${backendUrl}/${url}`
         );
 
@@ -244,16 +250,19 @@ const PostItem = ({ post, onDelete }) => {
                         alt=""
                         className="w-10 h-10 rounded-full object-cover bg-gray-700 cursor-pointer"
                     />
-                    <div>
-                        {/* Nom cliquable */}
-                        <h3
-                            onClick={() => navigate(`/@${post.userId?.username}`)}
-                            className="font-bold capitalize cursor-pointer hover:underline text-gray-700">
-                            {post.userId?.name || "Utilisateur"}
-                        </h3>
-                        <p className="text-xs text-gray-400">
-                            {new Date(post.createdAt).toLocaleDateString()} • {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
+                    <div className="flex flex-col">
+                        <div className="flex items-baseline gap-2">
+                            {/* Nom complet */}
+                            <span className="font-bold text-gray-900">{authorName}</span>
+                            {/* Nom d'utilisateur (@username) */}
+                            <span className="text-gray-500 text-sm">@{authorUsername}</span>
+                            {/* Point séparateur */}
+                            <span className="text-gray-400 text-xs">•</span>
+                            {/* Horodatage Relatif */}
+                            <span className="text-gray-500 text-sm hover:underline cursor-pointer" title={new Date(postDate).toLocaleString()}>
+                                {timeAgo(postDate)}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -293,10 +302,10 @@ const PostItem = ({ post, onDelete }) => {
             </div>
 
             {/* Post Content */}
-            <div className="mb-4"
+            <div className="mb-4 pl-13.5"
                 onMouseEnter={() => setShowControls(true)}
                 onMouseLeave={() => setShowControls(false)}
-            >
+                >
                 {/* --- 3. Affichage du contenu traité --- */}
                 <div
                     className="post-content text-gray-800 text-sm leading-relaxed mb-3 break-words whitespace-pre-wrap"
@@ -305,17 +314,17 @@ const PostItem = ({ post, onDelete }) => {
 
                 {/* --- NOUVEAU : AFFICHAGE DU LINK PREVIEW --- */}
                 {post.linkPreview && (
-                    <a 
-                        href={post.linkPreview.url} 
-                        target="_blank" 
+                    <a
+                        href={post.linkPreview.url}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="block mb-4 rounded-xl overflow-hidden border border-gray-300 hover:bg-gray-50 transition-colors group"
                     >
                         {post.linkPreview.image && (
                             <div className="h-54 overflow-hidden bg-gray-100 border-b border-gray-200">
-                                <img 
-                                    src={post.linkPreview.image} 
-                                    alt={post.linkPreview.title} 
+                                <img
+                                    src={post.linkPreview.image}
+                                    alt={post.linkPreview.title}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     onError={(e) => e.target.style.display = 'none'} // Cache si l'image est brisée
                                 />
@@ -337,8 +346,8 @@ const PostItem = ({ post, onDelete }) => {
 
                 {/* --- NOUVELLE GALERIE --- */}
                 {/* On passe le tableau post.media ou on crée un tableau si c'est l'ancien format post.image */}
-                <PostGallery 
-                    mediaList={post.media && post.media.length > 0 ? post.media : (post.image ? [post.image] : [])} 
+                <PostGallery
+                    mediaList={post.media && post.media.length > 0 ? post.media : (post.image ? [post.image] : [])}
                     backendUrl={backendUrl}
                     onMediaClick={handleMediaClick}
                 />
@@ -351,7 +360,7 @@ const PostItem = ({ post, onDelete }) => {
                         <i className="fi fi-tr-heart"></i>
                     </button>
                     <button className="hover:text-indigo-400 flex items-center gap-1 transition-colors">
-                        <i class="fi fi-tr-arrows-repeat"></i>
+                        <i className="fi fi-tr-arrows-repeat"></i>
                     </button>
                     <button className="hover:text-indigo-400 flex items-center gap-1 transition-colors">
                         <i className="fi fi-tr-comment-alt"></i>
@@ -359,7 +368,7 @@ const PostItem = ({ post, onDelete }) => {
                 </div>
                 <div className='flex gap-4'>
                     <button className="hover:text-indigo-400 flex items-center gap-1 transition-colors">
-                        <i class="fi fi-tr-up"></i>
+                        <i className="fi fi-tr-up"></i>
                     </button>
                     <button className="hover:text-indigo-400 flex items-center gap-1 transition-colors">
                         <i className="fi fi-tr-bookmark"></i>
