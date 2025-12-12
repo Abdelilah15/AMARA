@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import Feed from './pages/Feed';
 import MediaModal from './components/MediaModal';
 import { AppContext } from './context/AppContext'
+import PostDetails from './pages/PostDetails';
 
 
 
@@ -51,6 +52,7 @@ const App = () => {
                 <Route path='/settings' element={<Settings />} />
                 <Route path='/:username' element={<Profile />} />
                 <Route path='/feed' element={<Feed />} />
+                <Route path='/post/:id' element={<PostDetails />} />
             </Routes>
         </div>
       </div>

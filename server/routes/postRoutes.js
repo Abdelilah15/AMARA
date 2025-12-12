@@ -10,6 +10,7 @@ postRouter.post('/create', userAuth, upload.array('files', 5), createPost);
 postRouter.post('/preview-link', userAuth, getLinkMetadata);
 postRouter.get('/user/:userId', getUserPosts);
 postRouter.get('/all', getAllPosts);
+postRouter.get('/single/:id', getPostById);
 postRouter.delete('/delete/:id', userAuth, deletePost);
 
 export default postRouter;

@@ -102,7 +102,7 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
     }
 };
 
-const PostItem = ({ post, onDelete }) => {
+const PostItem = ({ post, onDelete, isDetail = false }) => {
     const navigate = useNavigate();
     const { userData, backendUrl, setMediaModalData } = useContext(AppContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -118,7 +118,12 @@ const PostItem = ({ post, onDelete }) => {
     const isLiked = post.likes && post.likes.includes(userData?._id);
     const isSaved = post.saves && post.saves.includes(userData?._id);
 
-
+const handlePostClick = () => {
+        // Si on n'est PAS déjà sur la page de détail, on redirige
+        if (!isDetail) {
+            navigate(`/post/${post._id}`);
+        }
+    };
 
     const handleLike = async (e) => {
     e.stopPropagation();
@@ -351,9 +356,10 @@ const PostItem = ({ post, onDelete }) => {
             </div>
 
             {/* Post Content */}
-            <div className="mb-4 pl-13.5"
+            <div className={`mb-4 pl-13.5 ${!isDetail ? 'cursor-pointer hover:bg-gray-50 transition-colors rounded-lg -ml-2 p-2' : ''}`}
                 onMouseEnter={() => setShowControls(true)}
                 onMouseLeave={() => setShowControls(false)}
+                onClick={handlePostClick}
             >
                 {/* --- 3. Affichage du contenu traité --- */}
                 <div

@@ -75,6 +75,26 @@ export const createPost = async (req, res) => {
     }
 }
 
+export const getPostById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const post = await postModel.findById(id).populate('userId', 'name username image');
+
+        if (!post) {
+            return res.json({ success: false, message: "Post introuvable" });
+        }
+
+        // On réutilise votre fonction de formatage existante
+        const formattedPost = formatPostForFrontend(post);
+
+        res.json({ success: true, post: formattedPost });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
 const formatPostForFrontend = (postDocument) => {
     // On convertit le document Mongoose en objet JavaScript simple si ce n'est pas déjà fait
     const post = postDocument.toObject ? postDocument.toObject() : postDocument;
