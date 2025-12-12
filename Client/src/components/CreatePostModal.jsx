@@ -48,11 +48,11 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
     // Fonction pour appeler le backend
     const fetchLinkPreview = async (url) => {
         if (ignoredUrls.has(url)) return; // Ne pas recharger si l'user a fermé
-        
+
         setIsFetchingPreview(true);
         try {
             const { data } = await axios.post(
-                backendUrl + '/api/post/preview-link', 
+                backendUrl + '/api/post/preview-link',
                 { url },
                 { withCredentials: true }
             );
@@ -68,7 +68,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
 
     // Version "Debounce" de la fonction pour ne pas spammer le serveur
     const debouncedFetchPreview = useCallback(
-        debounce((url) => fetchLinkPreview(url), 1000), 
+        debounce((url) => fetchLinkPreview(url), 1000),
         [ignoredUrls, backendUrl] // Dépendances
     );
 
@@ -79,9 +79,9 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
             setLinkPreview(null);
         }
     }
-    
+
     useEffect(() => {
-        if(!isOpen) {
+        if (!isOpen) {
             setLinkPreview(null);
             setIgnoredUrls(new Set());
             setFiles([]);
@@ -161,7 +161,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
         // Détection de lien
         // On cherche le PREMIER lien dans le texte
         const matches = text.match(URL_REGEX);
-        
+
         if (matches && matches.length > 0) {
             const firstUrl = matches[0];
             // Si on a déjà un preview pour cette URL, on ne fait rien
@@ -182,7 +182,6 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
         const selectedFiles = Array.from(e.target.files);
         setFiles(prev => [...prev, ...selectedFiles]);
     };
-
 
     const removeFile = (indexToRemove) => {
         setFiles(files.filter((_, index) => index !== indexToRemove));
@@ -277,7 +276,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                                 .ql-editor {
                                     min-height: 120px;
                                     font-size: 1rem;
-                                    color: white; /* Texte blanc */
+                                    color: white;
                                     padding: 0.75rem !important;
                                 }
                                 .ql-editor.ql-blank::before {
@@ -307,14 +306,24 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                                 className="w-full bg-transparent"
                             />
 
+                            {/* Compteur de caractères (Texte brut) */}
+                            <div className={`text-right text-xs font-semibold mt-1 transition-colors ${isOverLimit ? 'text-red-500' : 'text-gray-500'
+                                }`}>
+                                {isOverLimit ? `-${extraContentCount}` : plainTextLength} / {MAX_CHAR}
+                            </div>
+
                             {/* Loader Link Preview */}
                             {isFetchingPreview && (
                                 <div className="text-xs text-indigo-400 animate-pulse mt-1">Recherche de l'aperçu...</div>
                             )}
 
+
                             {/* --- AFFICHAGE LINK PREVIEW --- */}
-                            {linkPreview && (
-                                <div className="mt-3 relative rounded-xl overflow-hidden border border-gray-600 bg-gray-900 group/preview transition-all hover:border-gray-500">
+
+                            {linkPreview && previews.length === 0 && (
+                                <div className="relative rounded-xl overflow-hidden border border-gray-600 bg-gray-900 transition-all hover:border-gray-500">
+
+                                    {/* Bouton supprimer */}
                                     <button
                                         type="button"
                                         onClick={removeLinkPreview}
@@ -323,34 +332,67 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                                     >
                                         ✕
                                     </button>
-                                    
-                                    <a href={linkPreview.url} target="_blank" rel="noreferrer" className="block">
+
+                                    {/* Lien clickable */}
+                                    <a href={linkPreview.url} target="_blank" rel="noreferrer" className="gap-3">
+
+                                        {/* Image carrée version compacte */}
                                         {linkPreview.image && (
-                                            <div className="h-54 overflow-hidden">
+                                            <div className="mb-2 w-full max-h-64 overflow-hidden">
                                                 <img src={linkPreview.image} alt="" className="w-full h-full object-cover" />
                                             </div>
                                         )}
-                                        <div className="p-3 bg-gray-800/50">
+
+                                        {/* Texte */}
+                                        <div className="flex-1 ml-2">
                                             <div className="text-xs text-gray-400 uppercase mb-1">{linkPreview.domain}</div>
                                             <h3 className="text-white font-semibold text-sm line-clamp-1">{linkPreview.title}</h3>
                                             <p className="text-gray-400 text-xs mt-1 line-clamp-2">{linkPreview.description}</p>
                                         </div>
+
                                     </a>
                                 </div>
                             )}
+                            {linkPreview && previews.length > 0 && (
+                                <div className="mt-1 relative rounded-xl overflow-hidden border border-gray-600 bg-gray-900 transition-all hover:border-gray-500 pr-2">
 
-                            {/* Compteur de caractères (Texte brut) */}
-                            <div className={`text-right text-xs font-semibold mt-1 transition-colors ${isOverLimit ? 'text-red-500' : 'text-gray-500'
-                                }`}>
-                                {isOverLimit ? `-${extraContentCount}` : plainTextLength} / {MAX_CHAR}
-                            </div>
+                                    {/* Bouton supprimer */}
+                                    <button
+                                        type="button"
+                                        onClick={removeLinkPreview}
+                                        className="absolute top-2 right-2 bg-black/70 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-500 transition-colors z-20"
+                                        title="Supprimer l'aperçu"
+                                    >
+                                        ✕
+                                    </button>
+
+                                    {/* Lien clickable */}
+                                    <a href={linkPreview.url} target="_blank" rel="noreferrer" className="flex gap-3">
+
+                                        {/* Image carrée à gauche (comme Twitter) */}
+                                        {linkPreview.image && (
+                                            <div className="w-32 h-24 overflow-hidden flex-shrink-0">
+                                                <img src={linkPreview.image} alt="" className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+
+                                        {/* Texte à droite */}
+                                        <div className="flex-1 flex flex-col justify-center">
+                                            <div className="text-xs text-gray-400 uppercase mb-1">{linkPreview.domain}</div>
+                                            <h3 className="text-white font-semibold text-sm line-clamp-1">{linkPreview.title}</h3>
+                                            <p className="text-gray-400 text-xs mt-1 line-clamp-2">{linkPreview.description}</p>
+                                        </div>
+
+                                    </a>
+                                </div>
+                            )}
                         </div>
 
                         {/* --- Prévisualisation des images (MODIFIÉ) --- */}
                         {previews.length > 0 && (
-                            <div className="grid grid-cols-2 gap-2 mt-2">
+                            <div className="gap-2 w-full">
                                 {previews.map((preview, index) => (
-                                    <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-600 bg-gray-900">
+                                    <div key={index} className="flex flex-col relative group rounded-lg overflow-hidden border border-gray-600 bg-gray-900 mb-2">
                                         {/* Bouton supprimer l'image */}
                                         <button
                                             type="button"
@@ -364,7 +406,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                                             <img
                                                 src={preview.url}
                                                 alt="Preview"
-                                                className="w-full h-40 object-cover"
+                                                className="w-full h-full object-cover"
                                             />
                                         ) : (
                                             <div className="w-full h-40 flex flex-col items-center justify-center text-gray-400 gap-2">
@@ -398,25 +440,25 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
 
                             {/* Barre d'outils personnalisée connectée à Quill */}
                             <div className="flex gap-1 border-l border-gray-600 pl-4">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onMouseDown={(e) => { e.preventDefault(); insertFormat('bold'); }} // onMouseDown évite de perdre le focus de l'éditeur
                                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
                                     title="Gras"
                                 >
                                     <i className="fi fi-rr-bold flex"></i>
                                 </button>
-                                <button 
-                                    type="button" 
-                                    onMouseDown={(e) => { e.preventDefault(); insertFormat('italic'); }} 
+                                <button
+                                    type="button"
+                                    onMouseDown={(e) => { e.preventDefault(); insertFormat('italic'); }}
                                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
                                     title="Italique"
                                 >
                                     <i className="fi fi-rr-italic flex"></i>
                                 </button>
-                                <button 
-                                    type="button" 
-                                    onMouseDown={(e) => { e.preventDefault(); insertFormat('quote'); }} 
+                                <button
+                                    type="button"
+                                    onMouseDown={(e) => { e.preventDefault(); insertFormat('quote'); }}
                                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
                                     title="Citation"
                                 >

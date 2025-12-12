@@ -9,6 +9,7 @@ import DOMPurify from 'dompurify';
 import linkifyHtml from 'linkify-html';
 import '../index.css';
 import { timeAgo } from '../utils/timeAgo';
+import ReactionsBar from './ReactionsBar';
 
 // --- SOUS-COMPOSANT : GESTION DE LA GALERIE ---
 const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
@@ -113,6 +114,47 @@ const PostItem = ({ post, onDelete }) => {
     const authorUsername = post.userId ? post.userId.username : "inconnu";
     const authorAvatar = (post.userId && post.userId.avatar) ? post.userId.avatar : assets.profile_icon; // Image par défaut
     const postDate = post.createdAt;
+
+    const isLiked = post.likes && post.likes.includes(userData?._id);
+    const isSaved = post.saves && post.saves.includes(userData?._id);
+
+
+
+    const handleLike = async (e) => {
+    e.stopPropagation();
+    // ... votre logique de like existante ou future
+  };
+
+  const handleComment = (e) => {
+    e.stopPropagation();
+    // ... logique pour ouvrir les commentaires
+  };
+
+  const handleShare = (e) => {
+    e.stopPropagation();
+    // ... logique de partage
+  };
+  
+  const handleSave = (e) => {
+    e.stopPropagation();
+    // ... logique de sauvegarde
+  };
+
+    // Fonction pour copier le lien
+    const copyLink = () => {
+        // Génère le lien (ajustez '/post/' selon vos routes réelles)
+        const link = `${window.location.origin}/post/${post._id}`;
+
+        navigator.clipboard.writeText(link)
+            .then(() => {
+                toast.success("Lien copié !");
+                setIsMenuOpen(false); // Fermer le menu après le clic
+            })
+            .catch((err) => {
+                toast.error("Erreur lors de la copie");
+                console.error('Erreur copie :', err);
+            });
+    };
 
 
     const mediaUrl = rawMediaUrl
@@ -241,7 +283,7 @@ const PostItem = ({ post, onDelete }) => {
     return (
         <div className="w-full bg-white border-b border-gray-300 p-4 animate-fade-in">
             {/* --- HEADER DU POST --- */}
-            <div className="flex justify-between items-start mb-3 w-fuul">
+            <div className="flex justify-between items-start w-fuul">
                 <div className="flex items-center gap-3">
                     {/* Avatar cliquable */}
                     <img
@@ -282,15 +324,22 @@ const PostItem = ({ post, onDelete }) => {
                             {userData && (userData._id === post.userId?._id) ? (
                                 <button
                                     onClick={handleDelete}
-                                    className="w-full text-left px-3 pt-3 text-sm text-red-400 hover:bg-gray-100 flex items-center gap-2">
-                                    <i className="fi fi-rr-trash"></i> Supprimer
+                                    className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-gray-100 flex items-center gap-2">
+                                    <i className="fi fi-rr-trash flex"></i> Supprimer
                                 </button>
                             ) : (
                                 <button
-                                    className="w-full text-left px-3 pt-3 text-sm text-gray-600 hover:bg-gray-100 flex items-center gap-2">
-                                    <i className="fi fi-rr-flag"></i> Signaler
+                                    className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 flex items-center gap-2">
+                                    <i className="fi fi-tr-link-alt flex"></i> Signaler
                                 </button>
                             )}
+
+                            <button
+                                onClick={copyLink}
+                                className="w-full text-left px-3 pt-1 pb-2 text-sm text-gray-600 hover:bg-gray-100 flex items-center gap-2">
+                                <i className="fi fi-sr-link-alt flex"></i> Copier le lien
+                            </button>
+
                             <button
                                 onClick={() => setIsMenuOpen(false)}
                                 className="w-full text-left px-3 pt-1 pb-2 text-sm text-gray-600 hover:bg-gray-100 flex items-center gap-2">
@@ -305,7 +354,7 @@ const PostItem = ({ post, onDelete }) => {
             <div className="mb-4 pl-13.5"
                 onMouseEnter={() => setShowControls(true)}
                 onMouseLeave={() => setShowControls(false)}
-                >
+            >
                 {/* --- 3. Affichage du contenu traité --- */}
                 <div
                     className="post-content text-gray-800 text-sm leading-relaxed mb-3 break-words whitespace-pre-wrap"
@@ -313,35 +362,70 @@ const PostItem = ({ post, onDelete }) => {
                 ></div>
 
                 {/* --- NOUVEAU : AFFICHAGE DU LINK PREVIEW --- */}
-                {post.linkPreview && (
+                {post.linkPreview && post.media.length === 0 && (
+                    <>
+                        <a
+                            href={post.linkPreview.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block mb-4 rounded-xl overflow-hidden border border-gray-300 hover:bg-gray-50 transition-colors group"
+                        >
+                            {post.linkPreview.image && (
+                                <div className="max-h-64 overflow-hidden bg-gray-100 border-b border-gray-200">
+                                    <img
+                                        src={post.linkPreview.image}
+                                        alt={post.linkPreview.title}
+                                        className="w-full h-full object-cover group-hover:scale-101 transition-transform duration-500"
+                                        onError={(e) => e.target.style.display = 'none'} // Cache si l'image est brisée
+                                    />
+                                </div>
+                            )}
+                            <div className="p-3">
+                                <div className="text-xs text-gray-500 uppercase mb-1 font-medium">
+                                    {post.linkPreview.domain}
+                                </div>
+                                <h4 className="text-gray-900 font-bold text-base mb-1 line-clamp-1">
+                                    {post.linkPreview.title}
+                                </h4>
+                                <p className="text-gray-600 text-sm line-clamp-2">
+                                    {post.linkPreview.description}
+                                </p>
+                            </div>
+                        </a>
+                    </>
+                )}
+
+                {post.linkPreview && post.media.length > 0 && (
+
                     <a
                         href={post.linkPreview.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block mb-4 rounded-xl overflow-hidden border border-gray-300 hover:bg-gray-50 transition-colors group"
+                        className="flex rounded-xl overflow-hidden border border-gray-300 hover:bg-gray-100 transition-colors group"
                     >
                         {post.linkPreview.image && (
-                            <div className="h-54 overflow-hidden bg-gray-100 border-b border-gray-200">
+                            <div className="w-32 h-24 overflow-hidden bg-gray-100">
                                 <img
                                     src={post.linkPreview.image}
                                     alt={post.linkPreview.title}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    className="w-full h-full object-cover group-hover:scale-101 transition-transform duration-500"
                                     onError={(e) => e.target.style.display = 'none'} // Cache si l'image est brisée
                                 />
                             </div>
                         )}
-                        <div className="p-3">
-                            <div className="text-xs text-gray-500 uppercase mb-1 font-medium">
+                        <div className="p-3 flex flex-col justify-center bg-gray-50">
+                            <div className="text-xs text-gray-500 uppercase font-medium">
                                 {post.linkPreview.domain}
                             </div>
-                            <h4 className="text-gray-900 font-bold text-base mb-1 line-clamp-1">
+                            <h4 className="text-gray-900 font-bold text-base line-clamp-1">
                                 {post.linkPreview.title}
                             </h4>
-                            <p className="text-gray-600 text-sm line-clamp-2">
+                            <p className="text-gray-600 text-sm line-clamp-1">
                                 {post.linkPreview.description}
                             </p>
                         </div>
                     </a>
+
                 )}
 
                 {/* --- NOUVELLE GALERIE --- */}
@@ -354,29 +438,16 @@ const PostItem = ({ post, onDelete }) => {
             </div>
 
             {/* --- FOOTER (ACTIONS) --- */}
-            <div className="flex justify-between mt-4 p-1 pt-2 px-4 rounded-full bg-gray-200 text-gray-600">
-                <div className='flex gap-4'>
-                    <button className="hover:text-indigo-400 flex items-center gap-1 transition-colors">
-                        <i className="fi fi-tr-heart"></i>
-                    </button>
-                    <button className="hover:text-indigo-400 flex items-center gap-1 transition-colors">
-                        <i className="fi fi-tr-arrows-repeat"></i>
-                    </button>
-                    <button className="hover:text-indigo-400 flex items-center gap-1 transition-colors">
-                        <i className="fi fi-tr-comment-alt"></i>
-                    </button>
-                </div>
-                <div className='flex gap-4'>
-                    <button className="hover:text-indigo-400 flex items-center gap-1 transition-colors">
-                        <i className="fi fi-tr-up"></i>
-                    </button>
-                    <button className="hover:text-indigo-400 flex items-center gap-1 transition-colors">
-                        <i className="fi fi-tr-bookmark"></i>
-                    </button>
-                    <button className="hover:text-indigo-400 flex items-center gap-1 transition-colors">
-                        <i className="fi fi-tr-share-square"></i>
-                    </button>
-                </div>
+            <div >
+                <ReactionsBar
+                    post={post}
+                    isLiked={isLiked}
+                    isSaved={isSaved}
+                    handleLike={handleLike}
+                    handleComment={handleComment}
+                    handleShare={handleShare}
+                    handleSave={handleSave}
+                />
             </div>
         </div>
     );

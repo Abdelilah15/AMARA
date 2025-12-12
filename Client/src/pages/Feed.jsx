@@ -72,11 +72,11 @@ const Feed = () => {
     }, [globalNewPost, setGlobalNewPost]);
 
     return (
-        <div className='min-h-screen bg-gray-900 text-white pb-20 relative'>
+        <div className='min-h-screen bg-gray-900 text-white pb-10 relative'>
             <Navbar />
 
             {/* --- ZONE D'AFFICHAGE DES POSTS --- */}
-            <div className=" pt-18 max-w-2xl mx-auto flex flex-col">
+            <div className=" pt-16 max-w-xl mx-auto flex flex-col">
                 {loading ? (
                     <p className="text-center text-gray-400">Chargement des posts...</p>
                 ) : posts.length === 0 ? (

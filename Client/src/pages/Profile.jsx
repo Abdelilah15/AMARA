@@ -273,7 +273,7 @@ const Profile = () => {
     <div className='mt-16 min-h-screen flex flex-col items-center justify-start bg-gray-50'>
 
       {/* ======== Carte du Profil ======== */}
-      <div className="w-full max-w-3xl mx-auto border border-gray-700">
+      <div className="w-full max-w-xl mx-auto border border-gray-700">
 
         {/* --- Zone Bannière --- */}
         <div className="relative h-40 sm:h-48 bg-gray-200 group">

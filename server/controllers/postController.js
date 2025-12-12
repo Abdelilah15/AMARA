@@ -13,7 +13,7 @@ export const getLinkMetadata = async (req, res) => {
         // On récupère le HTML de la page
         const { data } = await axios.get(url, {
             headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AmaraBot/1.0)' },
-            timeout: 5000 // Timeout de 5s pour ne pas bloquer
+            timeout: 10000 // Timeout de 5s pour ne pas bloquer
         });
 
         const $ = cheerio.load(data);
