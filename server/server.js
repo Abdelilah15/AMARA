@@ -23,6 +23,11 @@ app.get('/', (req, res)=> res.send("ⵜⴰⵡⵡⵓⵔⵉ ⵜⴳⴰⴷⴷⴰ ⵜ
 app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
 app.use('/api/post', postRouter)
-app.use('/uploads', express.static('uploads'))
+app.use('/uploads', (req, res, next) => {
+    // Empêche les navigateurs de "deviner" le type de fichier (sniffing)
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Disposition', 'attachment'); 
+    next();
+}, express.static('uploads'));
 
 app.listen(port, ()=> console.log(`Server started on PORT: ${port}`));

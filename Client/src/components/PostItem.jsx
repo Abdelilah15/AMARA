@@ -286,7 +286,7 @@ const handlePostClick = () => {
     };
 
     return (
-        <div className="w-full bg-white border-b border-gray-300 p-4 animate-fade-in">
+        <div className="min-w-100hv bg-white border-b border-gray-300 p-4 animate-fade-in">
             {/* --- HEADER DU POST --- */}
             <div className="flex justify-between items-start w-fuul">
                 <div className="flex items-center gap-3">
@@ -300,13 +300,15 @@ const handlePostClick = () => {
                     <div className="flex flex-col">
                         <div className="flex items-baseline gap-2">
                             {/* Nom complet */}
-                            <span className="font-bold text-gray-900">{authorName}</span>
+                            <span 
+                            onClick={() => navigate(`/@${post.userId?.username}`)}
+                            className="font-bold text-gray-900 cursor-pointer hover:underline">{authorName}</span>
                             {/* Nom d'utilisateur (@username) */}
                             <span className="text-gray-500 text-sm">@{authorUsername}</span>
                             {/* Point séparateur */}
                             <span className="text-gray-400 text-xs">•</span>
                             {/* Horodatage Relatif */}
-                            <span className="text-gray-500 text-sm hover:underline cursor-pointer" title={new Date(postDate).toLocaleString()}>
+                            <span className="text-gray-500 text-sm hover:underline" title={new Date(postDate).toLocaleString()}>
                                 {timeAgo(postDate)}
                             </span>
                         </div>
@@ -356,7 +358,7 @@ const handlePostClick = () => {
             </div>
 
             {/* Post Content */}
-            <div className={`mb-4 pl-13.5 ${!isDetail ? 'cursor-pointer hover:bg-gray-50 transition-colors rounded-lg -ml-2 p-2' : ''}`}
+            <div className={`mb-4 pl-13.5 ${!isDetail ? ' cursor-pointer transition-colors rounded-lg -ml-2 p-2' : ''}`}
                 onMouseEnter={() => setShowControls(true)}
                 onMouseLeave={() => setShowControls(false)}
                 onClick={handlePostClick}

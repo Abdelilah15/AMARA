@@ -68,7 +68,7 @@
   
   .post-content strong {
       font-weight: 700;
-      color: #fff;
+      color: inherit;
   }
   
   .post-content em {
@@ -103,6 +103,7 @@
   height: 100%;
   object-fit: cover;
   cursor: pointer;
+  
 }
 
 /* Cas : 1 média (Pleine largeur) */

@@ -3,7 +3,9 @@ import jwt from 'jsonwebtoken';
 import userModel from '../models/userModel.js';
 import transporter from '../config/nodemailer.js';
 import { EMAIL_VERIFICATION_TEMPLATE, PASSWORD_RESET_TEMPLATE } from '../config/emailTemplates.js';
+import crypto from 'crypto';
 
+const otp = crypto.randomInt(100000, 999999).toString();
 
 export const register = async (req, res)=>{
     const {name, email, password, username} = req.body
