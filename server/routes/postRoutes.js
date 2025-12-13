@@ -1,5 +1,5 @@
 import express from 'express';
-import { createPost, getUserPosts, getAllPosts, deletePost, getLinkMetadata } from '../controllers/postController.js';
+import { createPost, getUserPosts, getAllPosts, deletePost, getLinkMetadata, getPostById } from '../controllers/postController.js';
 import userAuth from '../middleware/userAuth.js';
 import upload from '../middleware/multer.js'; // Assurez-vous que ce fichier existe
 
