@@ -217,8 +217,8 @@ export const likePost = async (req, res) => {
             res.json({ success: true, message: "Unliked" });
         } else {
             // Si non, on ajoute le like
-            await postModel.findByIdAndUpdate(postId, { $push: { likes: userId } });
-            res.json({ success: true, message: "Liked" });
+            await postModel.findByIdAndUpdate(postId, { $addToSet: { likes: userId } });
+            res.json({ success: true, message: "Post liké" });
         }
     } catch (error) {
         console.log(error);

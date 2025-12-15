@@ -109,14 +109,13 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
     const rawMediaUrl = post.media && post.media.length > 0 ? post.media[0] : null;
     const [showControls, setShowControls] = useState(false);
     const [processedContent, setProcessedContent] = useState('');
-    const [localLikes, setLocalLikes] = useState(post.likes || []);
     const authorName = post.userId ? post.userId.name : "Utilisateur Inconnu";
     const authorUsername = post.userId ? post.userId.username : "inconnu";
     const authorAvatar = (post.userId && post.userId.avatar) ? post.userId.avatar : assets.profile_icon; // Image par défaut
     const postDate = post.createdAt;
-
-    const isLiked = post.likes && post.likes.includes(userData?._id);
-    const isSaved = post.saves && post.saves.includes(userData?._id);
+ const [localLikes, setLocalLikes] = useState(post.likes || []);
+    const isLiked = userData && localLikes.includes(userData._id);
+    const isSaved = false; // À implémenter plus tard
 
     useEffect(() => {
         setLocalLikes(post.likes || []);
@@ -129,32 +128,30 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
             return toast.error("Connectez-vous pour aimer ce post");
         }
 
-        // 1. Mise à jour Optimiste (Immédiate) de l'UI
+        // Copie de l'état actuel pour rollback en cas d'erreur
         const previousLikes = [...localLikes];
         let updatedLikes;
 
         if (isLiked) {
-            // Retirer le like localement
+            // Si déjà liké, on retire (ID unique)
             updatedLikes = localLikes.filter(id => id !== userData._id);
         } else {
-            // Ajouter le like localement
+            // Sinon on ajoute
             updatedLikes = [...localLikes, userData._id];
         }
+
+        // Mise à jour visuelle immédiate
         setLocalLikes(updatedLikes);
 
-        // 2. Appel API
         try {
             const { data } = await axios.post(backendUrl + '/api/post/like', { postId: post._id });
-
             if (!data.success) {
-                // En cas d'erreur, on remet l'état précédent
-                setLocalLikes(previousLikes);
+                setLocalLikes(previousLikes); // Annuler si erreur serveur
                 toast.error(data.message);
             }
         } catch (error) {
             setLocalLikes(previousLikes);
             console.error(error);
-            toast.error("Erreur de connexion");
         }
     };
 

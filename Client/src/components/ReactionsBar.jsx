@@ -19,15 +19,20 @@ const ReactionsBar = ({
             {/* Bouton Like */}
             <button
                 onClick={handleLike}
-                className={`flex items-center space-x-1 group transition-colors ${isLiked ? 'text-pink-600' : 'hover:text-pink-600'
-                    }`}
+                className="flex items-center space-x-1 group transition-colors"
                 title="J'aime"
             >
-                <div className={`p-2 rounded-full transition-colors ${isLiked ? 'bg-pink-50' : ''
-                    }`}>
-                    <i className={` fi fi-tr-heart flex transition-transform ${isLiked ? 'fill-current scale-110' : ''}`}
-                        size={20}
-                    ></i>
+                <div className={`p-2 rounded-full transition-colors ${
+                    isLiked ? 'bg-red-50' : ''
+                }`}>
+
+                    {isLiked && (
+                        <i className="fi fi-ss-heart flex fill-current text-red-500"></i>
+                    )}
+                    {!isLiked && (
+                        <i className="fi fi-rr-heart flex"></i>
+                    )}
+
                 </div>
                 <span className="text-sm font-medium">
                     {formatCompactNumber(post.likes?.length || 0)}
