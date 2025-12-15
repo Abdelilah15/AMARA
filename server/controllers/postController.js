@@ -199,3 +199,29 @@ export const deletePost = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 }
+
+export const likePost = async (req, res) => {
+    try {
+        const { postId } = req.body;
+        const userId = req.user.id;
+
+        const post = await postModel.findById(postId);
+        if (!post) {
+            return res.json({ success: false, message: "Post introuvable" });
+        }
+
+        // Vérifier si l'utilisateur a déjà liké
+        if (post.likes.includes(userId)) {
+            // Si oui, on retire le like
+            await postModel.findByIdAndUpdate(postId, { $pull: { likes: userId } });
+            res.json({ success: true, message: "Unliked" });
+        } else {
+            // Si non, on ajoute le like
+            await postModel.findByIdAndUpdate(postId, { $push: { likes: userId } });
+            res.json({ success: true, message: "Liked" });
+        }
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}

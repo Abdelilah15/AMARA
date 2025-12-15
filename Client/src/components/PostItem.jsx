@@ -109,7 +109,7 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
     const rawMediaUrl = post.media && post.media.length > 0 ? post.media[0] : null;
     const [showControls, setShowControls] = useState(false);
     const [processedContent, setProcessedContent] = useState('');
-
+    const [localLikes, setLocalLikes] = useState(post.likes || []);
     const authorName = post.userId ? post.userId.name : "Utilisateur Inconnu";
     const authorUsername = post.userId ? post.userId.username : "inconnu";
     const authorAvatar = (post.userId && post.userId.avatar) ? post.userId.avatar : assets.profile_icon; // Image par défaut
@@ -118,32 +118,67 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
     const isLiked = post.likes && post.likes.includes(userData?._id);
     const isSaved = post.saves && post.saves.includes(userData?._id);
 
-const handlePostClick = () => {
+    useEffect(() => {
+        setLocalLikes(post.likes || []);
+    }, [post.likes]);
+
+    const handleLike = async (e) => {
+        e.stopPropagation();
+
+        if (!userData) {
+            return toast.error("Connectez-vous pour aimer ce post");
+        }
+
+        // 1. Mise à jour Optimiste (Immédiate) de l'UI
+        const previousLikes = [...localLikes];
+        let updatedLikes;
+
+        if (isLiked) {
+            // Retirer le like localement
+            updatedLikes = localLikes.filter(id => id !== userData._id);
+        } else {
+            // Ajouter le like localement
+            updatedLikes = [...localLikes, userData._id];
+        }
+        setLocalLikes(updatedLikes);
+
+        // 2. Appel API
+        try {
+            const { data } = await axios.post(backendUrl + '/api/post/like', { postId: post._id });
+
+            if (!data.success) {
+                // En cas d'erreur, on remet l'état précédent
+                setLocalLikes(previousLikes);
+                toast.error(data.message);
+            }
+        } catch (error) {
+            setLocalLikes(previousLikes);
+            console.error(error);
+            toast.error("Erreur de connexion");
+        }
+    };
+
+    const handlePostClick = () => {
         // Si on n'est PAS déjà sur la page de détail, on redirige
         if (!isDetail) {
             navigate(`/post/${post._id}`);
         }
     };
 
-    const handleLike = async (e) => {
-    e.stopPropagation();
-    // ... votre logique de like existante ou future
-  };
+    const handleComment = (e) => {
+        e.stopPropagation();
+        // ... logique pour ouvrir les commentaires
+    };
 
-  const handleComment = (e) => {
-    e.stopPropagation();
-    // ... logique pour ouvrir les commentaires
-  };
+    const handleShare = (e) => {
+        e.stopPropagation();
+        // ... logique de partage
+    };
 
-  const handleShare = (e) => {
-    e.stopPropagation();
-    // ... logique de partage
-  };
-  
-  const handleSave = (e) => {
-    e.stopPropagation();
-    // ... logique de sauvegarde
-  };
+    const handleSave = (e) => {
+        e.stopPropagation();
+        // ... logique de sauvegarde
+    };
 
     // Fonction pour copier le lien
     const copyLink = () => {
@@ -300,9 +335,9 @@ const handlePostClick = () => {
                     <div className="flex flex-col">
                         <div className="flex items-baseline gap-2">
                             {/* Nom complet */}
-                            <span 
-                            onClick={() => navigate(`/@${post.userId?.username}`)}
-                            className="font-bold text-gray-900 cursor-pointer hover:underline">{authorName}</span>
+                            <span
+                                onClick={() => navigate(`/@${post.userId?.username}`)}
+                                className="font-bold text-gray-900 cursor-pointer hover:underline">{authorName}</span>
                             {/* Nom d'utilisateur (@username) */}
                             <span className="text-gray-500 text-sm">@{authorUsername}</span>
                             {/* Point séparateur */}
@@ -448,7 +483,7 @@ const handlePostClick = () => {
             {/* --- FOOTER (ACTIONS) --- */}
             <div >
                 <ReactionsBar
-                    post={post}
+                    post={{ ...post, likes: localLikes }}
                     isLiked={isLiked}
                     isSaved={isSaved}
                     handleLike={handleLike}

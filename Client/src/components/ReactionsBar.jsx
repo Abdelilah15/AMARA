@@ -1,12 +1,5 @@
 // Client/src/components/ReactionsBar.jsx
 import React from 'react';
-import {
-    IconHeart,
-    IconMessageCircle,
-    IconRepeat,
-    IconSend,
-    IconBookmark
-} from "@tabler/icons-react";
 import { formatCompactNumber } from '../utils/formatNumber'; // Assurez-vous d'avoir cette fonction ou utilisez une simple fonction locale pour l'instant
 
 const ReactionsBar = ({
