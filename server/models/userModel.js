@@ -19,6 +19,16 @@ const userSchema = new mongoose.Schema({
     emailChangeOtp: {type: String, default: ''},
     emailChangeOtpExpireAt: {type: Number, default: 0},
 
+    savedCollections: { 
+        type: [String], 
+        default: ['Général'] // Collection par défaut
+    },
+    savedPosts: [{
+        post: { type: mongoose.Schema.Types.ObjectId, ref: 'post' }, // Référence au modèle Post
+        collectionName: { type: String, default: 'Général' },
+        savedAt: { type: Date, default: Date.now }
+    }],
+
     links: [{
         title: {type: String},
         url: {type: String}

@@ -13,7 +13,7 @@ import Feed from './pages/Feed';
 import MediaModal from './components/MediaModal';
 import { AppContext } from './context/AppContext'
 import PostDetails from './pages/PostDetails';
-
+import SavedPosts from './pages/SavedPosts';
 
 
 
@@ -53,6 +53,7 @@ const App = () => {
                 <Route path='/:username' element={<Profile />} />
                 <Route path='/feed' element={<Feed />} />
                 <Route path='/post/:id' element={<PostDetails />} />
+                <Route path="/saved" element={<SavedPosts />} />
             </Routes>
         </div>
       </div>

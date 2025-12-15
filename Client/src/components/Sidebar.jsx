@@ -9,7 +9,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import CreatePostModal from './CreatePostModal';
 import "@flaticon/flaticon-uicons/css/all/all.css";
-import { IconUser, IconUserFilled, IconHome, IconHomeFilled, IconSettings, IconSettingsFilled } from "@tabler/icons-react";
+import { IconUser, IconUserFilled, IconHome, IconHomeFilled, IconSettings, IconSettingsFilled, IconBookmark, IconBookmarkFilled } from "@tabler/icons-react";
 
 
 
@@ -120,19 +120,25 @@ const Sidebar = ({ previousPath }) => {
               <li onClick={() => { navigate('/feed'); setIsOpen(false); }}
                 style={{ fontSize: "20px" }}
                 className={`hover:bg-gray-700 px-3 py-2 rounded cursor-pointer flex items-center gap-5 ${location.pathname === "/feed" && "bg-gray-700 text-white"}`}>
-                {location.pathname === "/feed" ? (<IconHomeFilled size={40} strokeWidth={1} className='flex' />):(<IconHome size={40} strokeWidth={1} className='flex' />)} Accueil
+                {location.pathname === "/feed" ? (<IconHomeFilled size={35} strokeWidth={1} className='flex' />):(<IconHome size={35} strokeWidth={1} className='flex' />)} Accueil
               </li>
 
               <li onClick={() => { navigate(`/@${userData.username}`); setIsOpen(false); }}
                 style={{ fontSize: "20px" }}
                 className={`hover:bg-gray-700 px-3 py-2 rounded cursor-pointer flex items-center gap-5 ${location.pathname === `/@${userData.username}` && "bg-gray-700 text-white"}`}>
-                {location.pathname === `/@${userData.username}` ? (<IconUserFilled size={40} strokeWidth={1} className='flex' />):(<IconUser size={40} strokeWidth={1} className='flex' />)} Profil
+                {location.pathname === `/@${userData.username}` ? (<IconUserFilled size={35} strokeWidth={1} className='flex' />):(<IconUser size={35} strokeWidth={1} className='flex' />)} Profil
+              </li>
+
+              <li onClick={() => { navigate('/saved'); setIsOpen(false); }}
+                style={{ fontSize: "20px" }}
+                className={`hover:bg-gray-700 px-3 py-2 rounded cursor-pointer flex items-center gap-5 ${location.pathname === "/saved" && "bg-gray-700 text-white"}`}>
+                {location.pathname === "/saved" ? (<IconBookmarkFilled size={35} strokeWidth={1} className='flex' />):(<IconBookmark size={35} strokeWidth={1} className='flex' />)} Saved
               </li>
 
               <li onClick={() => { navigate('/settings'); setIsOpen(false); }}
                 style={{ fontSize: "20px" }}
                 className={`hover:bg-gray-700 mb-5 px-3 py-2 rounded cursor-pointer flex items-center gap-5 ${location.pathname === "/settings" && "bg-gray-700 text-white"}`}>
-                {location.pathname === "/settings" ? (<IconSettingsFilled size={40} strokeWidth={1} className='flex' />):(<IconSettings size={40} strokeWidth={1} className='flex' />)} Settings
+                {location.pathname === "/settings" ? (<IconSettingsFilled size={35} strokeWidth={1} className='flex' />):(<IconSettings size={35} strokeWidth={1} className='flex' />)} Settings
               </li>
 
               {/* --- BOUTON CREATE (Desktop Uniquement) --- */}

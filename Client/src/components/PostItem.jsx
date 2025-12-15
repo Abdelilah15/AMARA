@@ -10,6 +10,7 @@ import linkifyHtml from 'linkify-html';
 import '../index.css';
 import { timeAgo } from '../utils/timeAgo';
 import ReactionsBar from './ReactionsBar';
+import SavePostModal from './SavePostModal';
 
 // --- SOUS-COMPOSANT : GESTION DE LA GALERIE ---
 const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
@@ -113,9 +114,9 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
     const authorUsername = post.userId ? post.userId.username : "inconnu";
     const authorAvatar = (post.userId && post.userId.avatar) ? post.userId.avatar : assets.profile_icon; // Image par défaut
     const postDate = post.createdAt;
- const [localLikes, setLocalLikes] = useState(post.likes || []);
+    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+    const [localLikes, setLocalLikes] = useState(post.likes || []);
     const isLiked = userData && localLikes.includes(userData._id);
-    const isSaved = false; // À implémenter plus tard
 
     useEffect(() => {
         setLocalLikes(post.likes || []);
@@ -174,7 +175,14 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
 
     const handleSave = (e) => {
         e.stopPropagation();
-        // ... logique de sauvegarde
+        setIsSaveModalOpen(true);
+    };
+
+    const onSaveSuccess = (action) => {
+        // Optionnel : Mettre à jour l'état local isSaved si vous gérez ça localement
+        // Mais React Query ou re-fetch le post serait mieux.
+        // Comme post.saves est passé en prop, l'idéal est que le parent rafraîchisse,
+        // ou on force un update visuel simple ici.
     };
 
     // Fonction pour copier le lien
@@ -482,11 +490,17 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
                 <ReactionsBar
                     post={{ ...post, likes: localLikes }}
                     isLiked={isLiked}
-                    isSaved={isSaved}
                     handleLike={handleLike}
                     handleComment={handleComment}
                     handleShare={handleShare}
                     handleSave={handleSave}
+                />
+                {/* Ajoutez la modale ici */}
+                <SavePostModal
+                    isOpen={isSaveModalOpen}
+                    onClose={() => setIsSaveModalOpen(false)}
+                    postId={post._id}
+                    onSaveSuccess={onSaveSuccess}
                 />
             </div>
         </div>

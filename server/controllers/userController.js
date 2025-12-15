@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import userModel from "../models/userModel.js";
 import transporter from '../config/nodemailer.js';
 import { EMAIL_CHANGE_TEMPLATE } from '../config/emailTemplates.js';
+import postModel from '../models/postModel.js';
 
 
 export const getUserData = async (req, res)=>{
@@ -316,6 +317,111 @@ export const verifyEmailChange = async (req, res) => {
         await user.save();
 
         res.json({ success: true, message: "Email mis à jour avec succès !" });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export const savePost = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { postId, collectionName } = req.body;
+
+        const user = await userModel.findById(userId);
+        const post = await postModel.findById(postId);
+
+        if (!post) return res.json({ success: false, message: "Post introuvable" });
+
+        // Vérifier si le post est déjà sauvegardé
+        const isAlreadySaved = user.savedPosts.some(item => item.post.toString() === postId);
+
+        if (isAlreadySaved) {
+            // Si déjà sauvegardé, on le retire (Unsave) - Ou on pourrait mettre à jour le dossier
+            // Ici, pour simplifier : si on rappelle save, on met à jour la collection, ou on supprime si demandé explicitement
+            // Mais pour une logique "Toggle" simple :
+            
+            // Retirer de la liste de l'utilisateur
+            user.savedPosts = user.savedPosts.filter(item => item.post.toString() !== postId);
+            
+            // Retirer l'ID utilisateur du tableau 'saves' du Post (pour le compteur)
+            if (post.saves.includes(userId)) {
+                post.saves = post.saves.filter(id => id.toString() !== userId);
+                await post.save();
+            }
+            
+            await user.save();
+            return res.json({ success: true, message: "Post retiré des sauvegardes", action: 'unsaved' });
+        } else {
+            // Ajouter à la liste de l'utilisateur
+            user.savedPosts.push({ post: postId, collectionName: collectionName || 'Général' });
+            
+            // Ajouter l'ID utilisateur au tableau 'saves' du Post
+            if (!post.saves.includes(userId)) {
+                post.saves.push(userId);
+                await post.save();
+            }
+
+            // Si la collection n'existe pas dans la liste des collections, on l'ajoute
+            if (collectionName && !user.savedCollections.includes(collectionName)) {
+                user.savedCollections.push(collectionName);
+            }
+
+            await user.save();
+            return res.json({ success: true, message: "Post enregistré", action: 'saved' });
+        }
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export const createCollection = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { collectionName } = req.body;
+
+        if(!collectionName) return res.json({ success: false, message: "Nom requis" });
+
+        const user = await userModel.findById(userId);
+        
+        if (user.savedCollections.includes(collectionName)) {
+            return res.json({ success: false, message: "Ce groupe existe déjà" });
+        }
+
+        user.savedCollections.push(collectionName);
+        await user.save();
+
+        res.json({ success: true, message: "Groupe créé", collections: user.savedCollections });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+
+export const getSavedPosts = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { collectionName } = req.query; // Optionnel
+
+        const user = await userModel.findById(userId).populate({
+            path: 'savedPosts.post',
+            populate: { path: 'userId', select: 'name username image' } // Pour afficher l'auteur du post
+        });
+
+        if (!user) return res.json({ success: false, message: "Utilisateur non trouvé" });
+
+        let posts = user.savedPosts;
+
+        // Filtrer par collection si demandé
+        if (collectionName && collectionName !== 'Tous') {
+            posts = posts.filter(item => item.collectionName === collectionName);
+        }
+
+        // On inverse pour avoir les plus récents en premier
+        posts = posts.reverse();
+
+        res.json({ success: true, savedPosts: posts, collections: user.savedCollections });
 
     } catch (error) {
         res.json({ success: false, message: error.message });
