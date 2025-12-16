@@ -117,6 +117,7 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
     const [localLikes, setLocalLikes] = useState(post.likes || []);
     const isLiked = userData && localLikes.includes(userData._id);
+    const isSaved = userData && post.saves && post.saves.includes(userData._id);
 
     useEffect(() => {
         setLocalLikes(post.likes || []);
@@ -490,6 +491,7 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
                 <ReactionsBar
                     post={{ ...post, likes: localLikes }}
                     isLiked={isLiked}
+                    isSaved={isSaved}
                     handleLike={handleLike}
                     handleComment={handleComment}
                     handleShare={handleShare}

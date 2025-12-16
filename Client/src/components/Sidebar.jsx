@@ -24,33 +24,6 @@ const Sidebar = ({ previousPath }) => {
 
   const { userData, setUserData, backendUrl, setIsLoggedin, isSidebarOpen, setIsSidebarOpen, startAddAccount, setGlobalNewPost } = useContext(AppContext);
 
-  const logout = async () => {
-    try {
-      axios.defaults.withCredentials = true
-      const { data } = await axios.post(backendUrl + '/api/auth/logout')
-      data.success && setIsLoggedin(false)
-      data.success && setUserData(false)
-      navigate('/')
-      toast.success('Déconnecté avec succès')
-      setIsSidebarOpen(false);
-
-    } catch (error) {
-      toast.error(error.message)
-    }
-  };
-
-  const handleNavigate = (path) => {
-    navigate(path);
-    setIsSidebarOpen(false);
-  };
-
-  const handleAddAccount = () => {
-    // startAddAccount renvoie false si la limite est atteinte
-    if (startAddAccount()) {
-      navigate('/login');
-    }
-  };
-
   const handleSidebarPostCreated = (post) => {
       // On met le post dans le contexte global pour que Feed.jsx ou Profile.jsx le récupère
       setGlobalNewPost({
