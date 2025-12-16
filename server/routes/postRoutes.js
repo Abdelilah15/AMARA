@@ -1,5 +1,5 @@
 import express from 'express';
-import { createPost, getUserPosts, getAllPosts, deletePost, getLinkMetadata, getPostById } from '../controllers/postController.js';
+import { createPost, getUserPosts, getAllPosts, deletePost, getLinkMetadata, getPostById, likePost } from '../controllers/postController.js';
 import userAuth from '../middleware/userAuth.js';
 import { uploadMedia } from '../middleware/multer.js'; // Assurez-vous que ce fichier existe
 
@@ -9,6 +9,7 @@ const postRouter = express.Router();
 postRouter.post('/create', userAuth, uploadMedia.array('files', 5), createPost);
 postRouter.post('/preview-link', userAuth, getLinkMetadata);
 postRouter.get('/user/:userId', getUserPosts);
+postRouter.post('/like', userAuth, likePost);
 postRouter.get('/all', getAllPosts);
 postRouter.get('/single/:id', getPostById);
 postRouter.delete('/delete/:id', userAuth, deletePost);

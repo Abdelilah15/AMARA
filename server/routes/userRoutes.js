@@ -1,6 +1,6 @@
 import express from 'express'
 import userAuth from '../middleware/userAuth.js';
-import { getUserData, uploadProfileImage, uploadBannerImage, updateProfileType, updateUserBio, updateUserProfile, getAllUsers, getUserProfile, changePassword, sendEmailChangeOtp, verifyEmailChange} from '../controllers/userController.js';
+import { getUserData, uploadProfileImage, uploadBannerImage, updateProfileType, updateUserBio, updateUserProfile, getAllUsers, getUserProfile, changePassword, sendEmailChangeOtp, verifyEmailChange, savePost, createCollection, getSavedPosts } from '../controllers/userController.js';
 import { uploadImage } from '../middleware/multer.js';
 
 
@@ -17,6 +17,9 @@ userRouter.post('/change-password', userAuth, changePassword);
 userRouter.get('/:username', getUserProfile);
 userRouter.post('/send-email-otp', userAuth, sendEmailChangeOtp);
 userRouter.post('/verify-new-email', userAuth, verifyEmailChange);
+userRouter.post('/save-post', userAuth, savePost);
+userRouter.post('/create-collection', userAuth, createCollection);
+userRouter.get('/saved-posts', userAuth, getSavedPosts);
 
 
 
