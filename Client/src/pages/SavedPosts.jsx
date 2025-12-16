@@ -43,7 +43,7 @@ const SavedPosts = () => {
     }, [activeTab]);
 
     return (
-        <div className="mt-16 min-h-screen bg-gray-100">
+        <div className="pt-16 min-h-screen bg-gray-100">
             <div className="max-w-2xl mx-auto pt-4">
                 
                 {/* Header / Titre */}

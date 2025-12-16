@@ -288,7 +288,7 @@ const Profile = () => {
 
   return (
     // Container Principal : Centré sur desktop, fond gris clair
-    <div className='mt-16 min-h-screen flex flex-col items-center justify-start bg-gray-50'>
+    <div className='pt-16 min-h-screen flex flex-col items-center justify-start bg-gray-50'>
 
       {/* ======== Carte du Profil ======== */}
       <div className="w-full max-w-xl mx-auto border border-gray-700">

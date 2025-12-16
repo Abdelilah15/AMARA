@@ -415,19 +415,53 @@ export const getSavedPosts = async (req, res) => {
 
         if (!user) return res.json({ success: false, message: "Utilisateur non trouvé" });
 
-        let posts = user.savedPosts;
+        let savedItems = user.savedPosts.filter(item => item.post !== null);
 
         // Filtrer par collection si demandé
         if (collectionName && collectionName !== 'Tous') {
-            posts = posts.filter(item => item.collectionName === collectionName);
+            savedItems = savedItems.filter(item => item.collectionName === collectionName);
         }
 
-        // On inverse pour avoir les plus récents en premier
-        posts = posts.reverse();
+        savedItems = savedItems.reverse();
 
-        res.json({ success: true, savedPosts: posts, collections: user.savedCollections });
+        // On extrait l'objet 'post' et on lui ajoute mediaUrl/mediaType
+        const formattedPosts = savedItems.map(item => {
+            const postObj = item.post.toObject ? item.post.toObject() : item.post;
 
-    } catch (error) {
+            let mediaUrl = null;
+            let mediaType = null;
+
+            if (postObj.media && postObj.media.length > 0) {
+                // On garde la logique que tu as dans postController
+                mediaUrl = postObj.media[0]; 
+                
+                const extension = mediaUrl.split('.').pop().toLowerCase();
+                if (['mp4', 'mov', 'webm', 'ogg'].includes(extension)) {
+                    mediaType = 'video';
+                } else {
+                    mediaType = 'image';
+                }
+            }
+
+            return {
+                ...postObj,
+                mediaUrl,  // Indispensable pour PostItem
+                mediaType  // Indispensable pour PostItem
+            };
+        });
+
+        const uniqueCollections = [...new Set(user.savedCollections)]; // Supprime doublons
+        const finalCollections = uniqueCollections.filter(c => c !== 'Général'); // Retire Général s'il y est
+
+        res.json({ 
+            success: true, 
+            savedPosts: formattedPosts, 
+            // Le frontend gère l'ajout manuel de 'Tous', ici on renvoie juste les collections perso
+            collections: finalCollections 
+        });
+
+        } catch (error) {
+        console.log(error); // Ajoute un log pour voir les erreurs serveur
         res.json({ success: false, message: error.message });
     }
 };
