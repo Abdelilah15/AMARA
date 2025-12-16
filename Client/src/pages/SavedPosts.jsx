@@ -30,14 +30,8 @@ const SavedPosts = () => {
                 // data.savedPosts contient [{ post: {...}, collectionName: "..." }, ...]
                 // Nous devons extraire l'objet 'post' pour PostItem, mais garder le contexte
                 setSavedPosts(data.savedPosts);
-                savedPosts.map((item) => (
-                    <PostItem key={item.post._id} post={item.post} />
-                ))
-
-
                 // Mettre à jour la liste des collections (ajoute 'Tous' manuellement pour l'UI)
                 setCollections(['Tous', ...data.collections]);
-
                 const uniqueCollections = ['Tous', ...new Set(data.collections)];
                 setCollections(uniqueCollections);
             }
@@ -89,9 +83,10 @@ const SavedPosts = () => {
                     {loading ? (
                         <div className="p-10 text-center text-gray-500">Chargement...</div>
                     ) : savedPosts.length > 0 ? (
-                        savedPosts.map((post) => (
-                            <div key={post._id} className="bg-white rounded-xl shadow-sm overflow-hidden">
-                                <PostItem post={post} />
+                        savedPosts.map((item) => ( // 1. Renommez 'post' en 'item' pour plus de clarté
+                            <div key={item._id} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                                {/* 2. Passez item.post au lieu de item tout court */}
+                                <PostItem post={item.post} />
                             </div>
                         ))
                     ) : (
