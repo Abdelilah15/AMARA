@@ -426,6 +426,8 @@ export const getSavedPosts = async (req, res) => {
 
         // 2. FORMATAGE EN GARDANT LA STRUCTURE { post: ..., collectionName: ... }
         const formattedSavedPosts = savedItems.map(item => {
+
+            if (!item.post || !item.post._id) return null;
             // On convertit le post en objet modifiable
             const postObj = item.post.toObject ? item.post.toObject() : item.post;
 
@@ -448,7 +450,7 @@ export const getSavedPosts = async (req, res) => {
                 ...item.toObject(), // Garde collectionName, _id du wrapper, etc.
                 post: postObj       // Remplace le post brut par le post formaté
             };
-        });
+        }).filter(item => item !== null);
 
         const uniqueCollections = [...new Set(user.savedCollections)];
         const finalCollections = uniqueCollections.filter(c => c !== 'Général');

@@ -90,10 +90,7 @@ const ReactionsBar = ({
 
                 {/* Bouton Enregistrer */}
                 <button
-                    onClick={(e) => {
-                        e.stopPropagation(); // <--- LA LIGNE MAGIQUE
-                        openSaveModal(post._id);       // Passer 'e' si la fonction parent l'attend, sinon juste handleSave()
-                    }}
+                    onClick={handleSave}
                     className={`flex items-center space-x-1 group transition-colors ${isSaved ? 'text-yellow-600' : 'hover:text-yellow-600'
                         }`}
                     title="Enregistrer"

@@ -17,35 +17,49 @@ const SavedPosts = () => {
         try {
             // Note: On pourrait optimiser en filtrant côté client si on a déjà tout chargé
             // mais ici on demande au backend pour être sûr
-            const url = collection === 'Tous' 
+            const url = collection === 'Tous'
                 ? `${backendUrl}/api/user/saved-posts`
                 : `${backendUrl}/api/user/saved-posts?collectionName=${encodeURIComponent(collection)}`;
 
-            const { data } = await axios.get(url);
+            const { data } = await axios.get(url, {
+                headers: {
+                    Authorization: `Bearer ${userData.token}`
+                }
+            });
             if (data.success) {
                 // data.savedPosts contient [{ post: {...}, collectionName: "..." }, ...]
                 // Nous devons extraire l'objet 'post' pour PostItem, mais garder le contexte
-                const formattedPosts = data.savedPosts.map(item => item.post).filter(p => p !== null); 
-                setSavedPosts(formattedPosts);
-                
+                setSavedPosts(data.savedPosts);
+                savedPosts.map((item) => (
+                    <PostItem key={item.post._id} post={item.post} />
+                ))
+
+
                 // Mettre à jour la liste des collections (ajoute 'Tous' manuellement pour l'UI)
                 setCollections(['Tous', ...data.collections]);
+
+                const uniqueCollections = ['Tous', ...new Set(data.collections)];
+                setCollections(uniqueCollections);
             }
         } catch (error) {
             toast.error("Erreur chargement sauvegardes");
+            console.error(error);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchSavedPosts(activeTab);
-    }, [activeTab]);
+        if (userData?.token) {
+            fetchSavedPosts(activeTab);
+        }
+    }, [activeTab, userData]);
+
 
     return (
         <div className="pt-16 min-h-screen bg-gray-100">
             <div className="max-w-2xl mx-auto pt-4">
-                
+
                 {/* Header / Titre */}
                 <div className="bg-white p-4 rounded-xl shadow-sm mb-4">
                     <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -60,11 +74,10 @@ const SavedPosts = () => {
                         <button
                             key={col}
                             onClick={() => setActiveTab(col)}
-                            className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${
-                                activeTab === col
-                                    ? 'bg-black text-white'
-                                    : 'bg-white text-gray-700 hover:bg-gray-200'
-                            }`}
+                            className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${activeTab === col
+                                ? 'bg-black text-white'
+                                : 'bg-white text-gray-700 hover:bg-gray-200'
+                                }`}
                         >
                             {col}
                         </button>
