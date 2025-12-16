@@ -29,7 +29,10 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
             key={index}
             src={getFullUrl(url)}
             alt={`media-${index}`}
-            onClick={() => onMediaClick(index)}
+            onClick={(e) => {
+                e.stopPropagation(); // Empêche le clic de remonter au parent (navigation)
+                onMediaClick(index);
+            }}
             className={`media-item ${extraClass}`}
         />
     );
@@ -47,7 +50,10 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
                         src={url}
                         controls
                         className="media-item"
-                        onClick={() => onMediaClick(0)}
+                        onClick={(e) => {
+                            e.stopPropagation(); // IMPORTANT pour la vidéo aussi
+                            onMediaClick(0); 
+                        }}
                     />
                 </div>
             );
@@ -94,7 +100,10 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
                 {renderImage(mediaList[2], 2)}
 
                 {/* La 4ème case avec l'overlay */}
-                <div className="more-media-overlay" onClick={() => onMediaClick(3)}>
+                <div className="more-media-overlay" onClick={(e) => {
+                        e.stopPropagation(); // IMPORTANT ICI AUSSI
+                        onMediaClick(3);
+                    }}>
                     <img src={getFullUrl(mediaList[3])} alt="media-more" className="media-item" />
                     <div className="overlay-count">+{hiddenCount + 1}</div>
                 </div>
@@ -417,6 +426,7 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
                             href={post.linkPreview.url}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             className="block mb-4 rounded-xl overflow-hidden border border-gray-300 hover:bg-gray-50 transition-colors group"
                         >
                             {post.linkPreview.image && (
