@@ -26,7 +26,8 @@ export const getUserData = async (req, res)=>{
                 bio: user.bio,
                 profileType: user.profileType,
                 links: user.links || [],
-                createdAt: user.createdAt
+                createdAt: user.createdAt,
+                savedCollections: user.savedCollections || []
             }
         });
         
@@ -345,7 +346,7 @@ export const savePost = async (req, res) => {
             user.savedPosts = user.savedPosts.filter(item => item.post.toString() !== postId);
             
             // Retirer l'ID utilisateur du tableau 'saves' du Post (pour le compteur)
-            if (post.saves.includes(userId)) {
+            if (post.saves && post.saves.includes(userId)) { 
                 post.saves = post.saves.filter(id => id.toString() !== userId);
                 await post.save();
             }
@@ -357,10 +358,13 @@ export const savePost = async (req, res) => {
             user.savedPosts.push({ post: postId, collectionName: collectionName || 'Général' });
             
             // Ajouter l'ID utilisateur au tableau 'saves' du Post
+            if (!post.saves) post.saves = []; 
             if (!post.saves.includes(userId)) {
                 post.saves.push(userId);
                 await post.save();
             }
+
+            if (!user.savedCollections) user.savedCollections = [];
 
             // Si la collection n'existe pas dans la liste des collections, on l'ajoute
             if (collectionName && !user.savedCollections.includes(collectionName)) {
