@@ -14,6 +14,8 @@ import MediaModal from './components/MediaModal';
 import { AppContext } from './context/AppContext'
 import PostDetails from './pages/PostDetails';
 import SavedPosts from './pages/SavedPosts';
+import SavePostModal from './components/SavePostModal';
+
 
 
 
@@ -29,7 +31,7 @@ const App = () => {
 
   const hideNavRoutes = ['/', '/login', '/email-verify', '/reset-password', '/register'];
   const shouldShowNav = !hideNavRoutes.includes(location.pathname);
-  const { mediaModalData } = useContext(AppContext);
+  const { mediaModalData, saveModalData, closeSaveModal } = useContext(AppContext);
 
   return (
     <div className="flex bg-gray-900 min-h-screen">
@@ -50,14 +52,21 @@ const App = () => {
                 <Route path='/reset-password' element={<ResetPassword />} />
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/settings' element={<Settings />} />
-                <Route path='/:username' element={<Profile />} />
                 <Route path='/feed' element={<Feed />} />
                 <Route path='/post/:id' element={<PostDetails />} />
                 <Route path="/saved" element={<SavedPosts />} />
+                <Route path='/:username' element={<Profile />} />
             </Routes>
         </div>
       </div>
       <MediaModal />
+      {saveModalData && (
+          <SavePostModal 
+              isOpen={saveModalData.isOpen} 
+              postId={saveModalData.postId} 
+              onClose={closeSaveModal} 
+          />
+      )}
     </div>
   );
 }

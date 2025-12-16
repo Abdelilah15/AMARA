@@ -21,6 +21,7 @@ export const AppContextProvider = (props) => {
     const [isAddingAccount, setIsAddingAccount] = useState(false);
     const [globalNewPost, setGlobalNewPost] = useState(null);
     const [mediaModalData, setMediaModalData] = useState(null);
+    const [saveModalData, setSaveModalData] = useState({ isOpen: false, postId: null });
 
     const handleLogout = async (navigate) => {
         try {
@@ -101,6 +102,14 @@ export const AppContextProvider = (props) => {
         }
     }
 
+    const openSaveModal = (postId) => {
+        setSaveModalData({ isOpen: true, postId });
+    };
+
+    const closeSaveModal = () => {
+        setSaveModalData({ ...saveModalData, isOpen: false });
+    };
+
     // Fonction interne pour sauvegarder le compte dans la liste locale
     const saveAccountToList = (user, token) => {
         setAccounts(prevAccounts => {
@@ -169,7 +178,8 @@ export const AppContextProvider = (props) => {
         switchAccountSession,
         handleLogout,
         globalNewPost, setGlobalNewPost,
-        mediaModalData, setMediaModalData
+        mediaModalData, setMediaModalData,
+        saveModalData, openSaveModal, closeSaveModal
 
     }
 

@@ -406,62 +406,61 @@ export const createCollection = async (req, res) => {
 export const getSavedPosts = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { collectionName } = req.query; // Optionnel
+        const { collectionName } = req.query;
 
         const user = await userModel.findById(userId).populate({
             path: 'savedPosts.post',
-            populate: { path: 'userId', select: 'name username image' } // Pour afficher l'auteur du post
+            populate: { path: 'userId', select: 'name username image' }
         });
 
         if (!user) return res.json({ success: false, message: "Utilisateur non trouvé" });
 
-        let savedItems = user.savedPosts.filter(item => item.post !== null);
+        // 1. Filtrer et trier
+        let savedItems = user.savedPosts
+            .filter(item => item.post !== null)
+            .reverse();
 
-        // Filtrer par collection si demandé
         if (collectionName && collectionName !== 'Tous') {
             savedItems = savedItems.filter(item => item.collectionName === collectionName);
         }
 
-        savedItems = savedItems.reverse();
-
-        // On extrait l'objet 'post' et on lui ajoute mediaUrl/mediaType
-        const formattedPosts = savedItems.map(item => {
+        // 2. FORMATAGE EN GARDANT LA STRUCTURE { post: ..., collectionName: ... }
+        const formattedSavedPosts = savedItems.map(item => {
+            // On convertit le post en objet modifiable
             const postObj = item.post.toObject ? item.post.toObject() : item.post;
 
             let mediaUrl = null;
             let mediaType = null;
 
+            // Logique de détection média
             if (postObj.media && postObj.media.length > 0) {
-                // On garde la logique que tu as dans postController
-                mediaUrl = postObj.media[0]; 
-                
+                mediaUrl = postObj.media[0];
                 const extension = mediaUrl.split('.').pop().toLowerCase();
-                if (['mp4', 'mov', 'webm', 'ogg'].includes(extension)) {
-                    mediaType = 'video';
-                } else {
-                    mediaType = 'image';
-                }
+                mediaType = ['mp4', 'mov', 'webm', 'ogg'].includes(extension) ? 'video' : 'image';
             }
 
+            // On injecte les infos DANS l'objet post
+            postObj.mediaUrl = mediaUrl;
+            postObj.mediaType = mediaType;
+
+            // On retourne l'objet wrapper complet (item) avec le post mis à jour
             return {
-                ...postObj,
-                mediaUrl,  // Indispensable pour PostItem
-                mediaType  // Indispensable pour PostItem
+                ...item.toObject(), // Garde collectionName, _id du wrapper, etc.
+                post: postObj       // Remplace le post brut par le post formaté
             };
         });
 
-        const uniqueCollections = [...new Set(user.savedCollections)]; // Supprime doublons
-        const finalCollections = uniqueCollections.filter(c => c !== 'Général'); // Retire Général s'il y est
+        const uniqueCollections = [...new Set(user.savedCollections)];
+        const finalCollections = uniqueCollections.filter(c => c !== 'Général');
 
         res.json({ 
             success: true, 
-            savedPosts: formattedPosts, 
-            // Le frontend gère l'ajout manuel de 'Tous', ici on renvoie juste les collections perso
+            savedPosts: formattedSavedPosts, // <-- Envoie la structure attendue par SavedPosts.jsx
             collections: finalCollections 
         });
 
-        } catch (error) {
-        console.log(error); // Ajoute un log pour voir les erreurs serveur
+    } catch (error) {
+        console.log(error);
         res.json({ success: false, message: error.message });
     }
 };

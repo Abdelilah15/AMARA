@@ -10,7 +10,7 @@ import linkifyHtml from 'linkify-html';
 import '../index.css';
 import { timeAgo } from '../utils/timeAgo';
 import ReactionsBar from './ReactionsBar';
-import SavePostModal from './SavePostModal';
+
 
 // --- SOUS-COMPOSANT : GESTION DE LA GALERIE ---
 const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
@@ -114,7 +114,7 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
 
 const PostItem = ({ post, onDelete, isDetail = false }) => {
     const navigate = useNavigate();
-    const { userData, backendUrl, setMediaModalData } = useContext(AppContext);
+    const { userData, backendUrl, setMediaModalData, openSaveModal} = useContext(AppContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const rawMediaUrl = post.media && post.media.length > 0 ? post.media[0] : null;
     const [showControls, setShowControls] = useState(false);
@@ -123,7 +123,6 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
     const authorUsername = post.userId ? post.userId.username : "inconnu";
     const authorAvatar = (post.userId && post.userId.avatar) ? post.userId.avatar : assets.profile_icon; // Image par défaut
     const postDate = post.createdAt;
-    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
     const [localLikes, setLocalLikes] = useState(post.likes || []);
     const isLiked = userData && localLikes.includes(userData._id);
     const isSaved = userData && post.saves && post.saves.includes(userData._id);
@@ -185,7 +184,7 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
 
     const handleSave = (e) => {
         e.stopPropagation();
-        setIsSaveModalOpen(true);
+        openSaveModal(post._id);
     };
 
     const onSaveSuccess = (action) => {
@@ -506,13 +505,6 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
                     handleComment={handleComment}
                     handleShare={handleShare}
                     handleSave={handleSave}
-                />
-                {/* Ajoutez la modale ici */}
-                <SavePostModal
-                    isOpen={isSaveModalOpen}
-                    onClose={() => setIsSaveModalOpen(false)}
-                    postId={post._id}
-                    onSaveSuccess={onSaveSuccess}
                 />
             </div>
         </div>

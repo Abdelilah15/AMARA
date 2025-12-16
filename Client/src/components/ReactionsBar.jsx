@@ -92,7 +92,7 @@ const ReactionsBar = ({
                 <button
                     onClick={(e) => {
                         e.stopPropagation(); // <--- LA LIGNE MAGIQUE
-                        handleSave(e);       // Passer 'e' si la fonction parent l'attend, sinon juste handleSave()
+                        openSaveModal(post._id);       // Passer 'e' si la fonction parent l'attend, sinon juste handleSave()
                     }}
                     className={`flex items-center space-x-1 group transition-colors ${isSaved ? 'text-yellow-600' : 'hover:text-yellow-600'
                         }`}
