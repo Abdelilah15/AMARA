@@ -408,12 +408,16 @@ export const getSavedPosts = async (req, res) => {
         const userId = req.user.id;
         const { collectionName } = req.query;
 
+        console.log(`Fetching saved posts for user: ${userId}`);
+
         const user = await userModel.findById(userId).populate({
             path: 'savedPosts.post',
             populate: { path: 'userId', select: 'name username image' }
         });
 
         if (!user) return res.json({ success: false, message: "Utilisateur non trouvé" });
+
+        console.log(`Raw savedPosts count: ${user.savedPosts.length}`);
 
         // 1. Filtrer et trier
         let savedItems = user.savedPosts
@@ -423,6 +427,8 @@ export const getSavedPosts = async (req, res) => {
         if (collectionName && collectionName !== 'Tous') {
             savedItems = savedItems.filter(item => item.collectionName === collectionName);
         }
+
+        console.log(`Items after filtering: ${savedItems.length}`);
 
         // 2. FORMATAGE EN GARDANT LA STRUCTURE { post: ..., collectionName: ... }
         const formattedSavedPosts = savedItems.map(item => {

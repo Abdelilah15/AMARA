@@ -21,13 +21,17 @@ const SavedPosts = () => {
                 ? `${backendUrl}/api/user/saved-posts`
                 : `${backendUrl}/api/user/saved-posts?collectionName=${encodeURIComponent(collection)}`;
 
-            const { data } = await axios.get(url);
+            const { data } = await axios.get(url, { withCredentials: true });
             
             if (data.success) {
                 setSavedPosts(data.savedPosts);
                 const uniqueCollections = ['Tous', ...new Set(data.collections)];
                 setCollections(uniqueCollections);
+            } else {
+                toast.error(data.message || "Erreur lors de la récupération");
+                console.error("Backend error:", data);
             }
+
         } catch (error) {
             toast.error("Erreur chargement sauvegardes");
             console.error(error);
