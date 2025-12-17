@@ -389,9 +389,16 @@ export const createCollection = async (req, res) => {
 
         const user = await userModel.findById(userId);
         
-        if (user.savedCollections.includes(collectionName)) {
+        const exists = user.savedCollections.some(c => c.name === collectionName);
+        if (exists) {
             return res.json({ success: false, message: "Ce groupe existe déjà" });
         }
+
+        user.savedCollections.push({
+            name: collectionName,
+            color: 'bg-gray-200',
+            pinned: false
+        });
 
         user.savedCollections.push(collectionName);
         await user.save();
@@ -458,17 +465,115 @@ export const getSavedPosts = async (req, res) => {
             };
         }).filter(item => item !== null);
 
-        const uniqueCollections = [...new Set(user.savedCollections)];
-        const finalCollections = uniqueCollections.filter(c => c !== 'Général');
+
+        let collections = user.savedCollections.map(col => {
+            if (typeof col === 'string') {
+                return { name: col, color: 'bg-gray-200', pinned: false, _id: col }; 
+            }
+            return col;
+        });
 
         res.json({ 
             success: true, 
-            savedPosts: formattedSavedPosts, // <-- Envoie la structure attendue par SavedPosts.jsx
-            collections: finalCollections 
+            savedPosts: formattedSavedPosts,
+            collections: collections 
         });
 
     } catch (error) {
         console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export const renameCollection = async (req, res) => {
+    try {
+        const { collectionId, newName } = req.body;
+        const userId = req.user.id;
+        const user = await userModel.findById(userId);
+
+        const collection = user.savedCollections.id(collectionId);
+        if(!collection) return res.json({success: false, message: "Collection introuvable"});
+        
+        if (collection.name === 'Général') return res.json({success: false, message: "Impossible de renommer Général"});
+
+        // Mettre à jour le nom dans la liste des collections
+        const oldName = collection.name;
+        collection.name = newName;
+
+        // Mettre à jour le nom dans tous les posts sauvegardés associés
+        user.savedPosts.forEach(post => {
+            if (post.collectionName === oldName) {
+                post.collectionName = newName;
+            }
+        });
+
+        await user.save();
+        res.json({ success: true, message: "Renommé avec succès" });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export const deleteCollection = async (req, res) => {
+    try {
+        const { collectionId } = req.body;
+        const userId = req.user.id;
+        const user = await userModel.findById(userId);
+
+        const collection = user.savedCollections.id(collectionId);
+        if(!collection) return res.json({success: false, message: "Collection introuvable"});
+        if (collection.name === 'Général') return res.json({success: false, message: "Impossible de supprimer Général"});
+
+        // Supprimer la collection
+        user.savedCollections.pull(collectionId);
+
+        // Déplacer les posts vers "Général" (ou les supprimer si vous préférez)
+        // Ici je les déplace vers Général pour ne pas perdre les favoris
+        user.savedPosts.forEach(post => {
+            if (post.collectionName === collection.name) {
+                post.collectionName = 'Général';
+            }
+        });
+
+        await user.save();
+        res.json({ success: true, message: "Collection supprimée" });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export const togglePinCollection = async (req, res) => {
+    try {
+        const { collectionId } = req.body;
+        const user = await userModel.findById(req.user.id);
+        const collection = user.savedCollections.id(collectionId);
+        
+        if(collection) {
+            collection.pinned = !collection.pinned;
+            await user.save();
+            res.json({ success: true, message: collection.pinned ? "Épinglée" : "Désépinglée" });
+        } else {
+            res.json({ success: false, message: "Collection introuvable" });
+        }
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export const updateCollectionColor = async (req, res) => {
+    try {
+        const { collectionId, color } = req.body;
+        const user = await userModel.findById(req.user.id);
+        const collection = user.savedCollections.id(collectionId);
+        
+        if(collection) {
+            collection.color = color;
+            await user.save();
+            res.json({ success: true, message: "Couleur mise à jour" });
+        } else {
+            res.json({ success: false, message: "Collection introuvable" });
+        }
+    } catch (error) {
         res.json({ success: false, message: error.message });
     }
 };

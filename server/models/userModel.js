@@ -20,8 +20,13 @@ const userSchema = new mongoose.Schema({
     emailChangeOtpExpireAt: {type: Number, default: 0},
 
     savedCollections: { 
-        type: [String], 
-        default: ['Général'] // Collection par défaut
+        type: [{
+            name: { type: String, required: true },
+            color: { type: String, default: 'bg-gray-200' }, // Stockera la classe CSS ou code hex
+            pinned: { type: Boolean, default: false },
+            createdAt: { type: Date, default: Date.now }
+        }],
+        default: [{ name: 'Général', color: 'bg-gray-200', pinned: false }]
     },
     savedPosts: [{
         post: { type: mongoose.Schema.Types.ObjectId, ref: 'post' }, // Référence au modèle Post
