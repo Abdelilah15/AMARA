@@ -126,13 +126,18 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
     const [localLikes, setLocalLikes] = useState(post.likes || []);
     const [localSaves, setLocalSaves] = useState(post.saves || []);
 
-    useEffect(() => {
-        setLocalLikes(post.likes || []);
-        setLocalSaves(post.saves || []);
-    }, [post.likes, post.saves]);
-
     const isLiked = userData && localLikes.includes(userData._id);
     const isSaved = userData && localSaves.includes(userData._id);
+
+    useEffect(() => {
+        setLocalLikes(post.likes || []);
+    }, [post.likes]);
+
+    useEffect(() => {
+        setLocalSaves(post.saves || []);
+    }, [post.saves]);
+
+    
 
     const handleLike = async (e) => {
         e.stopPropagation();
@@ -199,7 +204,7 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
             const previousSaves = [...localSaves];
             
             // Mise à jour optimiste (visuelle immédiate)
-            setLocalSaves(localSaves.filter(id => id !== userData._id));
+            setLocalSaves(previousSaves.filter(id => id !== userData._id));
 
             try {
                 // On appelle la même API, elle gère le toggle (retrait) si le post existe déjà
@@ -223,13 +228,6 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
             // CAS 2 : PAS ENCORE ENREGISTRÉ -> ON OUVRE LA MODALE
             openSaveModal(post._id);
         }
-    };
-
-    const onSaveSuccess = (action) => {
-        // Optionnel : Mettre à jour l'état local isSaved si vous gérez ça localement
-        // Mais React Query ou re-fetch le post serait mieux.
-        // Comme post.saves est passé en prop, l'idéal est que le parent rafraîchisse,
-        // ou on force un update visuel simple ici.
     };
 
     // Fonction pour copier le lien
@@ -536,9 +534,9 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
             {/* --- FOOTER (ACTIONS) --- */}
             <div >
                 <ReactionsBar
-                    post={{ ...post, likes: localLikes }}
+                    post={{ ...post, likes: localLikes, saves: localSaves }}
                     isLiked={isLiked}
-                    isSaved={{isSaved, saves: localSaves}}
+                    isSaved={isSaved}
                     handleLike={handleLike}
                     handleComment={handleComment}
                     handleShare={handleShare}
