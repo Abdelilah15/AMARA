@@ -124,12 +124,15 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
     const authorAvatar = (post.userId && post.userId.avatar) ? post.userId.avatar : assets.profile_icon; // Image par défaut
     const postDate = post.createdAt;
     const [localLikes, setLocalLikes] = useState(post.likes || []);
-    const isLiked = userData && localLikes.includes(userData._id);
-    const isSaved = userData && post.saves && post.saves.includes(userData._id);
+    const [localSaves, setLocalSaves] = useState(post.saves || []);
 
     useEffect(() => {
         setLocalLikes(post.likes || []);
-    }, [post.likes]);
+        setLocalSaves(post.saves || []);
+    }, [post.likes, post.saves]);
+
+    const isLiked = userData && localLikes.includes(userData._id);
+    const isSaved = userData && localSaves.includes(userData._id);
 
     const handleLike = async (e) => {
         e.stopPropagation();
@@ -182,9 +185,44 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
         // ... logique de partage
     };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.stopPropagation();
-        openSaveModal(post._id);
+        
+        if (!userData) {
+            return toast.error("Connectez-vous pour enregistrer");
+        }
+
+        if (isSaved) {
+            // CAS 1 : DÉJÀ ENREGISTRÉ -> ON RETIRE (UNSAVE) DIRECTEMENT
+            
+            // Copie pour rollback en cas d'erreur
+            const previousSaves = [...localSaves];
+            
+            // Mise à jour optimiste (visuelle immédiate)
+            setLocalSaves(localSaves.filter(id => id !== userData._id));
+
+            try {
+                // On appelle la même API, elle gère le toggle (retrait) si le post existe déjà
+                const { data } = await axios.post(backendUrl + '/api/user/save-post', { 
+                    postId: post._id 
+                });
+
+                if (data.success) {
+                    toast.success("Post retiré des enregistrements");
+                } else {
+                    // Erreur backend : on remet l'état précédent
+                    setLocalSaves(previousSaves);
+                    toast.error(data.message);
+                }
+            } catch (error) {
+                setLocalSaves(previousSaves);
+                toast.error("Erreur de connexion");
+            }
+
+        } else {
+            // CAS 2 : PAS ENCORE ENREGISTRÉ -> ON OUVRE LA MODALE
+            openSaveModal(post._id);
+        }
     };
 
     const onSaveSuccess = (action) => {
@@ -500,7 +538,7 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
                 <ReactionsBar
                     post={{ ...post, likes: localLikes }}
                     isLiked={isLiked}
-                    isSaved={isSaved}
+                    isSaved={{isSaved, saves: localSaves}}
                     handleLike={handleLike}
                     handleComment={handleComment}
                     handleShare={handleShare}

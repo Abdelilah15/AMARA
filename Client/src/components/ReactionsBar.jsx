@@ -1,6 +1,7 @@
 // Client/src/components/ReactionsBar.jsx
 import React from 'react';
 import { formatCompactNumber } from '../utils/formatNumber'; // Assurez-vous d'avoir cette fonction ou utilisez une simple fonction locale pour l'instant
+import { IconBookmark, IconBookmarkOff, IconBookmarksOff } from '@tabler/icons-react';
 
 const ReactionsBar = ({
     post,
@@ -91,12 +92,16 @@ const ReactionsBar = ({
                 {/* Bouton Enregistrer */}
                 <button
                     onClick={handleSave}
-                    className={`flex items-center space-x-1 group transition-colors ${isSaved ? 'text-yellow-600' : 'hover:text-yellow-600'
-                        }`}
-                    title="Enregistrer"
+                    className={`flex items-center space-x-1 group transition-colors ${isSaved ? 'text-yellow-600' : 'hover:text-yellow-600'}`}
+                    title={isSaved ? "Retirer des éléments enregistrés" : "Enregistrer"}
                 >
-                    <div className="p-2 rounded-full  transition-colors">
-                        <i className={`fi fi-ts-bookmark flex ${isSaved ? 'fill-current' : ''}`}></i>
+                    <div className="p-2 rounded-full transition-colors">
+                        {/* Condition ternaire pour changer l'icône */}
+                        {isSaved ? (
+                            <i className="fi fi-ts-bookmark flex"></i>
+                        ) : (
+                            <i className="fi fi-ts-bookmark-slash flex"></i>
+                        )}
                     </div>
                 </button>
             </div>
