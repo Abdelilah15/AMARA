@@ -14,7 +14,7 @@ const SavePostModal = ({ isOpen, onClose, postId, onSaveSuccess }) => {
     // 1. On récupère les collections de l'utilisateur (ou tableau vide par défaut)
     const userCols = userData?.savedCollections || [];
     // 2. On filtre pour ne pas avoir "Général" en double si jamais il est dans la DB
-    const customCols = userCols.filter(col => col !== 'Général');
+    const customCols = userCols.filter(col => typeof col === 'object' ? col.name !== 'Général' : col !== 'Général');
     // 3. On construit la liste finale : Toujours "Général" en premier + les autres
     const displayCollections = ['Général', ...customCols];
 

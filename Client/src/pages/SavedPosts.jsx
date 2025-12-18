@@ -61,16 +61,10 @@ const SavedPosts = () => {
 
                 // On s'assure que Général est là
                 fetchedCollections = fetchedCollections.filter(c => c && typeof c === 'object' && c.name && c._id && c.name.trim() !== '');
-                const generalExists = fetchedCollections.find(c => c.name === 'Général');
-                if (!generalExists) {
-                    fetchedCollections.unshift({ name: 'Général', _id: 'general_id', color: 'bg-gray-200', pinned: false });
-                }
 
                 // Logique de tri : Général en premier, puis Épinglés, puis les autres
                 fetchedCollections.sort((a, b) => {
-                    if (a.name === 'Général') return -1;
-                    if (b.name === 'Général') return 1;
-                    if (a.pinned === b.pinned) return 0; // Si même statut d'épingle, ordre normal
+                    if (a.pinned === b.pinned) return 0; 
                     return a.pinned ? -1 : 1; // Épinglés en premier
                 });
 

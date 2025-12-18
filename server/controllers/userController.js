@@ -241,7 +241,6 @@ export const changePassword = async (req, res) => {
     }
 };
 
-// 1. Initier le changement d'email (Envoyer OTP au nouvel email)
 export const sendEmailChangeOtp = async (req, res) => {
     try {
         const { newEmail } = req.body;
@@ -283,7 +282,6 @@ export const sendEmailChangeOtp = async (req, res) => {
     }
 };
 
-// 2. Vérifier l'OTP et changer l'email
 export const verifyEmailChange = async (req, res) => {
     try {
         const { otp } = req.body;
@@ -355,7 +353,7 @@ export const savePost = async (req, res) => {
             return res.json({ success: true, message: "Post retiré des sauvegardes", action: 'unsaved' });
         } else {
             // Ajouter à la liste de l'utilisateur
-            user.savedPosts.push({ post: postId, collectionName: collectionName || 'Général' });
+            user.savedPosts.push({ post: postId, collectionName: collectionName });
             
             // Ajouter l'ID utilisateur au tableau 'saves' du Post
             if (!post.saves) post.saves = []; 
@@ -497,8 +495,6 @@ export const renameCollection = async (req, res) => {
 
         const collection = user.savedCollections.id(collectionId);
         if(!collection) return res.json({success: false, message: "Collection introuvable"});
-        
-        if (collection.name === 'Général') return res.json({success: false, message: "Impossible de renommer Général"});
 
         // Mettre à jour le nom dans la liste des collections
         const oldName = collection.name;
@@ -526,8 +522,7 @@ export const deleteCollection = async (req, res) => {
 
         const collection = user.savedCollections.id(collectionId);
         if(!collection) return res.json({success: false, message: "Collection introuvable"});
-        if (collection.name === 'Général') return res.json({success: false, message: "Impossible de supprimer Général"});
-
+        
         // Supprimer la collection
         user.savedCollections.pull(collectionId);
 
@@ -535,7 +530,6 @@ export const deleteCollection = async (req, res) => {
         // Ici je les déplace vers Général pour ne pas perdre les favoris
         user.savedPosts.forEach(post => {
             if (post.collectionName === collection.name) {
-                post.collectionName = 'Général';
             }
         });
 
