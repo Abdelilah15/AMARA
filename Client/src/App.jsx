@@ -64,7 +64,8 @@ const App = () => {
           <SavePostModal 
               isOpen={saveModalData.isOpen} 
               postId={saveModalData.postId} 
-              onClose={closeSaveModal} 
+              onClose={closeSaveModal}
+              onSaveSuccess={saveModalData.callback}
           />
       )}
     </div>

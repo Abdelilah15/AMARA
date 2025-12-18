@@ -102,8 +102,8 @@ export const AppContextProvider = (props) => {
         }
     }
 
-    const openSaveModal = (postId) => {
-        setSaveModalData({ isOpen: true, postId });
+    const openSaveModal = (postId, callback = null) => {
+        setSaveModalData({ isOpen: true, postId, callback });
     };
 
     const closeSaveModal = () => {

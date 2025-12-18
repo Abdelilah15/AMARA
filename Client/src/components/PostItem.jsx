@@ -198,13 +198,13 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
         }
 
         if (isSaved) {
+
             // CAS 1 : DÉJÀ ENREGISTRÉ -> ON RETIRE (UNSAVE) DIRECTEMENT
-            
-            // Copie pour rollback en cas d'erreur
             const previousSaves = [...localSaves];
             
             // Mise à jour optimiste (visuelle immédiate)
             setLocalSaves(previousSaves.filter(id => id !== userData._id));
+            
 
             try {
                 // On appelle la même API, elle gère le toggle (retrait) si le post existe déjà
@@ -226,7 +226,12 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
 
         } else {
             // CAS 2 : PAS ENCORE ENREGISTRÉ -> ON OUVRE LA MODALE
-            openSaveModal(post._id);
+            openSaveModal(post._id, (action) => {
+                if (action === 'saved') {
+                    // On ajoute l'ID de l'utilisateur à la liste locale des sauvegardes
+                    setLocalSaves(prev => [...prev, userData._id]);
+                }
+            });
         }
     };
 

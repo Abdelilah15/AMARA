@@ -97,11 +97,7 @@ const ReactionsBar = ({
                 >
                     <div className="p-2 rounded-full transition-colors">
                         {/* Condition ternaire pour changer l'icône */}
-                        {isSaved ? (
-                             <i className="fi fi-ts-bookmark-slash flex"></i>
-                        ) : (
-                             <i className="fi fi-ts-bookmark flex"></i>
-                        )}
+                        <i className={`fi ${isSaved ? 'fi-ts-bookmark-slash' : 'fi-ts-bookmark'} flex`}></i>
                     </div>
                 </button>
             </div>
