@@ -13,6 +13,7 @@ const SavedPosts = () => {
     const [activeTab, setActiveTab] = useState('Tous');
     const [loading, setLoading] = useState(true);
 
+    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
     const [menuOpenId, setMenuOpenId] = useState(null); // ID de la collection dont le menu est ouvert
     const [modal, setModal] = useState({ type: null, collection: null });
 
@@ -33,13 +34,13 @@ const SavedPosts = () => {
     ];
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setMenuOpenId(null);
-            }
+        const handleGlobalClick = () => setMenuOpenId(null);
+        window.addEventListener('click', handleGlobalClick);
+        window.addEventListener('scroll', handleGlobalClick, true); // Fermer si on scroll
+        return () => {
+            window.removeEventListener('click', handleGlobalClick);
+            window.removeEventListener('scroll', handleGlobalClick, true);
         };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const fetchSavedPosts = async (collection = 'Tous') => {
@@ -90,6 +91,23 @@ const SavedPosts = () => {
             fetchSavedPosts(activeTab);
         }
     }, [activeTab, userData]);
+
+    const handleMenuClick = (e, col) => {
+        e.stopPropagation(); // Empêche la fermeture immédiate
+        // Si on clique sur le même, on ferme
+        if (menuOpenId === col._id) {
+            setMenuOpenId(null);
+            return;
+        }
+
+        // Calcul de la position pour afficher le menu "par dessus" tout
+        const rect = e.currentTarget.getBoundingClientRect();
+        setMenuPosition({
+            top: rect.bottom + 5, // Juste en dessous du bouton
+            left: rect.left
+        });
+        setMenuOpenId(col._id);
+    };
 
     // --- ACTIONS ---
 
@@ -183,13 +201,13 @@ const SavedPosts = () => {
     const closeModal = () => {
         setModal({ type: null, collection: null });
     };
+    const activeMenuCollection = collections.find(c => c._id === menuOpenId);
 
 
     return (
         <div className="pt-16 min-h-screen bg-gray-100">
             <div className="max-w-2xl mx-auto pt-4">
 
-                {/* Header / Titre */}
                 <div className="bg-white p-4 rounded-xl shadow-sm mb-4">
                     <h1 className="text-2xl font-bold flex items-center gap-2">
                         <i className="fi fi-sr-bookmark flex text-indigo-600"></i>
@@ -198,8 +216,7 @@ const SavedPosts = () => {
                 </div>
 
                 {/* BARRE DES ONGLETS */}
-                <div className="flex overflow-x-auto gap-2 mb-4 pb-4 scrollbar-hide px-1">
-                    {/* Bouton 'Tous' statique */}
+                <div className="flex overflow-x-auto gap-2 mb-4 pb-4 scrollbar-hide px-1 relative">
                     <button
                         onClick={() => setActiveTab('Tous')}
                         className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${activeTab === 'Tous'
@@ -209,72 +226,66 @@ const SavedPosts = () => {
                     </button>
 
                     {collections.map((col) => (
-                        <div key={col._id || col.name} className="relative group flex items-center">
-
-                            {/* Le bouton de la collection */}
+                        <div key={col._id || col.name} className="relative group flex items-center shrink-0">
                             <button
                                 onClick={() => setActiveTab(col.name)}
                                 className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all flex items-center gap-2 pr-8 ${activeTab === col.name
-                                        ? 'bg-black text-white ring-2 ring-offset-1 ring-black'
-                                        : `${col.color || 'bg-white'} text-gray-700 hover:opacity-90 shadow-sm`
+                                    ? 'bg-black text-white ring-2 ring-offset-1 ring-black'
+                                    : `${col.color || 'bg-white'} text-gray-700 hover:opacity-90 shadow-sm`
                                     }`}
                             >
                                 {col.pinned && <IconPin size={14} className={activeTab === col.name ? 'text-white' : 'text-gray-500'} />}
                                 {col.name}
                             </button>
 
-                            {/* Le bouton 3 points (Sauf pour Général) */}
                             {col.name !== 'Général' && (
-                                <div className="absolute right-1 top-1/2 -translate-y-1/2 z-10" ref={menuRef}>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setMenuOpenId(menuOpenId === col._id ? null : col._id);
-                                        }}
-                                        className={`p-1 rounded-full hover:bg-black/10 transition-colors ${activeTab === col.name ? 'text-white hover:bg-white/20' : 'text-gray-500'
-                                            }`}
-                                    >
-                                        <IconDotsVertical size={16} />
-                                    </button>
-
-                                    {/* MENU DÉROULANT */}
-                                    {menuOpenId === col._id && (
-                                        <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
-                                            <div className="py-1">
-                                                <button onClick={() => handlePin(col)} className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700">
-                                                    <IconPin size={16} />
-                                                    {col.pinned ? 'Désépingler' : 'Épingler'}
-                                                </button>
-                                                <button onClick={() => openRenameModal(col)} className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700">
-                                                    <IconPencil size={16} />
-                                                    Changer le nom
-                                                </button>
-                                                <button onClick={() => openColorModal(col)} className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700">
-                                                    <IconPalette size={16} />
-                                                    Changer la couleur
-                                                </button>
-                                                <div className="h-px bg-gray-100 my-1"></div>
-                                                <button onClick={() => openDeleteModal(col)} className="w-full px-4 py-2.5 text-left text-sm hover:bg-red-50 flex items-center gap-2 text-red-600">
-                                                    <IconTrash size={16} />
-                                                    Supprimer
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                <button
+                                    onClick={(e) => handleMenuClick(e, col)}
+                                    className={`absolute right-1 p-1 rounded-full hover:bg-black/10 transition-colors z-10 ${activeTab === col.name ? 'text-white hover:bg-white/20' : 'text-gray-500'
+                                        }`}
+                                >
+                                    <IconDotsVertical size={16} />
+                                </button>
                             )}
                         </div>
                     ))}
                 </div>
 
-                {/* Liste des posts */}
+                {/* --- MENU DÉROULANT (Rendu en dehors du scroll) --- */}
+                {menuOpenId && activeMenuCollection && (
+                    <div
+                        className="fixed z-[9999] bg-white rounded-xl shadow-xl border border-gray-100 w-48 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+                        style={{ top: menuPosition.top, left: menuPosition.left }}
+                        onClick={(e) => e.stopPropagation()} // Empêche la fermeture si on clique DANS le menu
+                    >
+                        <div className="py-1">
+                            <button onClick={() => handlePin(activeMenuCollection)} className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700">
+                                <IconPin size={16} />
+                                {activeMenuCollection.pinned ? 'Désépingler' : 'Épingler'}
+                            </button>
+                            <button onClick={() => openRenameModal(activeMenuCollection)} className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700">
+                                <IconPencil size={16} />
+                                Changer le nom
+                            </button>
+                            <button onClick={() => openColorModal(activeMenuCollection)} className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700">
+                                <IconPalette size={16} />
+                                Changer la couleur
+                            </button>
+                            <div className="h-px bg-gray-100 my-1"></div>
+                            <button onClick={() => openDeleteModal(activeMenuCollection)} className="w-full px-4 py-2.5 text-left text-sm hover:bg-red-50 flex items-center gap-2 text-red-600">
+                                <IconTrash size={16} />
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* LISTE DES POSTS */}
                 <div className="space-y-4">
                     {loading ? (
                         <div className="p-10 text-center text-gray-500">Chargement...</div>
                     ) : savedPosts.length > 0 ? (
                         savedPosts.map((item) => (
-                            // CORRECTION 3 : On utilise 'item.post' pour passer les données du post, 
-                            // et on utilise item._id (l'ID de la sauvegarde) comme clé unique.
                             <div key={item._id} className="bg-white rounded-xl shadow-sm overflow-hidden">
                                 {item.post ? (
                                     <PostItem post={item.post} />
@@ -295,8 +306,8 @@ const SavedPosts = () => {
 
                 {/* 1. Rename Modal */}
                 {modal.type === 'rename' && (
-                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+                    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4" onClick={closeModal}>
+                        <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
                             <h3 className="text-lg font-bold mb-4">Renommer la collection</h3>
                             <input
                                 type="text"
@@ -315,8 +326,8 @@ const SavedPosts = () => {
 
                 {/* 2. Color Modal */}
                 {modal.type === 'color' && (
-                    <div className="fixed inset-0 bg-black/50 z-5000 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+                    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4" onClick={closeModal}>
+                        <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
                             <h3 className="text-lg font-bold mb-4">Choisir une couleur</h3>
                             <div className="grid grid-cols-4 gap-3 mb-6">
                                 {colorOptions.map((opt) => (
@@ -338,8 +349,8 @@ const SavedPosts = () => {
 
                 {/* 3. Delete Modal */}
                 {modal.type === 'delete' && (
-                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+                    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4" onClick={closeModal}>
+                        <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
                             <h3 className="text-lg font-bold mb-2 text-red-600">Supprimer la collection ?</h3>
                             <p className="text-gray-600 mb-6 text-sm">Les posts contenus ne seront pas supprimés, mais ils ne seront plus classés dans ce groupe.</p>
                             <div className="flex justify-end gap-2">

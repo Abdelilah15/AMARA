@@ -400,7 +400,6 @@ export const createCollection = async (req, res) => {
             pinned: false
         });
 
-        user.savedCollections.push(collectionName);
         await user.save();
 
         res.json({ success: true, message: "Groupe créé", collections: user.savedCollections });
