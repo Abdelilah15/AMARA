@@ -366,9 +366,14 @@ export const savePost = async (req, res) => {
 
             if (!user.savedCollections) user.savedCollections = [];
 
-            // Si la collection n'existe pas dans la liste des collections, on l'ajoute
-            if (collectionName && !user.savedCollections.includes(collectionName)) {
-                user.savedCollections.push(collectionName);
+            // On vérifie correctement si une collection avec ce nom existe déjà
+            if (collectionName) {
+                const collectionExists = user.savedCollections.some(col => col.name === collectionName);
+                
+                // Si elle n'existe pas, on l'ajoute comme un OBJET et non comme une string
+                if (!collectionExists) {
+                    user.savedCollections.push({ name: collectionName });
+                }
             }
 
             await user.save();

@@ -67,16 +67,22 @@ const SavePostModal = ({ isOpen, onClose, postId, onSaveSuccess }) => {
 
             <div className="max-h-60 overflow-y-auto mb-4 space-y-2 pr-1">
                 {/* Liste des collections existantes */}
-                {displayCollections.map((col, index) => (
-                    <button
-                        key={index}
-                        onClick={() => handleSave(col)}
-                        className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 flex justify-between items-center group transition-colors"
-                    >
-                        <span className="font-medium text-gray-700">{col}</span>
-                        <i className="fi fi-rr-angle-small-right text-gray-400 group-hover:text-gray-600"></i>
-                    </button>
-                ))}
+                {displayCollections.map((col, index) => {
+                    const collectionName = typeof col === 'object' ? col.name : col;
+
+                    return (
+                        <button
+                            key={index}
+                            // CORRECTION ICI : On passe le nom (string) à la fonction, pas l'objet entier
+                            onClick={() => handleSave(collectionName)}
+                            className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 flex justify-between items-center group transition-colors"
+                        >
+                            {/* CORRECTION ICI : On affiche le nom (string) */}
+                            <span className="font-medium text-gray-700">{collectionName}</span>
+                            <i className="fi fi-rr-angle-small-right text-gray-400 group-hover:text-gray-600"></i>
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Section Créer nouveau groupe */}
