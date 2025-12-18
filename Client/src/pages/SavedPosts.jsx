@@ -60,6 +60,7 @@ const SavedPosts = () => {
                 let fetchedCollections = data.collections || [];
 
                 // On s'assure que Général est là
+                fetchedCollections = fetchedCollections.filter(c => c && typeof c === 'object' && c.name && c._id && c.name.trim() !== '');
                 const generalExists = fetchedCollections.find(c => c.name === 'Général');
                 if (!generalExists) {
                     fetchedCollections.unshift({ name: 'Général', _id: 'general_id', color: 'bg-gray-200', pinned: false });
