@@ -57,7 +57,8 @@ const SavePostModal = ({ isOpen, onClose, postId, onSaveSuccess }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in" onClick={onClose}>            <div className="bg-white rounded-xl w-full max-w-sm p-5 animate-fade-in" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in" onClick={onClose}>
+            <div className="bg-white rounded-xl w-full max-w-sm p-5 animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-lg">Enregistrer dans...</h3>
                 <button onClick={onClose} className="text-gray-500 hover:bg-gray-100 rounded-full p-1">

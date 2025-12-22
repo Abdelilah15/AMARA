@@ -1,6 +1,26 @@
 import express from 'express'
 import userAuth from '../middleware/userAuth.js';
-import { getUserData, uploadProfileImage, uploadBannerImage, updateProfileType, updateUserBio, updateUserProfile, getAllUsers, getUserProfile, changePassword, sendEmailChangeOtp, verifyEmailChange, savePost, createCollection, getSavedPosts, renameCollection, deleteCollection, togglePinCollection, updateCollectionColor} from '../controllers/userController.js';
+import { 
+    getUserData, 
+    uploadProfileImage, 
+    uploadBannerImage, 
+    updateProfileType, 
+    updateUserBio, 
+    updateUserProfile, 
+    getAllUsers, 
+    getUserProfile, 
+    changePassword, 
+    sendEmailChangeOtp, 
+    verifyEmailChange, 
+    savePost, 
+    createCollection, 
+    getSavedPosts, 
+    renameCollection, 
+    deleteCollection, 
+    togglePinCollection, 
+    updateCollectionColor, 
+    toggleFollow 
+} from '../controllers/userController.js';
 import { uploadImage } from '../middleware/multer.js';
 
 
@@ -23,6 +43,7 @@ userRouter.post('/collection/rename', userAuth, renameCollection);
 userRouter.post('/collection/delete', userAuth, deleteCollection);
 userRouter.post('/collection/toggle-pin', userAuth, togglePinCollection);
 userRouter.post('/collection/color', userAuth, updateCollectionColor);
+userRouter.post('/follow', userAuth, toggleFollow);
 userRouter.get('/:username', getUserProfile);
 
 

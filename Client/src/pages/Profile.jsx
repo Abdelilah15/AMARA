@@ -13,6 +13,10 @@ const Profile = () => {
   const navigate = useNavigate();
   const { username } = useParams();
 
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+
   // États locaux pour gérer l'aperçu des images avant l'envoi au serveur
   // (Note: La logique d'upload vers le serveur devra être connectée ici)
   const [profileImage, setProfileImage] = useState(null);
@@ -42,6 +46,8 @@ const Profile = () => {
 
       if (data.success) {
         setProfileData(data.userData);
+        setFollowersCount(data.userData.followers ? data.userData.followers.length : 0);
+        setFollowingCount(data.userData.following ? data.userData.following.length : 0);
       } else {
         toast.error("Utilisateur introuvable");
       }
@@ -50,6 +56,45 @@ const Profile = () => {
       toast.error(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (userData && profileData && profileData.followers) {
+      // On vérifie si mon ID est dans la liste des followers du profil visité
+      const isAlreadyFollowing = profileData.followers.includes(userData._id);
+      setIsFollowing(isAlreadyFollowing);
+    }
+  }, [userData, profileData]);
+
+  const handleFollowAction = async () => {
+    if (!isLoggedin) {
+      toast.error("Connectez-vous pour suivre ce profil");
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const { data } = await axios.post(backendUrl + '/api/user/follow', {
+        targetUserId: profileData._id
+      });
+
+      if (data.success) {
+        // Mise à jour optimiste de l'UI
+        if (data.action === 'followed') {
+          setIsFollowing(true);
+          setFollowersCount(prev => prev + 1);
+          // Optionnel : Mettre à jour userData pour augmenter mon 'following' count localement
+        } else {
+          setIsFollowing(false);
+          setFollowersCount(prev => prev - 1);
+        }
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -351,25 +396,34 @@ const Profile = () => {
                 </>
               )}
             </div>
-
-            <div style={{ marginLeft: "auto", marginTop: "auto", }}>
-
-              {/* --- Bouton Modifier le profil --- */}
-              {isOwnProfile && (
-                <button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="px-10 py-2 border border-gray-300 rounded-full text-gray-700 font-medium transition-colors flex items-center justify-center hover:bg-gray-100 cursor-pointer"
-                  title="Modifier le profil"
-                > <i className="fi fi-ts-user-pen flex"></i>
-                </button>
-              )}
-            </div>
+        
+            {/* BOUTON MODIFIER (Si c'est mon profil) */}
+            <div className='flex ml-auto mt-auto space-x-1'>
+            {isOwnProfile ? (
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="flex gap-2 px-6 py-2 border border-gray-300 rounded-full text-gray-700 font-medium hover:bg-gray-100 transition-colors"
+              >
+                <i className="fi fi-ts-user-pen flex items-center"></i> Modifier
+              </button>
+            ) : (
+              /* BOUTON SUIVRE / SUIVI (Si c'est le profil de quelqu'un d'autre) */
+              <button
+                onClick={handleFollowAction}
+                className={`px-6 py-2 rounded-full font-medium transition-colors shadow-sm ${isFollowing
+                  ? 'bg-white border border-gray-300 text-gray-900 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                  }`}
+              >
+                {isFollowing ? 'Abonné(e)' : 'Suivre'}
+              </button>
+            )}
 
             {/* --- NOUVEAU : BOUTON 3 POINTS ET MENU --- */}
             <div className="relative mt-auto ml-1">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 border border-gray-300 rounded-full hover:bg-gray-50 text-gray-600 transition-colors cursor-pointer"
+                className="p-3 border border-gray-300 rounded-full hover:bg-gray-100 text-gray-600 transition-colors cursor-pointer"
               >
                 {/* Icône 3 points verticale */}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -394,7 +448,7 @@ const Profile = () => {
                 </div>
               )}
             </div>
-
+            </div>
           </div>
 
           {/* Informations Textuelles */}
@@ -655,7 +709,6 @@ const Profile = () => {
           />
         </div>
       )}
-
     </div>
   );
 };

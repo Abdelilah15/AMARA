@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
     emailChangeOtp: {type: String, default: ''},
     emailChangeOtpExpireAt: {type: Number, default: 0},
 
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
+
     savedCollections: { 
         type: [{
             name: { type: String, required: true },
@@ -26,7 +29,6 @@ const userSchema = new mongoose.Schema({
             pinned: { type: Boolean, default: false },
             createdAt: { type: Date, default: Date.now }
         }],
-        default: [{ name: 'Général', color: 'bg-gray-200', pinned: false }]
     },
     savedPosts: [{
         post: { type: mongoose.Schema.Types.ObjectId, ref: 'post' }, // Référence au modèle Post

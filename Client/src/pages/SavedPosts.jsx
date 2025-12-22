@@ -225,7 +225,7 @@ const SavedPosts = () => {
                             <button
                                 onClick={() => setActiveTab(col.name)}
                                 className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all flex items-center gap-2 pr-8 ${activeTab === col.name
-                                    ? 'bg-black text-white ring-2 ring-offset-1 ring-black'
+                                    ? 'bg-black text-white ring-offset-1 ring-black'
                                     : `${col.color || 'bg-white'} text-gray-700 hover:opacity-90 shadow-sm`
                                     }`}
                             >
@@ -233,15 +233,7 @@ const SavedPosts = () => {
                                 {col.name}
                             </button>
 
-                            {col.name !== 'Général' && (
-                                <button
-                                    onClick={(e) => handleMenuClick(e, col)}
-                                    className={`absolute right-1 p-1 rounded-full hover:bg-black/10 transition-colors z-10 ${activeTab === col.name ? 'text-white hover:bg-white/20' : 'text-gray-500'
-                                        }`}
-                                >
-                                    <IconDotsVertical size={16} />
-                                </button>
-                            )}
+                            
                         </div>
                     ))}
                 </div>

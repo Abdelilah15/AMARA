@@ -322,6 +322,50 @@ export const verifyEmailChange = async (req, res) => {
     }
 };
 
+export const toggleFollow = async (req, res) => {
+    try {
+        const { targetUserId } = req.body; // L'ID de la personne qu'on veut suivre
+        const userId = req.user.id; // Mon ID (celui qui clique)
+
+        if (userId === targetUserId) {
+            return res.json({ success: false, message: "Vous ne pouvez pas vous suivre vous-même." });
+        }
+
+        const user = await userModel.findById(userId);
+        const targetUser = await userModel.findById(targetUserId);
+
+        if (!user || !targetUser) {
+            return res.json({ success: false, message: "Utilisateur introuvable" });
+        }
+
+        // Vérifier si on suit déjà cette personne
+        const isFollowing = user.following.includes(targetUserId);
+
+        if (isFollowing) {
+            // UNFOLLOW : Retirer des deux listes
+            user.following = user.following.filter(id => id.toString() !== targetUserId);
+            targetUser.followers = targetUser.followers.filter(id => id.toString() !== userId);
+            
+            await user.save();
+            await targetUser.save();
+            
+            return res.json({ success: true, message: "Unfollowed", action: 'unfollowed' });
+        } else {
+            // FOLLOW : Ajouter aux deux listes
+            user.following.push(targetUserId);
+            targetUser.followers.push(userId);
+
+            await user.save();
+            await targetUser.save();
+
+            return res.json({ success: true, message: "Followed", action: 'followed' });
+        }
+
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+};
+
 export const savePost = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -575,3 +619,4 @@ export const updateCollectionColor = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 };
+
