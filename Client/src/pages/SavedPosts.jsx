@@ -232,8 +232,15 @@ const SavedPosts = () => {
                                 {col.pinned && <IconPin size={14} className={activeTab === col.name ? 'text-white' : 'text-gray-500'} />}
                                 {col.name}
                             </button>
-
-                            
+                            {/* Bouton menu */}
+                            <button
+                                onClick={(e) => handleMenuClick(e, col)}
+                                ref={menuRef}
+                                className={`absolute right-1 top-1.5 p-1 rounded-full transition-opacity ${activeTab === col.name && `text-white`}`}
+                                title="Options de la collection"
+                            >
+                                <IconDotsVertical size={16} />
+                            </button>
                         </div>
                     ))}
                 </div>
