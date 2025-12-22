@@ -235,7 +235,6 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
         }
     };
 
-    // Fonction pour copier le lien
     const copyLink = () => {
         // Génère le lien (ajustez '/post/' selon vos routes réelles)
         const link = `${window.location.origin}/post/${post._id}`;
@@ -313,7 +312,6 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
         }
     };
 
-    // Cette fonction reçoit maintenant l'index de l'élément cliqué
     const handleMediaClick = (index) => {
         // On récupère la liste brute
         const rawList = post.media && post.media.length > 0 ? post.media : (post.image ? [post.image] : []);

@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { IconDotsVertical, IconPin, IconPencil, IconPalette, IconTrash, IconX } from '@tabler/icons-react';
 
 const SavedPosts = () => {
-    const { backendUrl, userData } = useContext(AppContext);
+    const { backendUrl, userData, getUserData } = useContext(AppContext);
     const [savedPosts, setSavedPosts] = useState([]);
     const [collections, setCollections] = useState([]);
     const [activeTab, setActiveTab] = useState('Tous');
@@ -152,6 +152,7 @@ const SavedPosts = () => {
             if (data.success) {
                 if (activeTab === modal.collection.name) setActiveTab('Tous');
                 fetchSavedPosts('Tous');
+                await getUserData();
                 closeModal();
                 toast.success("Collection supprimée");
             }
