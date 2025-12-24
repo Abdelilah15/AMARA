@@ -76,7 +76,7 @@ const Feed = () => {
             <Navbar />
 
             {/* --- ZONE D'AFFICHAGE DES POSTS --- */}
-            <div className=" pt-16 max-w-xl mx-auto flex flex-col">
+            <div className=" pt-16 max-w-[650px] mx-auto flex flex-col">
                 {loading ? (
                     <p className="text-center text-gray-400">Chargement des posts...</p>
                 ) : posts.length === 0 ? (

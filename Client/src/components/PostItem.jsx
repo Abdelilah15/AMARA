@@ -52,7 +52,7 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
                         className="media-item"
                         onClick={(e) => {
                             e.stopPropagation(); // IMPORTANT pour la vidéo aussi
-                            onMediaClick(0); 
+                            onMediaClick(0);
                         }}
                     />
                 </div>
@@ -101,9 +101,9 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
 
                 {/* La 4ème case avec l'overlay */}
                 <div className="more-media-overlay" onClick={(e) => {
-                        e.stopPropagation(); // IMPORTANT ICI AUSSI
-                        onMediaClick(3);
-                    }}>
+                    e.stopPropagation(); // IMPORTANT ICI AUSSI
+                    onMediaClick(3);
+                }}>
                     <img src={getFullUrl(mediaList[3])} alt="media-more" className="media-item" />
                     <div className="overlay-count">+{hiddenCount + 1}</div>
                 </div>
@@ -114,7 +114,7 @@ const PostGallery = ({ mediaList, backendUrl, onMediaClick }) => {
 
 const PostItem = ({ post, onDelete, isDetail = false }) => {
     const navigate = useNavigate();
-    const { userData, backendUrl, setMediaModalData, openSaveModal} = useContext(AppContext);
+    const { userData, backendUrl, setMediaModalData, openSaveModal } = useContext(AppContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const rawMediaUrl = post.media && post.media.length > 0 ? post.media[0] : null;
     const [showControls, setShowControls] = useState(false);
@@ -127,17 +127,26 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
     const [localSaves, setLocalSaves] = useState(post.saves || []);
 
     const isLiked = userData && localLikes.includes(userData._id);
-    const isSaved = userData && localSaves.includes(userData._id);
+    const [isSaved, setIsSaved] = useState(false);
 
     useEffect(() => {
         setLocalLikes(post.likes || []);
     }, [post.likes]);
 
     useEffect(() => {
-        setLocalSaves(post.saves || []);
-    }, [post.saves]);
+        if (userData) {
+            // On vérifie d'abord dans le profil utilisateur (Source la plus fiable)
+            // Assurez-vous que votre userData contient un tableau 'saved' ou 'savedPosts'
+            const savedInUser = userData.saved && userData.saved.includes(post._id);
 
-    
+            // On vérifie aussi dans le post (au cas où le user n'est pas à jour mais le post si)
+            const savedInPost = post.saves && post.saves.includes(userData._id);
+
+            setIsSaved(!!(savedInUser || savedInPost));
+        }
+    }, [userData, post.saves, post._id]);
+
+
 
     const handleLike = async (e) => {
         e.stopPropagation();
@@ -192,7 +201,7 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
 
     const handleSave = async (e) => {
         e.stopPropagation();
-        
+
         if (!userData) {
             return toast.error("Connectez-vous pour enregistrer");
         }
@@ -201,26 +210,29 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
 
             // CAS 1 : DÉJÀ ENREGISTRÉ -> ON RETIRE (UNSAVE) DIRECTEMENT
             const previousSaves = [...localSaves];
-            
+
             // Mise à jour optimiste (visuelle immédiate)
-            setLocalSaves(previousSaves.filter(id => id !== userData._id));
             
+            setIsSaved(false);
+
 
             try {
                 // On appelle la même API, elle gère le toggle (retrait) si le post existe déjà
-                const { data } = await axios.post(backendUrl + '/api/user/save-post', { 
-                    postId: post._id 
+                const { data } = await axios.post(backendUrl + '/api/user/save-post', {
+                    postId: post._id
                 });
 
                 if (data.success) {
                     toast.success("Post retiré des enregistrements");
                 } else {
                     // Erreur backend : on remet l'état précédent
-                    setLocalSaves(previousSaves);
+                    
+                    setIsSaved(true);
                     toast.error(data.message);
                 }
             } catch (error) {
-                setLocalSaves(previousSaves);
+                
+                setIsSaved(true);
                 toast.error("Erreur de connexion");
             }
 
@@ -228,6 +240,7 @@ const PostItem = ({ post, onDelete, isDetail = false }) => {
             // CAS 2 : PAS ENCORE ENREGISTRÉ -> ON OUVRE LA MODALE
             openSaveModal(post._id, (action) => {
                 if (action === 'saved') {
+                    setIsSaved(true);
                     // On ajoute l'ID de l'utilisateur à la liste locale des sauvegardes
                     setLocalSaves(prev => [...prev, userData._id]);
                 }

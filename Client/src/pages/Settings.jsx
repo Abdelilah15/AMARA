@@ -218,7 +218,7 @@ const Settings = () => {
 
     return (
         <div className='flex justify-center min-h-screen bg-gray-50 p-6 pt-24'>
-            <div className="w-full max-w-3xl mx-auto">
+            <div className="w-[650px] mx-auto ">
                 <h1 className="text-3xl font-bold mb-8 text-gray-800">Paramètres</h1>
 
                 {/* --- SECTION COMPTE --- */}

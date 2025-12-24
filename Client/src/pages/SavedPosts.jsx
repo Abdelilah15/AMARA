@@ -202,7 +202,7 @@ const SavedPosts = () => {
 
     return (
         <div className="pt-16 min-h-screen bg-gray-100">
-            <div className="max-w-2xl mx-auto pt-4">
+            <div className="max-w-[650px] mx-auto pt-4">
 
                 <div className="bg-white p-4 rounded-xl shadow-sm mb-4">
                     <h1 className="text-2xl font-bold flex items-center gap-2">
